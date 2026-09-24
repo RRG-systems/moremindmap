@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { Buffer } from 'node:buffer';
 import { applyLocalAction, requireThat } from './state.js';
 const digest = x => createHash('sha256').update(x).digest('hex');
 export function applyCapture(state, body, bundle) {
@@ -43,6 +44,10 @@ export function applyLiveCapture(state, body, bundle) {
   const c = body.capture;
   requireThat(c?.reviewed === true, 'CAPTURE_REVIEW_REQUIRED');
   requireThat(Array.isArray(c.attachments), 'CAPTURE_MEDIA_INVALID');
+  const coachConnect = c.channel === 'coach_connect_box04_v1';
+  requireThat(c.channel === undefined || coachConnect, 'CAPTURE_CHANNEL_DENIED');
+  if (coachConnect) requireThat(c.role === 'coach' && c.kind === 'text' && c.attachments.length === 0,
+    'CAPTURE_CHANNEL_DENIED');
   const bytes = c.attachments.reduce((n,a) => n + (typeof a?.data === 'string' ? a.data.length : 9999999), 0);
   requireThat(bytes <= 360000, 'CAPTURE_MEDIA_TOO_LARGE');
   const saved = state.messages.reduce((n,m) => n + (m.capture?.attachments || []).reduce((v,a) => v + (a.data?.length || 0), 0), 0);
@@ -51,6 +56,10 @@ export function applyLiveCapture(state, body, bundle) {
   applyCapture(state, {...body, capture:{subject:c.subject, source:c.source, role:c.role, kind:c.kind,
     text:c.text, attachments:c.attachments}}, bundle);
   state.messages.at(-1).capture.bridge = 'darren_demo_same_scope_v1';
+  if (coachConnect) {
+    state.messages.at(-1).capture.channel = 'coach_connect_box04_v1';
+    state.messages.at(-1).capture.reviewed = true;
+  }
 }
 
 export function captureContextMessage(message) {

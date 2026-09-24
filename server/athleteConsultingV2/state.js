@@ -7,6 +7,41 @@ export const initial = (bundle) => ({ version: 2, mm: bundle.person.mm, revision
 const object = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
 const text = (value) => typeof value === 'string';
 
+// This projection is limited to reviewed Coach Alex captures for the selected
+// synthetic DarrenDemo athlete. Existing v2 states need no migration.
+export function pendingCoachNoteIds(state, bundle) {
+  const person = bundle?.person;
+  if (person?.synthetic !== true || !['nia', 'sofia'].includes(person.slug)
+    || bundle.bos?.synthetic !== true || bundle.apa?.synthetic !== true
+    || state.mm !== person.mm || bundle.bos.mm !== person.mm
+    || bundle.apa.mm !== person.mm) return [];
+  const delivered = new Set((state.events || [])
+    .filter((event) => event.type === 'coach_note_opened')
+    .flatMap((event) => event.note_ids || []));
+  return (state.messages || [])
+    .filter((message) => message.capture?.contract === 'athlete_capture_demo_v1'
+      && message.capture?.bridge === 'darren_demo_same_scope_v1'
+      && message.capture?.channel === 'coach_connect_box04_v1'
+      && message.capture?.reviewed === true
+      && message.capture?.kind === 'text'
+      && Array.isArray(message.capture?.attachments)
+      && message.capture.attachments.length === 0
+      && message.capture?.subject === person.slug
+      && message.capture?.role === 'coach'
+      && message.capture?.source === 'Coach Alex (synthetic)'
+      && !delivered.has(message.id))
+    .map((message) => message.id);
+}
+
+// Authenticated UI receives delivery metadata only. Note text remains in its
+// already-protected source message and is not copied into this projection.
+export function coachNoteHandoffStatus(state, bundle) {
+  const ids = pendingCoachNoteIds(state, bundle);
+  const last = (state.events || []).filter((event) => event.type === 'coach_note_opened').at(-1);
+  return { pending_count: ids.length, pending_ids: ids,
+    last_opening: last ? { at: last.at, note_ids: last.note_ids, request_id: last.request_id } : null };
+}
+
 export function validatePlan(plan) {
   requireThat(object(plan) && text(plan.title) && plan.title.trim()
     && text(plan.why) && text(plan.review) && Array.isArray(plan.steps)

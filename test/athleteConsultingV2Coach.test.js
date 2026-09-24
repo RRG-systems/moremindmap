@@ -31,8 +31,8 @@ const response = (changes = {}) => ({
 test('schema, instructions, input function and imported mission match the frozen release bytes', async () => {
   // These digests were computed from the locked source/engine files, before adaptation.
   assert.equal(hash(JSON.stringify(SCHEMA)), 'fa318e7b7c3f1bedbb85698ff3f48707845850cd16754f5f0291c2ceb3730c37');
-  assert.equal(hash(INSTRUCTIONS), 'b5dd647ebe4284f4c34c13a16fae02f99665cc644f5ff785c171bdd44fc00256');
-  assert.equal(hash(coachingInput.toString()), '4adb7432300aa455cb79f2407d489784c711029bcd7ed55ed8632494dd0bd9d4');
+  assert.equal(hash(INSTRUCTIONS), '7b3e0395006c6e0e3ca558beb21749209b42bd651a82f1099fa20b1b56211974');
+  assert.equal(hash(coachingInput.toString()), '09710f24b3e3f22fcc303a135bebf20ab1769bdeff0aa59eb05dfad78dd79ec6');
   const mission = await readFile(new URL('../server/athleteConsultingV2/model2-mission.js', import.meta.url));
   assert.equal(hash(mission), '3c4b6d0236b82e118c871683c77f3ede64725cf7e9e542f8aa58b06cf06a09a2');
   const source = await readFile(new URL('../server/athleteConsultingV2/coach.js', import.meta.url), 'utf8');
@@ -79,7 +79,7 @@ test('offline transport receives the exact frozen request, unmodifiable policy a
   assert.deepEqual(events[1].response, response());
   assert.equal(events[2].status, 'completed');
   assert.equal(ATHLETE_CONSULTING_V2_COACH_POLICY.max_retries, 0);
-  assert.deepEqual(ATHLETE_CONSULTING_V2_COACH_POLICY.frozen_request_delta, []);
+  assert.deepEqual(ATHLETE_CONSULTING_V2_COACH_POLICY.frozen_request_delta, ['same-scope-synthetic-coach-note-next-opening']);
 });
 
 test('request and raw response persistence must finish before provider call or result delivery', async () => {

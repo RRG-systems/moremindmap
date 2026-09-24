@@ -107,7 +107,8 @@ export default function Capture() {
     if(locked||!state||!reviewed||!text.trim())return;
     setBusy(true);setError('');setSaved('');
     const capture={subject:slug,role,source:role==='coach'?'Coach Alex (synthetic)':person.name+' (synthetic)',
-      kind:coachConnectMode?'text':media.some(a=>a.mime.startsWith('audio/'))?'voice':media.length?'photo':'text',text,attachments:coachConnectMode?[]:media,reviewed};
+      kind:coachConnectMode?'text':media.some(a=>a.mime.startsWith('audio/'))?'voice':media.length?'photo':'text',text,attachments:coachConnectMode?[]:media,reviewed,
+      ...(coachConnectMode?{channel:'coach_connect_box04_v1'}:{})};
     const signature=JSON.stringify(capture);
     const operation=pending.current?.signature===signature?pending.current.operation:{action:'capture_demo',requestId:crypto.randomUUID(),capture};
     pending.current={signature,operation};
@@ -139,9 +140,9 @@ export default function Capture() {
         <label className="capture-check"><input type="checkbox" checked={reviewed} disabled={locked} onChange={e=>setReviewed(e.target.checked)}/><span>I reviewed this fictional note{coachConnectMode?' or edited transcript':''} and its selected athlete.</span></label>
         <button className="capture-primary" disabled={locked||!state||!text.trim()||!reviewed} onClick={save}>{busy?'Working…':`Save to ${person?.name.split(' ')[0]}’s notes`} <span>→</span></button>
         {dirty&&<button className="capture-back" disabled={locked} onClick={()=>{setText('');setMedia([]);setReviewed(false);pending.current=null;}}>Clear unsaved note</button>}
-        <p className="capture-fine">Source: {role==='coach'?'Coach Alex':person?.name} (synthetic). Saving adds an unverified observation for Consulting. It does not approve a plan or change BOS, APA or approved learning.</p>
+        <p className="capture-fine">Source: {role==='coach'?'Coach Alex':person?.name} (synthetic). {coachConnectMode?'This reviewed Coach Alex note will be shared with the selected athlete’s next successful Start My Session opening.':'Saving adds an unverified observation for Consulting.'} It does not approve a plan or change BOS, APA or approved learning.</p>
       </div>
-      {saved&&<p className="capture-success" role="status">✓ {saved} Open MORE to see it in the conversation.</p>}
+      {saved&&<p className="capture-success" role="status">✓ {saved} {coachConnectMode?'The note is ready for this athlete’s next session.':'Open MORE to see it in the conversation.'}</p>}
       <div className="capture-notes"><h2>Recent captured notes</h2>{!state?<p>Loading the saved record…</p>:!notes.length?<p>Your first observation can start here.</p>:notes.map(m=><article key={m.id}><small>{m.capture.source} · {new Date(m.at).toLocaleString()}</small><p>{m.text}</p><div className="capture-media"><Media items={m.capture.attachments}/></div></article>)}</div>
     </section>}
     {error&&<div className="capture-error" role="alert"><p>{error}</p><a href="/leadership" target="_top">Open the existing Leadership sign-in</a></div>}

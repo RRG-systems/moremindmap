@@ -99,3 +99,48 @@ test('voice transcription is default-off and bounded to four new clips per fifte
   }
   assert.equal(calls, 4);
 });
+
+test('authenticated Coach Connect capture reaches only Nia’s next opening and returns a durable metadata receipt', async () => {
+  const redis = new FakeRedis();
+  const observed = [];
+  const handler = createAthleteConsultingV2Handler({ env, redis,
+    coach: async (bundle, state, task) => {
+      observed.push({ slug: bundle.person.slug, task, messages: state.messages });
+      return { reply: 'Coach Alex noticed a useful reset. What did you make of it?', plan: null,
+        plan_change: 'none', retire_draft: false, learning: [], recap: '' };
+    },
+  });
+  const credential = await cookie(redis);
+  const before = (await invoke(handler, request({ cookie: credential }))).body;
+  const note = { subject: 'nia', role: 'coach', source: 'Coach Alex (synthetic)',
+    channel: 'coach_connect_box04_v1', kind: 'text', text: 'Nia reset after a missed pass.',
+    attachments: [], reviewed: true };
+  const capture = await invoke(handler, request({ method: 'POST', kind: 'action', cookie: credential,
+    headers: { 'x-athlete-consulting-csrf': before._transport.csrf }, body: {
+      action: 'capture_demo', requestId: 'coach-connect-nia-1', capture: note,
+      revision: before.revision, proof_revision: before._transport.revision,
+      state_hash: before._transport.state_hash,
+      actor_capability: before._transport.actors.instructor,
+    } }));
+  assert.equal(capture.status, 200, JSON.stringify(capture.body));
+  assert.equal(capture.body.coachNoteHandoff.pending_count, 1);
+  assert.equal(capture.body.messages.at(-1).capture.channel, 'coach_connect_box04_v1');
+  const sofia = await invoke(handler, request({ cookie: credential, slug: 'sofia' }));
+  assert.equal(sofia.body.coachNoteHandoff.pending_count, 0);
+  const current = (await invoke(handler, request({ cookie: credential }))).body;
+  const opened = await invoke(handler, request({ method: 'POST', kind: 'action', cookie: credential,
+    headers: { 'x-athlete-consulting-csrf': current._transport.csrf }, body: {
+      action: 'start', requestId: 'coach-connect-open-nia-1', revision: current.revision,
+      proof_revision: current._transport.revision, state_hash: current._transport.state_hash,
+      actor_capability: current._transport.actors.conversation, view: 'home', speaker: 'athlete',
+    } }));
+  assert.equal(opened.status, 200, JSON.stringify(opened.body));
+  assert.equal(observed.length, 1);
+  assert.equal(observed[0].slug, 'nia');
+  assert.equal(observed[0].task, 'OPENING');
+  assert.equal(observed[0].messages.at(-1).coach_note_handoff, 'next_opening');
+  assert.equal(opened.body.coachNoteHandoff.pending_count, 0);
+  assert.deepEqual(opened.body.coachNoteHandoff.last_opening.note_ids, ['coach-connect-nia-1']);
+  assert.equal(opened.body.plan, null);
+  assert.deepEqual(opened.body.learning, []);
+});

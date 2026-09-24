@@ -2,7 +2,8 @@ import { Buffer } from 'node:buffer';
 import { randomUUID } from 'node:crypto';
 import { captureContextMessage } from './capture.js';
 import { withAthleteConsultingSessionLeaseV1 } from '../athleteLivingConsultOneShotV1/durableInfrastructure.js';
-import { hash, initial, requireThat, validatePlan, applyOutput, applyLocalAction } from './state.js';
+import { hash, initial, requireThat, validatePlan, applyOutput, applyLocalAction,
+  pendingCoachNoteIds, coachNoteHandoffStatus } from './state.js';
 
 export const ATHLETE_V2_PREFIX = 'more:athlete-consulting-demo:v2';
 export const MAX_STATE_BYTES = 4 * 1024 * 1024;
@@ -133,13 +134,14 @@ export function createStore({ redis, bundles, coach, scopeId, localAction = appl
     envelope.operations[requestId] = { ...envelope.operations[requestId], status: 'unknown', completed_at: new Date().toISOString(), revision: state.revision };
     return persist(ctx, lease, saved.raw, envelope);
   }
+  const visibleState = (state, bundle) => ({ ...clone(state), coachNoteHandoff: coachNoteHandoffStatus(state, bundle) });
   async function read(slug) {
     const ctx = context(slug), saved = await load(ctx);
-    if (saved.envelope.state.status !== 'working') return clone(saved.envelope.state);
+    if (saved.envelope.state.status !== 'working') return visibleState(saved.envelope.state, ctx.bundle);
     try {
-      return await leaseOperation(ctx, async (lease) => clone((await recover(ctx, lease, await load(ctx))).envelope.state));
+      return await leaseOperation(ctx, async (lease) => visibleState((await recover(ctx, lease, await load(ctx))).envelope.state, ctx.bundle));
     } catch (error) {
-      if (error.message === 'PLEASE_WAIT') return clone((await load(ctx)).envelope.state);
+      if (error.message === 'PLEASE_WAIT') return visibleState((await load(ctx)).envelope.state, ctx.bundle);
       throw error;
     }
   }
@@ -154,7 +156,7 @@ export function createStore({ redis, bundles, coach, scopeId, localAction = appl
       if (existing) {
         requireThat(existing.hash === requestHash, 'REQUEST_ID_REUSED');
         requireThat(TERMINAL.includes(existing.status), 'PLEASE_WAIT');
-        return clone(saved.envelope.state);
+        return visibleState(saved.envelope.state, ctx.bundle);
       }
       requireThat(body.revision === saved.envelope.state.revision, 'STATE_CHANGED_RELOAD');
       let envelope = clone(saved.envelope), state = envelope.state;
@@ -182,14 +184,29 @@ export function createStore({ redis, bundles, coach, scopeId, localAction = appl
         saved = await persist(ctx, lease, saved.raw, envelope);
         await lease.assertOwned();
         let output, failure;
-        try { const inputState = clone(state); inputState.messages = inputState.messages.map(captureContextMessage); output = await coach(clone(ctx.bundle), inputState, task); }
+        const pendingIds = pendingCoachNoteIds(state, ctx.bundle);
+        try {
+          const inputState = clone(state), waiting = new Set(pendingIds);
+          // Existing reviewed messages are the only text source. Pending notes
+          // wait for OPENING, even if captured during an active session.
+          const pendingMessages = inputState.messages.filter((message) => waiting.has(message.id));
+          inputState.messages = inputState.messages.filter((message) => !waiting.has(message.id)).map(captureContextMessage);
+          if (task === 'OPENING') inputState.messages.push(...pendingMessages.map((message) => ({
+            ...captureContextMessage(message), coach_note_handoff: 'next_opening',
+          })));
+          output = await coach(clone(ctx.bundle), inputState, task);
+        }
         catch (error) { failure = error; }
         // No response can publish after lease ownership has changed.
         await lease.assertOwned();
         envelope = clone(saved.envelope); state = envelope.state;
         state.status = state.beforeWorking;
         if (!failure) {
-          try { applyOutput(state, output, task); } catch (error) { failure = error; }
+          try {
+            applyOutput(state, output, task);
+            if (task === 'OPENING' && pendingIds.length) state.events.push({ type: 'coach_note_opened',
+              note_ids: pendingIds, request_id: body.requestId, at: new Date().toISOString() });
+          } catch (error) { failure = error; }
         }
         if (failure) {
           status = 'failed';
@@ -201,7 +218,7 @@ export function createStore({ redis, bundles, coach, scopeId, localAction = appl
       state.revision++;
       state.processed = [...state.processed, body.requestId].slice(-200);
       envelope.operations[body.requestId] = { ...envelope.operations[body.requestId], hash: requestHash, status, started_at: started, completed_at: new Date().toISOString(), revision: state.revision };
-      return clone((await persist(ctx, lease, saved.raw, envelope, body.action === 'reset' ? body.requestId : null)).envelope.state);
+      return visibleState((await persist(ctx, lease, saved.raw, envelope, body.action === 'reset' ? body.requestId : null)).envelope.state, ctx.bundle);
     });
   }
   return { read, act };
