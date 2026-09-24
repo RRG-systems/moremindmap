@@ -199,7 +199,7 @@ test('Athlete Consulting is default-off and becomes an exact fourth, separately 
   assert.equal((await authenticateAthleteConsultingDemoRequest({ redis, req: athleteReq, env: { ...enabledEnv, SUBSCRIPTION_V1_INTERNAL_DEV_ENABLED: 'false' } })).status, 404);
 });
 
-test('Leadership launcher keeps Consulting and exposes Coach Connect as a distinct V2 Box 04 choice', () => {
+test('Leadership launcher keeps one Box 04 with distinct V2 choices and preserves Box 05', () => {
   const launcher = fs.readFileSync(new URL('../src/LeadershipDemo.jsx', import.meta.url), 'utf8');
   const portal = fs.readFileSync(new URL('../src/LeadershipPortal.jsx', import.meta.url), 'utf8');
   const launcherApi = fs.readFileSync(new URL('../api/internal/leadership-demo-entry.js', import.meta.url), 'utf8');
@@ -212,7 +212,13 @@ test('Leadership launcher keeps Consulting and exposes Coach Connect as a distin
   assert.equal((launcher.match(/title: 'SUBSCRIPTION MODEL 2'/gu) || []).length, 1);
   assert.equal((launcher.match(/title: 'ATHLETE CONSULTING TOOL'/gu) || []).length, 1);
   assert.equal((launcher.match(/title: 'ATHLETE COACH CONNECT'/gu) || []).length, 1);
-  assert.equal((launcher.match(/number: '04'/gu) || []).length, 2);
+  assert.equal((launcher.match(/number: '04'/gu) || []).length, 1);
+  assert.equal((launcher.match(/number: '05'/gu) || []).length, 1);
+  assert.match(launcher, /product\.id !== 'athlete-coach-connect'/u);
+  assert.match(launcher, /<article key=\{product\.id\}[\s\S]*?>04<\/span>/u);
+  assert.match(launcher, /\[product, coachConnect\]\.map\(\(choice\) => \(/u);
+  assert.match(launcher, /onClick=\{\(\) => launch\(choice\)\}/u);
+  assert.match(launcher, /choice\.title/u);
   assert.equal((launcher.match(/action: 'LAUNCH_/gu) || []).length, 5);
   assert.equal((launcher.match(/action: 'OPEN_DARREN_LIBRARY'/gu) || []).length, 1);
   assert.match(launcher, /ATHLETE_V2_PRODUCT_IDS = \[\.\.\.ATHLETE_PRODUCT_IDS, 'athlete-coach-connect'\]/u);

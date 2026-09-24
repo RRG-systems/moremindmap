@@ -45,7 +45,6 @@ const products = [
   {
     id: 'athlete-coach-connect',
     action: 'LAUNCH_ATHLETE_COACH_CONNECT',
-    number: '04',
     eyebrow: 'Coach observations',
     title: 'ATHLETE COACH CONNECT',
     description: 'Choose Nia or Sofia and save a reviewed coach observation to their synthetic Consulting record. Type a note or turn a short voice note into editable text before confirming it.',
@@ -154,7 +153,9 @@ export default function LeadershipDemo() {
   if (status === 'loading') return <LeadershipDemoStatus title="Opening Darren’s demo area…" />
   if (status === 'locked') return <LockedLeadershipDemo />
 
-  const availableProducts = products.filter((product) => availableProductIds.includes(product.id))
+  const coachConnect = availableProductIds.includes('athlete-coach-connect')
+    ? products.find((product) => product.id === 'athlete-coach-connect') : null
+  const availableProducts = products.filter((product) => availableProductIds.includes(product.id) && product.id !== 'athlete-coach-connect')
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#030605] text-white">
@@ -180,6 +181,35 @@ export default function LeadershipDemo() {
             const product = original.id === 'athlete-consulting-tool' && athleteVersion === 2
               ? { ...original, title: 'ATHLETE CONSULTING TOOL V2', description: original.description.replace('Mika and Avery', 'Nia and Sofia'), detail: 'Ages 15 and 19 · Synthetic fixtures only · No customer access' }
               : original
+            if (product.id === 'athlete-consulting-tool' && coachConnect) return (
+              <article key={product.id} className="min-h-[360px] rounded-[2rem] border border-sky-300/24 bg-[linear-gradient(145deg,rgba(18,68,92,.62),rgba(6,16,28,.94))] p-8 text-left shadow-[0_24px_90px_rgba(0,0,0,0.42)] backdrop-blur-md">
+                <div className="flex items-start justify-between gap-6">
+                  <span className="text-sm font-semibold tracking-[0.2em] text-sky-300">04</span>
+                  <span className="rounded-full border border-white/12 bg-black/25 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-white/54">Synthetic demo</span>
+                </div>
+                <div className="mt-10 text-xs uppercase tracking-[0.24em] text-white/42">Shared athlete clarity</div>
+                <h2 className="mt-4 text-3xl font-semibold tracking-tight md:text-4xl">ATHLETE DEMONSTRATIONS</h2>
+                <p className="mt-4 text-sm leading-6 text-white/62">Two distinct choices for the same protected Nia and Sofia demonstration.</p>
+                <div className="mt-7 grid gap-3">
+                  {[product, coachConnect].map((choice) => (
+                    <button
+                      key={choice.id}
+                      type="button"
+                      onClick={() => launch(choice)}
+                      disabled={Boolean(busyProduct) || !csrfToken}
+                      className="rounded-2xl border border-sky-200/20 bg-black/25 px-5 py-4 text-left transition hover:border-sky-200/55 hover:bg-sky-200/10 focus:outline-none focus:ring-4 focus:ring-sky-300/15 disabled:cursor-wait disabled:opacity-55"
+                    >
+                      <span className="flex items-center justify-between gap-3 text-sm font-semibold text-sky-100">
+                        {choice.title}<span aria-hidden="true">→</span>
+                      </span>
+                      <small className="mt-2 block text-xs leading-5 text-white/55">{choice.id === 'athlete-coach-connect' ? 'Review a typed or short voice-to-text Coach Alex note before saving.' : 'Open the continuing synthetic athlete relationship.'}</small>
+                      {busyProduct === choice.id && <small className="mt-2 block text-xs text-sky-200">Opening experience…</small>}
+                    </button>
+                  ))}
+                </div>
+                <small className="mt-6 block text-xs leading-5 text-white/42">Ages 15 and 19 · Synthetic fixtures only · No customer access</small>
+              </article>
+            )
             return (
             <button
               key={product.id}
