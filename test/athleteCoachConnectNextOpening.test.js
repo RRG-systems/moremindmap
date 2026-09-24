@@ -109,7 +109,53 @@ test('older-than-50 reviewed coach note reaches only the next successful opening
   state = await act(store, 'nia', { action: 'finish' });
   await act(store, 'nia', { action: 'start' });
   assert.equal(calls[1].conversation.some((message) => message.coach_note_handoff), false);
+  assert.equal(calls[1].conversation.some((message) => message.id === noteId || message.text.includes('missed pass')), false);
   assert.equal((await store.read('nia')).events.filter((event) => event.type === 'coach_note_opened').length, 1);
+});
+
+test('a delivered note remains in the authenticated record but never re-enters model input', async () => {
+  const calls = [];
+  const { store } = fixture(async (bundle, state, task) => {
+    calls.push({ task, conversation: coachingInput(bundle, state, task).conversation });
+    return output();
+  });
+  let state = await act(store, 'nia', { action: 'capture_demo',
+    capture: capture('coach', 'nia', 'Only for the next session: a fictional practice reset.') });
+  const noteId = state.messages.at(-1).id;
+  state = await act(store, 'nia', { action: 'start' });
+  assert.equal(calls[0].conversation.some((message) => message.id === noteId && message.coach_note_handoff === 'next_opening'), true);
+  assert.equal(state.messages.some((message) => message.id === noteId), true);
+  await act(store, 'nia', { action: 'message', speaker: 'athlete', text: 'Let us discuss school.' });
+  await act(store, 'nia', { action: 'close' });
+  await act(store, 'nia', { action: 'finish' });
+  state = await act(store, 'nia', { action: 'start' });
+  for (const call of calls.slice(1)) {
+    assert.equal(call.conversation.some((message) => message.id === noteId
+      || message.text.includes('Only for the next session')), false, call.task);
+  }
+  assert.equal(state.messages.some((message) => message.id === noteId), true);
+  assert.deepEqual(state.coachNoteHandoff.last_opening.note_ids, [noteId]);
+  assert.equal(state.events.filter((event) => event.type === 'coach_note_opened').length, 1);
+});
+
+test('a caller-chosen capture ID cannot relabel an older non-coach message as a handoff', async () => {
+  const calls = [];
+  const { store } = fixture(async (bundle, state, task) => {
+    calls.push({ task, conversation: coachingInput(bundle, state, task).conversation });
+    return output();
+  });
+  let state = await act(store, 'nia', { action: 'start' });
+  const priorAssistant = state.messages.at(-1);
+  state = await act(store, 'nia', { action: 'finish' });
+  state = await store.act('nia', { action: 'capture_demo', revision: state.revision,
+    requestId: priorAssistant.id, capture: capture('coach', 'nia', 'A reviewed Nia-only note.') });
+  assert.equal(state.coachNoteHandoff.pending_count, 1);
+  state = await act(store, 'nia', { action: 'start' });
+  const opening = calls.at(-1).conversation;
+  assert.equal(opening.filter((message) => message.coach_note_handoff === 'next_opening').length, 1);
+  assert.equal(opening.find((message) => message.role === 'assistant' && message.id === priorAssistant.id)?.coach_note_handoff, undefined);
+  assert.equal(opening.find((message) => message.capture?.channel === 'coach_connect_box04_v1')?.text.includes('Nia-only note'), true);
+  assert.equal(state.messages.filter((message) => message.id === priorAssistant.id).length, 2);
 });
 
 test('a coach note saved mid-session is withheld from CHAT and CLOSE until the next OPENING', async () => {

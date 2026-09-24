@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { captureContextMessage } from './capture.js';
 import { withAthleteConsultingSessionLeaseV1 } from '../athleteLivingConsultOneShotV1/durableInfrastructure.js';
 import { hash, initial, requireThat, validatePlan, applyOutput, applyLocalAction,
-  pendingCoachNoteIds, coachNoteHandoffStatus } from './state.js';
+  pendingCoachNoteMessages, reviewedCoachNoteMessages, coachNoteHandoffStatus } from './state.js';
 
 export const ATHLETE_V2_PREFIX = 'more:athlete-consulting-demo:v2';
 export const MAX_STATE_BYTES = 4 * 1024 * 1024;
@@ -184,13 +184,15 @@ export function createStore({ redis, bundles, coach, scopeId, localAction = appl
         saved = await persist(ctx, lease, saved.raw, envelope);
         await lease.assertOwned();
         let output, failure;
-        const pendingIds = pendingCoachNoteIds(state, ctx.bundle);
+        const pendingMessages = pendingCoachNoteMessages(state, ctx.bundle);
+        const pendingIds = pendingMessages.map((message) => message.id);
         try {
-          const inputState = clone(state), waiting = new Set(pendingIds);
-          // Existing reviewed messages are the only text source. Pending notes
-          // wait for OPENING, even if captured during an active session.
-          const pendingMessages = inputState.messages.filter((message) => waiting.has(message.id));
-          inputState.messages = inputState.messages.filter((message) => !waiting.has(message.id)).map(captureContextMessage);
+          const inputState = clone(state);
+          // Only exact reviewed Coach Alex messages can enter the handoff.
+          // Neither pending nor delivered notes re-enter ordinary model history.
+          // Their original source messages remain saved for the authenticated UI.
+          const reviewedMessages = new Set(reviewedCoachNoteMessages(inputState, ctx.bundle));
+          inputState.messages = inputState.messages.filter((message) => !reviewedMessages.has(message)).map(captureContextMessage);
           if (task === 'OPENING') inputState.messages.push(...pendingMessages.map((message) => ({
             ...captureContextMessage(message), coach_note_handoff: 'next_opening',
           })));

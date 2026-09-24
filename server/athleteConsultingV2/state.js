@@ -9,15 +9,12 @@ const text = (value) => typeof value === 'string';
 
 // This projection is limited to reviewed Coach Alex captures for the selected
 // synthetic DarrenDemo athlete. Existing v2 states need no migration.
-export function pendingCoachNoteIds(state, bundle) {
+export function reviewedCoachNoteMessages(state, bundle) {
   const person = bundle?.person;
   if (person?.synthetic !== true || !['nia', 'sofia'].includes(person.slug)
     || bundle.bos?.synthetic !== true || bundle.apa?.synthetic !== true
     || state.mm !== person.mm || bundle.bos.mm !== person.mm
     || bundle.apa.mm !== person.mm) return [];
-  const delivered = new Set((state.events || [])
-    .filter((event) => event.type === 'coach_note_opened')
-    .flatMap((event) => event.note_ids || []));
   return (state.messages || [])
     .filter((message) => message.capture?.contract === 'athlete_capture_demo_v1'
       && message.capture?.bridge === 'darren_demo_same_scope_v1'
@@ -28,9 +25,18 @@ export function pendingCoachNoteIds(state, bundle) {
       && message.capture.attachments.length === 0
       && message.capture?.subject === person.slug
       && message.capture?.role === 'coach'
-      && message.capture?.source === 'Coach Alex (synthetic)'
-      && !delivered.has(message.id))
-    .map((message) => message.id);
+      && message.capture?.source === 'Coach Alex (synthetic)');
+}
+
+export function pendingCoachNoteMessages(state, bundle) {
+  const delivered = new Set((state.events || [])
+    .filter((event) => event.type === 'coach_note_opened')
+    .flatMap((event) => event.note_ids || []));
+  return reviewedCoachNoteMessages(state, bundle).filter((message) => !delivered.has(message.id));
+}
+
+export function pendingCoachNoteIds(state, bundle) {
+  return pendingCoachNoteMessages(state, bundle).map((message) => message.id);
 }
 
 // Authenticated UI receives delivery metadata only. Note text remains in its
