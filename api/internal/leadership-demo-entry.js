@@ -57,6 +57,11 @@ export default async function leadershipDemoEntryHandler(req, res) {
                 ? { title: 'ATHLETE CONSULTING TOOL V2', version: 2 }
                 : { title: 'ATHLETE CONSULTING TOOL' }) }]
               : []),
+            ...(athleteConsultingDarrenDemoEnabled(process.env)
+              && auth.capability.allowed_products?.includes('athlete-consulting-tool')
+              && process.env.ATHLETE_CONSULTING_V2_ENABLED === 'true'
+              ? [{ id: 'athlete-coach-connect', title: 'ATHLETE COACH CONNECT', version: 2 }]
+              : []),
             ...(darrenDemoLibraryEnabled(process.env)
               && auth.capability.library_read_scope === 'approved_saved_bos_v1'
               ? [{ id: 'presentations-athlete-reports', title: 'PRESENTATIONS & ATHLETE REPORTS' }]
@@ -129,8 +134,9 @@ export default async function leadershipDemoEntryHandler(req, res) {
       });
     }
 
-    if (action === 'LAUNCH_ATHLETE_CONSULTING_TOOL') {
-      if (!athleteConsultingDarrenDemoEnabled(process.env)) {
+    if (action === 'LAUNCH_ATHLETE_CONSULTING_TOOL' || action === 'LAUNCH_ATHLETE_COACH_CONNECT') {
+      if (!athleteConsultingDarrenDemoEnabled(process.env)
+        || (action === 'LAUNCH_ATHLETE_COACH_CONNECT' && process.env.ATHLETE_CONSULTING_V2_ENABLED !== 'true')) {
         return send(res, 404, { ok: false, code: 'ATHLETE_CONSULTING_DEMO_DEFAULT_OFF' });
       }
       const issued = await issueAthleteConsultingDemoCapability({
@@ -143,7 +149,9 @@ export default async function leadershipDemoEntryHandler(req, res) {
       return send(res, 200, {
         ok: true,
         code: 'LEADERSHIP_DEMO_ATHLETE_CONSULTING_CAPABILITY_ISSUED',
-        redirect_to: '/athlete-consulting-tool/demo',
+        redirect_to: action === 'LAUNCH_ATHLETE_COACH_CONNECT'
+          ? '/athlete-consulting-tool/demo?capture=1&role=coach'
+          : '/athlete-consulting-tool/demo',
         synthetic_only: true,
       });
     }

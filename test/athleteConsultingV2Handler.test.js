@@ -85,12 +85,17 @@ test('real shared Leadership entry and launcher issue Nia/Sofia under V2 using o
   assert.equal((await invoke(leadershipEntry, enterRequest)).status, 403);
   const launcherCookie = cookiePair(entered.headers['set-cookie']);
   const launcher = await invoke(leadershipEntry, req({ cookie: launcherCookie, url: '/api/internal/leadership-demo-entry?view=launcher' }));
-  assert.deepEqual(launcher.body.choices.map((item) => item.id), ['recruiting', 'subscription-model-1', 'subscription-model-2', 'athlete-consulting-tool']);
+  assert.deepEqual(launcher.body.choices.map((item) => item.id), ['recruiting', 'subscription-model-1', 'subscription-model-2', 'athlete-consulting-tool', 'athlete-coach-connect']);
   assert.equal(launcher.body.choices.find(item => item.id === 'athlete-consulting-tool').version, 2);
   assert.equal(launcher.body.choices.find(item => item.id === 'athlete-consulting-tool').title, 'ATHLETE CONSULTING TOOL V2');
+  assert.deepEqual(launcher.body.choices.find(item => item.id === 'athlete-coach-connect'), { id: 'athlete-coach-connect', title: 'ATHLETE COACH CONNECT', version: 2 });
   process.env.ATHLETE_CONSULTING_V2_ENABLED = 'false';
   const legacyLauncher = await invoke(leadershipEntry, req({ cookie: launcherCookie, url: '/api/internal/leadership-demo-entry?view=launcher' }));
+  assert.deepEqual(legacyLauncher.body.choices.map((item) => item.id), ['recruiting', 'subscription-model-1', 'subscription-model-2', 'athlete-consulting-tool']);
   assert.deepEqual(legacyLauncher.body.choices.find(item => item.id === 'athlete-consulting-tool'), { id: 'athlete-consulting-tool', title: 'ATHLETE CONSULTING TOOL' });
+  const legacyCoach = await invoke(leadershipEntry, req({ method: 'POST', cookie: launcherCookie, url: '/api/internal/leadership-demo-entry', body: { action: 'LAUNCH_ATHLETE_COACH_CONNECT' },
+    headers: { 'x-leadership-demo-launch-csrf': legacyLauncher.body.csrf_token } }));
+  assert.equal(legacyCoach.status, 404);
   process.env.ATHLETE_CONSULTING_V2_ENABLED = 'true';
   const launchRequest = req({ method: 'POST', cookie: launcherCookie, url: '/api/internal/leadership-demo-entry', body: { action: 'LAUNCH_ATHLETE_CONSULTING_TOOL' },
     headers: { 'x-leadership-demo-launch-csrf': launcher.body.csrf_token } });
@@ -102,6 +107,15 @@ test('real shared Leadership entry and launcher issue Nia/Sofia under V2 using o
   assert.equal(auth.ok, true);
   assert.deepEqual(auth.capability.allowed_subjects, ['nia', 'sofia']);
   assert.equal(auth.capability.synthetic_only, true);
+  const refreshedLauncher = await invoke(leadershipEntry, req({ cookie: launcherCookie, url: '/api/internal/leadership-demo-entry?view=launcher' }));
+  const coachLaunch = await invoke(leadershipEntry, req({ method: 'POST', cookie: launcherCookie, url: '/api/internal/leadership-demo-entry', body: { action: 'LAUNCH_ATHLETE_COACH_CONNECT' },
+    headers: { 'x-leadership-demo-launch-csrf': refreshedLauncher.body.csrf_token } }));
+  assert.equal(coachLaunch.status, 200);
+  assert.equal(coachLaunch.body.redirect_to, '/athlete-consulting-tool/demo?capture=1&role=coach');
+  const coachAuth = await authenticateAthleteConsultingDemoRequest({ redis: entryRedis, env, req: req({ cookie: cookiePair(coachLaunch.headers['set-cookie']) }) });
+  assert.equal(coachAuth.ok, true);
+  assert.deepEqual(coachAuth.capability.allowed_subjects, ['nia', 'sofia']);
+  assert.equal(coachAuth.capability.demo_scope_id, auth.capability.demo_scope_id);
   assert.equal((await invoke(leadershipEntry, launchRequest)).status, 403);
   const wrong = await invoke(leadershipEntry, req({ method: 'POST', url: '/api/internal/leadership-demo-entry', origin: 'https://hostile.invalid', body: { action: 'ENTER' } }));
   assert.equal(wrong.status, 403);

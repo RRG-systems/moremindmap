@@ -199,7 +199,7 @@ test('Athlete Consulting is default-off and becomes an exact fourth, separately 
   assert.equal((await authenticateAthleteConsultingDemoRequest({ redis, req: athleteReq, env: { ...enabledEnv, SUBSCRIPTION_V1_INTERNAL_DEV_ENABLED: 'false' } })).status, 404);
 });
 
-test('Leadership launcher preserves four launch handlers and adds the library as an exact fifth server choice', () => {
+test('Leadership launcher keeps Consulting and exposes Coach Connect as a distinct V2 Box 04 choice', () => {
   const launcher = fs.readFileSync(new URL('../src/LeadershipDemo.jsx', import.meta.url), 'utf8');
   const portal = fs.readFileSync(new URL('../src/LeadershipPortal.jsx', import.meta.url), 'utf8');
   const launcherApi = fs.readFileSync(new URL('../api/internal/leadership-demo-entry.js', import.meta.url), 'utf8');
@@ -211,15 +211,22 @@ test('Leadership launcher preserves four launch handlers and adds the library as
   assert.equal((launcher.match(/title: 'SUBSCRIPTION MODEL 1'/gu) || []).length, 1);
   assert.equal((launcher.match(/title: 'SUBSCRIPTION MODEL 2'/gu) || []).length, 1);
   assert.equal((launcher.match(/title: 'ATHLETE CONSULTING TOOL'/gu) || []).length, 1);
-  assert.equal((launcher.match(/action: 'LAUNCH_/gu) || []).length, 4);
+  assert.equal((launcher.match(/title: 'ATHLETE COACH CONNECT'/gu) || []).length, 1);
+  assert.equal((launcher.match(/number: '04'/gu) || []).length, 2);
+  assert.equal((launcher.match(/action: 'LAUNCH_/gu) || []).length, 5);
   assert.equal((launcher.match(/action: 'OPEN_DARREN_LIBRARY'/gu) || []).length, 1);
+  assert.match(launcher, /ATHLETE_V2_PRODUCT_IDS = \[\.\.\.ATHLETE_PRODUCT_IDS, 'athlete-coach-connect'\]/u);
+  assert.match(launcher, /ATHLETE_V2_LIBRARY_PRODUCT_IDS = \[\.\.\.ATHLETE_V2_PRODUCT_IDS, 'presentations-athlete-reports'\]/u);
+  assert.match(launcher, /\(exactAthleteV2 \|\| exactAthleteV2Library\) && coachChoice\?\.version === 2/u);
   assert.match(launcher, /HOME → YOU → YOUR BUSINESS → PLAN/u);
-  assert.match(launcher, /\['\/recruiting-gu-v1\/demo', '\/subscription', '\/athlete-consulting-tool\/demo', '\/darren-library\/library'\]/u);
+  assert.match(launcher, /'\/athlete-consulting-tool\/demo\?capture=1&role=coach'/u);
   assert.match(launcherApi, /redirect_to: '\/recruiting-gu-v1\/demo'/u);
   assert.match(launcherApi, /title: 'CONSULTING DEMONSTRATION'/u);
   assert.match(launcherApi, /LAUNCH_SUBSCRIPTION_MODEL_1/u);
   assert.match(launcherApi, /LAUNCH_SUBSCRIPTION_MODEL_2/u);
   assert.match(launcherApi, /LAUNCH_ATHLETE_CONSULTING_TOOL/u);
+  assert.match(launcherApi, /LAUNCH_ATHLETE_COACH_CONNECT/u);
+  assert.match(launcherApi, /id: 'athlete-coach-connect', title: 'ATHLETE COACH CONNECT', version: 2/u);
   assert.match(launcherApi, /OPEN_DARREN_LIBRARY/u);
   assert.doesNotMatch(launcherApi, /action === 'LAUNCH_SUBSCRIPTION'/u);
   assert.doesNotMatch(launcher, /OpenAI|GPT|Grok|xAI|provider logo|pricing/u);

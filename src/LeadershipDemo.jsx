@@ -43,6 +43,16 @@ const products = [
     tone: 'blue',
   },
   {
+    id: 'athlete-coach-connect',
+    action: 'LAUNCH_ATHLETE_COACH_CONNECT',
+    number: '04',
+    eyebrow: 'Coach observations',
+    title: 'ATHLETE COACH CONNECT',
+    description: 'Choose Nia or Sofia and save a reviewed coach observation to their synthetic Consulting record. Type a note or turn a short voice note into editable text before confirming it.',
+    detail: 'Same two synthetic athletes · Reviewed text only · No customer access',
+    tone: 'blue',
+  },
+  {
     id: 'presentations-athlete-reports',
     action: 'OPEN_DARREN_LIBRARY',
     number: '05',
@@ -56,8 +66,10 @@ const products = [
 
 const BASE_PRODUCT_IDS = ['recruiting', 'subscription-model-1', 'subscription-model-2']
 const ATHLETE_PRODUCT_IDS = [...BASE_PRODUCT_IDS, 'athlete-consulting-tool']
+const ATHLETE_V2_PRODUCT_IDS = [...ATHLETE_PRODUCT_IDS, 'athlete-coach-connect']
 const LIBRARY_PRODUCT_IDS = [...BASE_PRODUCT_IDS, 'presentations-athlete-reports']
 const ATHLETE_LIBRARY_PRODUCT_IDS = [...ATHLETE_PRODUCT_IDS, 'presentations-athlete-reports']
+const ATHLETE_V2_LIBRARY_PRODUCT_IDS = [...ATHLETE_V2_PRODUCT_IDS, 'presentations-athlete-reports']
 
 export default function LeadershipDemo() {
   const [status, setStatus] = useState('loading')
@@ -73,17 +85,26 @@ export default function LeadershipDemo() {
     try {
       const response = await fetch('/api/internal/leadership-demo-entry?view=launcher', { credentials: 'same-origin', cache: 'no-store' })
       const payload = await response.json().catch(() => null)
-      const receivedIds = Array.isArray(payload?.choices) ? payload.choices.map((choice) => choice?.id) : []
+      const choices = Array.isArray(payload?.choices) ? payload.choices : []
+      const receivedIds = choices.map((choice) => choice?.id)
       const exactBase = JSON.stringify(receivedIds) === JSON.stringify(BASE_PRODUCT_IDS)
       const exactAthlete = JSON.stringify(receivedIds) === JSON.stringify(ATHLETE_PRODUCT_IDS)
+      const exactAthleteV2 = JSON.stringify(receivedIds) === JSON.stringify(ATHLETE_V2_PRODUCT_IDS)
       const exactLibrary = JSON.stringify(receivedIds) === JSON.stringify(LIBRARY_PRODUCT_IDS)
       const exactAthleteLibrary = JSON.stringify(receivedIds) === JSON.stringify(ATHLETE_LIBRARY_PRODUCT_IDS)
-      if (!response.ok || payload?.ok !== true || !payload.csrf_token || (!exactBase && !exactAthlete && !exactLibrary && !exactAthleteLibrary)) {
+      const exactAthleteV2Library = JSON.stringify(receivedIds) === JSON.stringify(ATHLETE_V2_LIBRARY_PRODUCT_IDS)
+      const athleteChoice = choices.find((choice) => choice?.id === 'athlete-consulting-tool')
+      const coachChoice = choices.find((choice) => choice?.id === 'athlete-coach-connect')
+      const v2 = athleteChoice?.version === 2
+      const exactChoiceSet = v2
+        ? (exactAthleteV2 || exactAthleteV2Library) && coachChoice?.version === 2
+        : exactBase || exactAthlete || exactLibrary || exactAthleteLibrary
+      if (!response.ok || payload?.ok !== true || !payload.csrf_token || !exactChoiceSet) {
         setStatus('locked')
         return
       }
       setAvailableProductIds(receivedIds)
-      setAthleteVersion(payload.choices.find(choice => choice.id === 'athlete-consulting-tool')?.version === 2 ? 2 : 1)
+      setAthleteVersion(v2 ? 2 : 1)
       setCsrfToken(payload.csrf_token)
       setStatus('ready')
     } catch {
@@ -118,7 +139,7 @@ export default function LeadershipDemo() {
         body: JSON.stringify({ action: product.action }),
       })
       const payload = await response.json().catch(() => null)
-      if (!response.ok || payload?.ok !== true || !['/recruiting-gu-v1/demo', '/subscription', '/athlete-consulting-tool/demo', '/darren-library/library'].includes(payload.redirect_to)) {
+      if (!response.ok || payload?.ok !== true || !['/recruiting-gu-v1/demo', '/subscription', '/athlete-consulting-tool/demo', '/athlete-consulting-tool/demo?capture=1&role=coach', '/darren-library/library'].includes(payload.redirect_to)) {
         throw new Error(payload?.code || 'LEADERSHIP_DEMO_LAUNCH_FAILED')
       }
       window.location.assign(payload.redirect_to)
@@ -148,7 +169,7 @@ export default function LeadershipDemo() {
       <main className="relative z-10 mx-auto max-w-7xl px-6 py-16 md:py-24">
         <section className="max-w-4xl">
           <div className="inline-flex rounded-full border border-emerald-300/25 bg-emerald-400/10 px-4 py-2 text-xs uppercase tracking-[0.28em] text-emerald-100">Darren’s demo area</div>
-          <h1 className="mt-7 text-5xl font-semibold tracking-tight md:text-7xl">{availableProducts.length === 5 ? 'Four product demos. Film, presentations and athlete reports.' : `${availableProducts.length} products. One bounded demo area.`}</h1>
+          <h1 className="mt-7 text-5xl font-semibold tracking-tight md:text-7xl">{availableProductIds.includes('presentations-athlete-reports') ? `${availableProducts.length - 1} product demos. Film, presentations and athlete reports.` : `${availableProducts.length} products. One bounded demo area.`}</h1>
           <p className="mt-6 max-w-3xl text-lg leading-8 text-white/66 md:text-xl">Choose what you’d like to explore. Each experience stays inside the protected DarrenDemo boundary.</p>
         </section>
 
