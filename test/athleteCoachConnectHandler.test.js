@@ -3,6 +3,7 @@ import test from 'node:test';
 import { Buffer } from 'node:buffer';
 import { FakeRedis } from '../scripts/athlete-consulting-v2-review/fakeRedis.mjs';
 import { createAthleteConsultingV2Handler } from '../server/athleteConsultingV2/handler.js';
+import { CoachVoiceTranscriptionFailure } from '../server/athleteConsultingV2/transcription.js';
 import { issueLeadershipLauncherCapability, issueAthleteConsultingDemoCapability } from '../api/engine/leadershipDemo/authority.js';
 
 const env = Object.freeze({
@@ -98,6 +99,41 @@ test('voice transcription is default-off and bounded to four new clips per fifte
     assert.equal(result.status, index <= 4 ? 200 : 429);
   }
   assert.equal(calls, 4);
+});
+
+test('failed voice keeps only a safe one-use diagnostic receipt without retrying the clip', async () => {
+  const redis = new FakeRedis(); let calls = 0; const logs = [];
+  const handler = createAthleteConsultingV2Handler({ env, redis,
+    transcribe: async () => {
+      calls++;
+      throw new CoachVoiceTranscriptionFailure('invoke', 'provider_http', {
+        status: 401, requestID: 'req_SyntheticVoice123', message: 'private provider response',
+      });
+    }, logVoiceFailure: (event) => logs.push(event),
+  });
+  const credential = await cookie(redis);
+  const state = (await invoke(handler, request({ cookie: credential }))).body;
+  const first = await invoke(handler, request({ kind: 'transcribe', method: 'POST', cookie: credential,
+    body: voiceBody(state), headers: { 'x-athlete-consulting-csrf': state._transport.csrf } }));
+  assert.equal(first.status, 503);
+  assert.equal(first.body.error, 'VOICE_TRANSCRIPTION_FAILED');
+  assert.match(first.body.diagnostic.attempt_id, /^[a-f0-9-]{36}$/u);
+  assert.deepEqual({ ...first.body.diagnostic, attempt_id: null }, {
+    attempt_id: null, stage: 'invoke', category: 'provider_http', sdk_invoke_count: 1,
+    provider_http_status: 401, provider_request_id: 'req_SyntheticVoice123',
+  });
+  assert.equal(logs.length, 1);
+  assert.equal(logs[0].attempt_id, first.body.diagnostic.attempt_id);
+  const failed = [...redis.values.entries()].find(([key]) => key.includes(':coach-voice:'));
+  assert.equal(JSON.parse(failed[1]).status, 'failed');
+  assert.deepEqual(JSON.parse(failed[1]).diagnostic, first.body.diagnostic);
+  assert.doesNotMatch(JSON.stringify({ response: first.body, log: logs, redis: failed[1] }), /private provider response/u);
+  const after = (await invoke(handler, request({ cookie: credential }))).body;
+  const replay = await invoke(handler, request({ kind: 'transcribe', method: 'POST', cookie: credential,
+    body: voiceBody(after), headers: { 'x-athlete-consulting-csrf': after._transport.csrf } }));
+  assert.equal(replay.status, 409);
+  assert.equal(replay.body.error, 'VOICE_ALREADY_ATTEMPTED');
+  assert.equal(calls, 1);
 });
 
 test('authenticated Coach Connect capture reaches only Nia’s next opening and returns a durable metadata receipt', async () => {

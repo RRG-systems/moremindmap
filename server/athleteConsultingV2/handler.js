@@ -1,5 +1,5 @@
 import { Buffer } from 'node:buffer';
-import { createHash, timingSafeEqual } from 'node:crypto';
+import { createHash, randomUUID, timingSafeEqual } from 'node:crypto';
 import {
   athleteConsultingDarrenDemoEnabled, authenticateAthleteConsultingDemoRequest,
   issueAthleteConsultingDemoCsrf, consumeAthleteConsultingDemoCsrf,
@@ -11,7 +11,7 @@ import { bundles, athletes, binding, digest } from './bundles.js';
 import { createStore } from './store.js';
 import { createCoach } from './coach.js';
 import { applyLiveCapture } from './capture.js';
-import { transcribeCoachVoice, validateCoachVoice } from './transcription.js';
+import { CoachVoiceTranscriptionFailure, transcribeCoachVoice, validateCoachVoice } from './transcription.js';
 
 const equal = (a, b) => typeof a === 'string' && typeof b === 'string'
   && Buffer.byteLength(a) === Buffer.byteLength(b) && timingSafeEqual(Buffer.from(a), Buffer.from(b));
@@ -41,7 +41,9 @@ const expectedRole = body => body.action === 'transcribe_coach_voice' ? 'instruc
   : ['draft', 'discard', 'reset'].includes(body.action) ? 'shared_editor'
     : ['feedback', 'remember', 'forget', 'finish'].includes(body.action) ? 'athlete' : 'conversation';
 
-export function createAthleteConsultingV2Handler({ env = globalThis.process?.env || {}, redis: injectedRedis, authenticate, coach: injectedCoach, transport, transcribe: injectedTranscribe } = {}) {
+export function createAthleteConsultingV2Handler({ env = globalThis.process?.env || {}, redis: injectedRedis, authenticate,
+  coach: injectedCoach, transport, transcribe: injectedTranscribe,
+  logVoiceFailure = (event) => console.error(JSON.stringify(event)) } = {}) {
   return async (req, res) => {
     try {
       if (!athleteConsultingDarrenDemoEnabled(env) || env.ATHLETE_CONSULTING_V2_ENABLED !== 'true') return send(res, 404, { error: 'ATHLETE_V2_DISABLED' });
@@ -107,9 +109,14 @@ export function createAthleteConsultingV2Handler({ env = globalThis.process?.env
           const text = await (injectedTranscribe || transcribeCoachVoice)({ env, audio: body.audio });
           await redis.set(key, JSON.stringify({ status: 'complete', text }), 'EX', 3600);
           return send(res, 200, { text, saved_audio: false });
-        } catch {
-          await redis.set(key, JSON.stringify({ status: 'failed' }), 'EX', 3600);
-          return send(res, 503, { error: 'VOICE_TRANSCRIPTION_FAILED' });
+        } catch (error) {
+          const diagnostic = { attempt_id: randomUUID(), ...(error instanceof CoachVoiceTranscriptionFailure
+            ? error.diagnostic : { stage: 'unknown', category: 'unknown', sdk_invoke_count: null,
+              provider_http_status: null, provider_request_id: null }) };
+          await redis.set(key, JSON.stringify({ status: 'failed', diagnostic }), 'EX', 3600);
+          logVoiceFailure({ event: 'COACH_VOICE_TRANSCRIPTION_FAILURE', ...diagnostic,
+            raw_audio_logged: false, transcript_logged: false, provider_error_logged: false });
+          return send(res, 503, { error: 'VOICE_TRANSCRIPTION_FAILED', diagnostic });
         }
       }
       const { actor_capability: _actor, state_hash: _hash, proof_revision: _revision, ...operation } = body;

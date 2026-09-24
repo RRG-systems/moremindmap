@@ -16,6 +16,11 @@ export async function api(path, body, proof) {
     method:'POST',headers:{'Content-Type':'application/json','x-athlete-consulting-csrf':proof.csrf},body:JSON.stringify(requestBody),
   } : {})});
   const value = await response.json();
-  if (!response.ok) throw Error(response.status === 401 ? 'Please enter through the shared Leadership gate.' : value.error || 'Please try again.');
+  if (!response.ok) {
+    const error = Error(response.status === 401 ? 'Please enter through the shared Leadership gate.' : value.error || 'Please try again.');
+    if (response.status === 503 && value.error === 'VOICE_TRANSCRIPTION_FAILED'
+      && /^[a-f0-9-]{36}$/u.test(value.diagnostic?.attempt_id || '')) error.voice_diagnostic_id = value.diagnostic.attempt_id;
+    throw error;
+  }
   return value;
 }

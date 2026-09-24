@@ -69,7 +69,7 @@ export default function Capture() {
       const fresh=await api('state/'+slug);
       const result=await api('transcribe/'+slug,{action:'transcribe_coach_voice',requestId:crypto.randomUUID(),audio:{mime,data:await dataOf(file)}},fresh._transport);
       if(mounted.current){setText(prior=>[prior.trim(),result.text].filter(Boolean).join('\n\n'));setReviewed(false);}
-    } catch(e){if(mounted.current)setError(e.message==='VOICE_TRANSCRIPTION_DISABLED'?'Voice transcription is not enabled here yet. You can type a note instead.':e.message==='VOICE_RATE_LIMITED'?'Voice transcription has reached its demo limit. You can type a note instead.':e.message==='VOICE_ALREADY_ATTEMPTED'?'That voice note was already attempted. You can type the note instead.':e.message==='VOICE_TRANSCRIPTION_FAILED'?'The voice note could not be transcribed. Your current draft is safe; please try typing it.':e.message);} finally {if(mounted.current)setBusy(false);}
+    } catch(e){if(mounted.current)setError(e.message==='VOICE_TRANSCRIPTION_DISABLED'?'Voice transcription is not enabled here yet. You can type a note instead.':e.message==='VOICE_RATE_LIMITED'?'Voice transcription has reached its demo limit. You can type a note instead.':e.message==='VOICE_ALREADY_ATTEMPTED'?'That voice note was already attempted. You can type the note instead.':e.message==='VOICE_TRANSCRIPTION_FAILED'?`The voice note could not be transcribed. Your current draft is safe; please try typing it.${e.voice_diagnostic_id?` Reference ${e.voice_diagnostic_id}.`:''}`:e.message);} finally {if(mounted.current)setBusy(false);}
   }
   async function attachment(file,isPhoto) {
     if (!file) return;
@@ -121,6 +121,7 @@ export default function Capture() {
     finally{setBusy(false);}
   }
   const notes=state?.messages.filter(m=>m.capture&&(!coachConnectMode||m.capture.role==='coach')).slice(-12).reverse()||[];
+  const needsLeadershipSignIn=error==='Please enter through the shared Leadership gate.'||error==='Reopen through Leadership to continue.';
   return <main className="capture-app">
     <header><a className="capture-brand" href="/leadership" target="_top"><b>M</b><span>MORE <strong>ATHLETE</strong></span></a><span className="capture-status">{coachConnectMode?'COACH CONNECT · DEMO':'DARRENDEMO'}</span></header>
     <p className="capture-disclosure">{['localhost','127.0.0.1'].includes(location.hostname)?'Local rehearsal · No live writes':'Fictional athletes · Saved in your current DarrenDemo session'}</p>
@@ -145,6 +146,6 @@ export default function Capture() {
       {saved&&<p className="capture-success" role="status">✓ {saved} {coachConnectMode?'The note is ready for this athlete’s next session.':'Open MORE to see it in the conversation.'}</p>}
       <div className="capture-notes"><h2>Recent captured notes</h2>{!state?<p>Loading the saved record…</p>:!notes.length?<p>Your first observation can start here.</p>:notes.map(m=><article key={m.id}><small>{m.capture.source} · {new Date(m.at).toLocaleString()}</small><p>{m.text}</p><div className="capture-media"><Media items={m.capture.attachments}/></div></article>)}</div>
     </section>}
-    {error&&<div className="capture-error" role="alert"><p>{error}</p><a href="/leadership" target="_top">Open the existing Leadership sign-in</a></div>}
+    {error&&<div className="capture-error" role="alert"><p>{error}</p>{needsLeadershipSignIn&&<a href="/leadership" target="_top">Open the existing Leadership sign-in</a>}</div>}
   </main>;
 }
