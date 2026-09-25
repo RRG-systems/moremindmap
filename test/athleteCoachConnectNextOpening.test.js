@@ -80,6 +80,31 @@ test('handoff eligibility revalidates exact synthetic subject, MM, source and br
   }
 });
 
+test('a reviewed note never crosses distinct DarrenDemo Leadership scopes', async () => {
+  const redis = new FakeRedis();
+  const calls = [];
+  const coach = async (bundle, state, task) => {
+    calls.push({ mm: bundle.person.mm, task, conversation: coachingInput(bundle, state, task).conversation });
+    return output();
+  };
+  const first = createStore({ redis, bundles, scopeId: 'synthetic-leadership-scope-first',
+    localAction: applyLiveCapture, coach });
+  const second = createStore({ redis, bundles, scopeId: 'synthetic-leadership-scope-second',
+    localAction: applyLiveCapture, coach });
+  const captured = await act(first, 'nia', { action: 'capture_demo',
+    capture: capture('coach', 'nia', 'Only the first Leadership scope may see this note.') });
+  assert.equal(captured.coachNoteHandoff.pending_count, 1);
+  assert.equal((await second.read('nia')).coachNoteHandoff.pending_count, 0);
+  const otherOpening = await act(second, 'nia', { action: 'start' });
+  assert.equal(otherOpening.coachNoteHandoff.last_opening, null);
+  assert.equal(calls[0].conversation.some((message) => message.text.includes('first Leadership scope')), false);
+  const ownOpening = await act(first, 'nia', { action: 'start' });
+  assert.equal(ownOpening.coachNoteHandoff.pending_count, 0);
+  assert.equal(ownOpening.coachNoteHandoff.last_opening.note_ids.length, 1);
+  assert.equal(calls[1].conversation.some((message) => message.coach_note_handoff === 'next_opening'
+    && message.text.includes('first Leadership scope')), true);
+});
+
 test('older-than-50 reviewed coach note reaches only the next successful opening, with metadata receipt', async () => {
   const calls = [];
   const { store } = fixture(async (bundle, state, task) => {

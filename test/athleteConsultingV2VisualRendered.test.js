@@ -29,6 +29,9 @@ const plan = {
     summary: 'Your conversation is saved.', nextCue: 'Review any proposal before it becomes your plan.' },
   blocks: [{ blockId: 'athlete-block-recap', type: 'COMMITMENTS', title: 'What to carry forward',
     subtitle: 'A review, not a new agreement', objects: [
+      { id: 'athlete-map-change', kind: 'MAP_CHANGE_REVEAL', title: 'This is how your map has changed',
+        statement: 'The saved APA did not change this session.', sourceIds: ['athlete-source-map-start'],
+        items: [{ label: 'Saved APA', value: 'Version 0 → 0', note: 'No published APA change this session.' }] },
       { id: 'athlete-session-recap', kind: 'SESSION_RECAP', title: 'Before you go',
         statement: 'You discussed a practice option but made no commitment.', sourceIds: ['athlete-source-session-recap'] },
       { id: 'athlete-draft', kind: 'PROPOSED_PLAN', title: 'For your review',
@@ -36,7 +39,8 @@ const plan = {
         sourceIds: ['athlete-source-draft'], items: [
           { label: 'Try one drill', value: 'On Tuesday', note: 'Athlete · Notice energy after practice' },
         ] },
-    ], evidence: [{ id: 'athlete-source-session-recap', label: 'Current unconfirmed closing review' },
+    ], evidence: [{ id: 'athlete-source-map-start', label: 'Session-start saved map' },
+      { id: 'athlete-source-session-recap', label: 'Current unconfirmed closing review' },
       { id: 'athlete-source-draft', label: 'Unapproved plan proposal' }] }],
 };
 
@@ -44,6 +48,8 @@ test('rendered closing visual keeps source and draft boundary while containing n
   const before = structuredClone(plan);
   const html = renderToStaticMarkup(React.createElement(AthleteVisual, { plan }));
   assert.match(html, /What we learned today/u);
+  assert.match(html, /This is how your map has changed/u);
+  assert.match(html, /No published APA change this session/u);
   assert.match(html, /You discussed a practice option but made no commitment/u);
   assert.match(html, /Not yet agreed/u);
   assert.match(html, /Current unconfirmed closing review/u);

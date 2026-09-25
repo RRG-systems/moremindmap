@@ -9,6 +9,7 @@ import { createAthleteRslScope, createAthleteRslEvent, deriveAthleteRslEvents,
   replayAthleteRsl, athleteRslRetrievalContext, validateAthleteRslSourceMessages } from './rsl.js';
 import { buildAthleteVisualWorld, materializeAthleteVisualPlan,
   validateAthleteVisualPlan } from './visual.js';
+import { captureSessionStartMap } from './mapChange.js';
 
 export const ATHLETE_V2_PREFIX = 'more:athlete-consulting-demo:v2';
 export const MAX_STATE_BYTES = 4 * 1024 * 1024;
@@ -20,6 +21,8 @@ const safeCode = (error) => /^[A-Z_]+$/u.test(error?.message) ? error.message : 
 const FAILURE = 'MORE could not complete this response. Your message and saved plan are safe. You can try again when ready.';
 const APA_FAILURE = 'MORE could not update your APA. Your current saved reading is unchanged. Please try again when ready.';
 const INTERRUPTED = 'The connection was interrupted. Your saved conversation and plan are intact.';
+const CLOSING_SOURCE_ACTIONS = new Set(['approve', 'draft', 'discard', 'update_apa',
+  'publish_apa', 'discard_apa', 'confirm_fact', 'remember', 'forget']);
 const VIEW_SECTIONS = Object.freeze({ home: ['home'], you: ['you', 'map', 'portrait', 'why', 'answers',
   'identity', 'mind', 'communication', 'connection', 'effort', 'pressure', 'strengths', 'thriving'],
   sport: ['sport', 'where', 'futures', 'move', 'plan', 'evidence'],
@@ -425,8 +428,15 @@ export function createStore({ redis, bundles, coach, scopeId, localAction = appl
         if (!failure) {
           try {
             const staged = clone(state);
+            const nextSessionId = task === 'OPENING' ? randomUUID() : null;
+            const sessionStartMap = task === 'OPENING' && visualComposer
+              ? captureSessionStartMap({ bundle: ctx.bundle,
+                state: { ...staged, sessionId: nextSessionId } }) : null;
             applyOutput(staged, output, task);
-            if (task === 'OPENING') staged.sessionId = randomUUID();
+            if (task === 'OPENING') {
+              staged.sessionId = nextSessionId;
+              staged.sessionStartMap = sessionStartMap;
+            }
             await composeVisual(ctx, staged, task, body);
             await lease.assertOwned();
             if (task === 'OPENING' && pendingIds.length) staged.events.push({ type: 'coach_note_opened',
@@ -467,7 +477,15 @@ export function createStore({ redis, bundles, coach, scopeId, localAction = appl
             state.apaDraft = null;
           }
         }
-        state.beforeWorking = state.status;
+        // An unresolved APA update must not leave the earlier closing visual
+        // visible as though it were the final map. Re-closing is automatic in
+        // the authenticated UI after a successful update.
+        if (state.status === 'review' && state.closing) {
+          state.events.push({ type: 'closing_preview_invalidated', visual_id: state.closing.visual_id || null,
+            action: 'update_apa', request_id: body.requestId, at: started });
+          state.closing = null;
+          state.beforeWorking = 'active';
+        } else state.beforeWorking = state.status;
         state.status = 'working';
         state.pending = { task: 'APA_UPDATE', at: started, requestId: body.requestId };
         envelope.operations[body.requestId] = { hash: requestHash, status: 'pending', task: 'APA_UPDATE', started_at: started };
@@ -558,6 +576,17 @@ export function createStore({ redis, bundles, coach, scopeId, localAction = appl
         state.events.push({ type: 'current_apa_draft_invalidated', draft_id: state.apaDraft.id,
           reason: 'SOURCE_LINEAGE_CHANGED', at: new Date().toISOString() });
         state.apaDraft = null;
+      }
+      if (status === 'completed' && CLOSING_SOURCE_ACTIONS.has(body.action)) state.lastError = null;
+      // A review is a preview of an exact saved-source set. Once any of those
+      // sources changes, the old recap and its model-composed visual cannot be
+      // displayed as the final result. The authenticated UI automatically
+      // requests a fresh close after this committed action.
+      if (CLOSING_SOURCE_ACTIONS.has(body.action) && state.status === 'review' && state.closing) {
+        state.events.push({ type: 'closing_preview_invalidated', visual_id: state.closing.visual_id || null,
+          action: body.action, request_id: body.requestId, at: new Date().toISOString() });
+        state.closing = null;
+        state.status = 'active';
       }
       state.revision++;
       state.processed = [...state.processed, body.requestId].slice(-200);

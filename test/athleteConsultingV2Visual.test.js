@@ -2,15 +2,21 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { bundles } from '../server/athleteConsultingV2/bundles.js';
 import { initial } from '../server/athleteConsultingV2/state.js';
+import { captureSessionStartMap } from '../server/athleteConsultingV2/mapChange.js';
 import {
   ATHLETE_VISUAL_EVENTS, ATHLETE_VISUAL_OUTPUT_SCHEMA, buildAthleteVisualWorld,
   validateAthleteVisualPlan, materializeAthleteVisualPlan, createAthleteVisualComposer,
 } from '../server/athleteConsultingV2/visual.js';
 
 const scopeId = 'private-darren-synthetic-visual-test';
-const sessionId = 'visual-session-2026-09-25';
+const sessionId = '5f613922-c577-4cc4-89b6-b5e6bb8434ec';
 const triggerRequestId = 'visual-request-2026-09-25';
-const baseState = (slug = 'nia') => initial(bundles[slug]);
+const baseState = (slug = 'nia') => {
+  const state = initial(bundles[slug]);
+  state.sessionId = sessionId;
+  state.sessionStartMap = captureSessionStartMap({ bundle: bundles[slug], state });
+  return state;
+};
 const worldFor = (event, state = baseState(), slug = 'nia', extras = {}) => buildAthleteVisualWorld({
   event, bundle: bundles[slug], state, scopeId, sessionId, triggerRequestId, ...extras,
 });
@@ -133,10 +139,17 @@ test('eligible finalization requires exact current recap, cannot claim acceptanc
   state.closing = { id: 'closing-review', summary: 'We discussed a possible cue but made no agreement.',
     continuity: 'Ask whether it felt useful next time.' };
   const world = worldFor('SESSION_FINALIZATION', state);
-  const final = candidate(world, { objects: ['athlete-session-recap'], evidence: ['athlete-source-session-recap'] });
+  const mapEvidence = world.objects.find((item) => item.id === 'athlete-map-change').sourceIds;
+  const final = candidate(world, { objects: ['athlete-map-change', 'athlete-session-recap'],
+    evidence: [...mapEvidence, 'athlete-source-session-recap'] });
   assert.equal(validateAthleteVisualPlan({ candidate: final, world }).ok, true);
-  assert.equal(materializeAthleteVisualPlan({ candidate: final, world }).blocks[0].objects[0].qualifier,
+  assert.equal(materializeAthleteVisualPlan({ candidate: final, world }).blocks[0].objects[1].qualifier,
     state.closing.continuity);
+  assert.equal(materializeAthleteVisualPlan({ candidate: final, world }).blocks[0].objects[0].title,
+    'This is how your map has changed');
+  const missingReveal = candidate(world, { objects: ['athlete-session-recap'], evidence: ['athlete-source-session-recap'] });
+  assert.ok(validateAthleteVisualPlan({ candidate: missingReveal, world }).errors
+    .includes('ATHLETE_VISUAL_FINAL_MAP_CHANGE_REQUIRED'));
   assert.equal(validateAthleteVisualPlan({ candidate: candidate(world), world }).ok, false);
   const falsePlan = { ...final, guidance: { ...final.guidance, summary: 'Your agreed plan is now saved.' } };
   assert.equal(validateAthleteVisualPlan({ candidate: falsePlan, world }).ok, false);
@@ -165,16 +178,17 @@ test('finalization must show each exact saved accepted or proposed plan status',
     why: 'Still to review.', review: 'When ready.', approvals: [],
     steps: [{ action: 'Compare another cue.', when: 'Later.', notice: 'Whether it fits.', owner: 'athlete' }] };
   const world = worldFor('SESSION_FINALIZATION', state);
-  const recapOnly = candidate(world, { objects: ['athlete-session-recap'],
-    evidence: ['athlete-source-session-recap'] });
+  const mapEvidence = world.objects.find((item) => item.id === 'athlete-map-change').sourceIds;
+  const recapOnly = candidate(world, { objects: ['athlete-map-change', 'athlete-session-recap'],
+    evidence: [...mapEvidence, 'athlete-source-session-recap'] });
   assert.ok(validateAthleteVisualPlan({ candidate: recapOnly, world }).errors
     .includes('ATHLETE_VISUAL_FINAL_PLAN_STATUS_REQUIRED'));
-  const acceptedOnly = candidate(world, { objects: ['athlete-session-recap', 'athlete-plan'],
-    evidence: ['athlete-source-session-recap', 'athlete-source-plan'] });
+  const acceptedOnly = candidate(world, { objects: ['athlete-map-change', 'athlete-session-recap', 'athlete-plan'],
+    evidence: [...mapEvidence, 'athlete-source-session-recap', 'athlete-source-plan'] });
   assert.ok(validateAthleteVisualPlan({ candidate: acceptedOnly, world }).errors
     .includes('ATHLETE_VISUAL_FINAL_PLAN_STATUS_REQUIRED'));
-  const complete = candidate(world, { objects: ['athlete-session-recap', 'athlete-plan', 'athlete-draft'],
-    evidence: ['athlete-source-session-recap', 'athlete-source-plan', 'athlete-source-draft'] });
+  const complete = candidate(world, { objects: ['athlete-map-change', 'athlete-session-recap', 'athlete-plan', 'athlete-draft'],
+    evidence: [...mapEvidence, 'athlete-source-session-recap', 'athlete-source-plan', 'athlete-source-draft'] });
   assert.equal(validateAthleteVisualPlan({ candidate: complete, world }).ok, true);
   const objects = materializeAthleteVisualPlan({ candidate: complete, world }).blocks[0].objects;
   assert.equal(objects.find(item => item.id === 'athlete-plan').kind, 'ACCEPTED_PLAN');

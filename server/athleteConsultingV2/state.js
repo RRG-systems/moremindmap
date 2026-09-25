@@ -3,7 +3,7 @@ import { randomUUID, createHash } from 'node:crypto';
 // The Founder-locked state rules, with complete boundary validation before mutation.
 export const hash = (value) => createHash('sha256').update(JSON.stringify(value)).digest('hex');
 export const requireThat = (value, message) => { if (!value) throw new Error(message); };
-export const initial = (bundle) => ({ version: 2, mm: bundle.person.mm, revision: 0, status: 'ready', speaker: 'athlete', view: 'home', viewContext: null, messages: [], opening: null, plan: null, draft: null, learning: [], feedback: [], suggestedLearning: [], sessions: [], events: [], closing: null, lastError: null, processed: [], currentApa: null, apaDraft: null, apaNeedsReview: false, apaReviewRequirements: [], rslEvents: [], sessionId: null, visuals: [] });
+export const initial = (bundle) => ({ version: 2, mm: bundle.person.mm, revision: 0, status: 'ready', speaker: 'athlete', view: 'home', viewContext: null, messages: [], opening: null, plan: null, draft: null, learning: [], feedback: [], suggestedLearning: [], sessions: [], events: [], closing: null, lastError: null, processed: [], currentApa: null, apaDraft: null, apaNeedsReview: false, apaReviewRequirements: [], rslEvents: [], sessionId: null, sessionStartMap: null, visuals: [] });
 const object = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
 const text = (value) => typeof value === 'string';
 

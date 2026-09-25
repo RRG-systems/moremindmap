@@ -6,7 +6,7 @@ function GovernedObject({ value }) {
   const items = Array.isArray(value.items) ? value.items : [];
   return <div className={`athlete-visual-object athlete-visual-object-${String(value.kind || 'plain').toLowerCase()}`}>
     <div className="athlete-visual-object-heading">
-      <span>{value.title}</span>
+      {value.kind === 'MAP_CHANGE_REVEAL' ? <h4>{value.title}</h4> : <span>{value.title}</span>}
       {value.kind === 'PROPOSED_PLAN' && <small>Not yet agreed</small>}
       {value.kind === 'ACCEPTED_PLAN' && <small>Agreed plan</small>}
       {value.kind === 'APA_OPTION' && <small>Assessment option</small>}
@@ -38,6 +38,15 @@ export default function AthleteVisual({ plan, className = '' }) {
   if (!plan?.guidance || plan.renderDecision?.render !== true || !Array.isArray(plan.blocks)
     || plan.blocks.length === 0) return null;
   const event = String(plan.event || '').toLowerCase();
+  const mapBlock = plan.event === 'SESSION_FINALIZATION'
+    ? plan.blocks.find((block) => block.objects?.some((item) => item.kind === 'MAP_CHANGE_REVEAL')) : null;
+  const mapChange = mapBlock?.objects.find((item) => item.kind === 'MAP_CHANGE_REVEAL');
+  const remainingBlocks = mapChange ? plan.blocks.map((block) => {
+    const objects = block.objects.filter((item) => item.id !== mapChange.id);
+    const sourceIds = new Set(objects.flatMap((item) => item.sourceIds || []));
+    return { ...block, objects, evidence: (block.evidence || []).filter((source) => sourceIds.has(source.id)) };
+  }).filter((block) => block.objects.length) : plan.blocks;
+  const mapSources = mapChange ? (mapBlock.evidence || []).filter((source) => mapChange.sourceIds.includes(source.id)) : [];
   return <section className={`athlete-visual athlete-visual-${event} ${className}`.trim()}
     aria-label={plan.guidance.headline} data-athlete-visual-event={plan.event}>
     <header className="athlete-visual-heading">
@@ -45,7 +54,13 @@ export default function AthleteVisual({ plan, className = '' }) {
       <h3>{plan.guidance.headline}</h3>
       <p>{plan.guidance.summary}</p>
     </header>
-    <div className="athlete-visual-grid">{plan.blocks.map((block) => <VisualBlock key={block.blockId} block={block}/>)}</div>
+    {mapChange && <section className="athlete-visual-map-reveal" aria-label={mapChange.title}>
+      <GovernedObject value={mapChange}/>
+      {mapSources.length > 0 && <details className="athlete-visual-sources"><summary>What this change view draws on</summary>
+        <ul>{mapSources.map((source) => <li key={source.id}>{source.label}</li>)}</ul>
+      </details>}
+    </section>}
+    {remainingBlocks.length > 0 && <div className="athlete-visual-grid">{remainingBlocks.map((block) => <VisualBlock key={block.blockId} block={block}/>)}</div>}
     <footer><p>{plan.guidance.nextCue}</p>
       {plan.event === 'SESSION_FINALIZATION' && <small>This review does not approve a plan or rewrite your assessment.</small>}
     </footer>

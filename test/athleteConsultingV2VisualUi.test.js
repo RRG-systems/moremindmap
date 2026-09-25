@@ -14,6 +14,7 @@ function receipt(bundle, event, changes = {}) {
 }
 function stateFor(bundle) {
   return { mm: bundle.person.mm, sessionId: 'session-one',
+    closing: { visual_id: 'visual-SESSION_FINALIZATION' },
     messages: [{ id: 'assistant-one', role: 'assistant', text: 'Synthetic opening' }],
     visuals: [receipt(bundle, 'SESSION_OPENING'), receipt(bundle, 'COACHING_MOMENT'),
       receipt(bundle, 'SESSION_FINALIZATION')] };
@@ -35,11 +36,14 @@ test('selected synthetic athlete sees only exact current-session, source-bound v
 });
 
 test('closing canvas is selected by exact saved visual ID, not latest unrelated visual', () => {
-  const visuals = selectAthleteVisuals(bundles.nia, stateFor(bundles.nia));
+  const state = stateFor(bundles.nia);
+  const visuals = selectAthleteVisuals(bundles.nia, state);
   assert.equal(selectClosingAthleteVisual(visuals, { visual_id: 'visual-SESSION_FINALIZATION' }).event,
     'SESSION_FINALIZATION');
   assert.equal(selectClosingAthleteVisual(visuals, { visual_id: 'visual-COACHING_MOMENT' }), null);
   assert.equal(selectClosingAthleteVisual(visuals, null), null);
+  state.closing = null;
+  assert.equal(selectAthleteVisuals(bundles.nia, state).some((visual) => visual.event === 'SESSION_FINALIZATION'), false);
 });
 
 test('stale APA visuals are withheld after correction or current APA publication', () => {

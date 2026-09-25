@@ -39,7 +39,10 @@ const proposedPlan = () => ({ title: 'Try one useful cue', why: 'A possible next
   steps: [{ action: 'Try one short cue', when: 'At the next practice', notice: 'Whether it helped', owner: 'athlete' }],
   review: 'After practice' });
 function visualCandidate(world, { render = true, objectIds, type = 'PLAIN_LANGUAGE' } = {}) {
-  const ids = objectIds || (world.event === 'SESSION_FINALIZATION' ? ['athlete-session-recap'] : ['athlete-apa']);
+  const requested = objectIds || (world.event === 'SESSION_FINALIZATION'
+    ? ['athlete-session-recap', ...['athlete-plan', 'athlete-draft'].filter((id) => world.objects.some((item) => item.id === id))]
+    : ['athlete-apa']);
+  const ids = world.event === 'SESSION_FINALIZATION' ? ['athlete-map-change', ...requested] : requested;
   const chosen = world.objects.filter((item) => ids.includes(item.id));
   const sourceIds = [...new Set(chosen.flatMap((item) => item.sourceIds))];
   return { planVersion: 'athlete-consulting-v2-visual-v1', event: world.event,
@@ -62,8 +65,8 @@ function validComposer({ choose = () => ({}) } = {}) {
   return { compose, calls };
 }
 function fixture({ coach = async (_bundle, _state, task) => noPlan(task === 'CLOSE' ? 'We can review without making a plan.' : 'Let us talk.'),
-  visualComposer, redis = new FakeRedis(), scopeId = 'private-visual-store-test' } = {}) {
-  return { redis, store: createStore({ redis, bundles, coach, scopeId, visualComposer }) };
+  visualComposer, apaComposer = null, redis = new FakeRedis(), scopeId = 'private-visual-store-test' } = {}) {
+  return { redis, store: createStore({ redis, bundles, coach, scopeId, visualComposer, apaComposer }) };
 }
 async function act(store, slug, body, requestId = randomUUID()) {
   const before = await store.read(slug);
@@ -85,7 +88,8 @@ test('mandatory opening and closing visuals persist with exact selected athlete 
   assert.equal(closed.visuals.length, 2);
   assert.equal(closed.visuals[1].event, 'SESSION_FINALIZATION');
   assert.equal(closed.closing.visual_id, closed.visuals[1].id);
-  assert.equal(closed.visuals[1].plan.blocks[0].objects[0].id, 'athlete-session-recap');
+  assert.equal(closed.visuals[1].plan.blocks[0].objects[0].id, 'athlete-map-change');
+  assert.equal(closed.visuals[1].plan.blocks[0].objects[1].id, 'athlete-session-recap');
   assert.deepEqual(calls.map((world) => world.event), ['SESSION_OPENING', 'SESSION_FINALIZATION']);
   const reloaded = await store.read('nia');
   assert.deepEqual(reloaded.visuals, closed.visuals);
@@ -153,6 +157,71 @@ test('a previously accepted plan appears by exact saved identity in the final re
   assert.equal(visualPlan.statement, accepted.plan.title);
   assert.equal(closed.plan.id, accepted.plan.id);
   assert.equal(closed.draft, null);
+});
+
+test('session-start map survives reload and a post-preview plan choice invalidates the old closing reveal', async () => {
+  const { compose } = validComposer();
+  const { store } = fixture({ visualComposer: compose });
+  const opened = await act(store, 'nia', { action: 'start' });
+  const startHash = opened.sessionStartMap.snapshot_hash;
+  assert.equal((await store.read('nia')).sessionStartMap.snapshot_hash, startHash);
+  const firstClose = await act(store, 'nia', { action: 'close' });
+  assert.equal(firstClose.status, 'review');
+  assert.match(firstClose.visuals.at(-1).plan.blocks[0].objects[0].statement, /No saved APA or accepted-plan change/u);
+  const oldVisualId = firstClose.closing.visual_id;
+  const draft = await act(store, 'nia', { action: 'draft', plan: proposedPlan() });
+  assert.equal(draft.status, 'active');
+  assert.equal(draft.closing, null);
+  assert.equal(draft.sessionStartMap.snapshot_hash, startHash);
+  assert.ok(draft.events.some((event) => event.type === 'closing_preview_invalidated'
+    && event.visual_id === oldVisualId));
+  const accepted = await act(store, 'nia', { action: 'approve', id: draft.draft.id,
+    hash: draft.draft.hash, actor: 'athlete' });
+  const final = await act(store, 'nia', { action: 'close' });
+  assert.equal(final.status, 'review');
+  assert.notEqual(final.closing.visual_id, oldVisualId);
+  assert.equal(final.sessionStartMap.snapshot_hash, startHash);
+  const changed = final.visuals.at(-1).plan.blocks[0].objects[0];
+  assert.equal(changed.kind, 'MAP_CHANGE_REVEAL');
+  assert.match(changed.statement, /accepted plan changed this session/u);
+  assert.ok(changed.items.some((item) => item.label === 'Accepted plan'
+    && item.value.includes(accepted.plan.title)));
+  assert.equal(final.visuals.at(-1).plan.blocks[0].objects.some((item) => item.id === 'athlete-plan'), true);
+  await act(store, 'nia', { action: 'finish' });
+  const next = await act(store, 'nia', { action: 'start' });
+  assert.notEqual(next.sessionStartMap.snapshot_hash, startHash);
+  assert.equal(next.sessionStartMap.plan.id, accepted.plan.id);
+});
+
+test('an in-flight APA update hides the earlier closing preview and failure cannot claim a saved change', async () => {
+  let entered;
+  let rejectUpdate;
+  const started = new Promise((resolve) => { entered = resolve; });
+  const pending = new Promise((_resolve, reject) => { rejectUpdate = reject; });
+  const { compose } = validComposer();
+  const { store } = fixture({ visualComposer: compose,
+    apaComposer: async () => { entered(); return pending; } });
+  await act(store, 'nia', { action: 'start' });
+  const discussed = await act(store, 'nia', { action: 'message', speaker: 'athlete',
+    text: 'My synthetic practice schedule changed this week.' });
+  const sourceMessageId = discussed.messages.filter((item) => item.role === 'user').at(-1).id;
+  const preview = await act(store, 'nia', { action: 'close' });
+  const update = store.act('nia', { action: 'update_apa', kind: 'reality', supersedes: [],
+    reason: 'The athlete confirmed the current synthetic schedule.', sourceMessageId,
+    expectedApaVersion: 0, revision: preview.revision, requestId: randomUUID() });
+  await started;
+  const inFlight = await store.read('nia');
+  assert.equal(inFlight.status, 'working');
+  assert.equal(inFlight.pending.task, 'APA_UPDATE');
+  assert.equal(inFlight.closing, null);
+  assert.equal(inFlight.currentApa, null);
+  rejectUpdate(new Error('Synthetic composer outage'));
+  const failed = await update;
+  assert.equal(failed.status, 'active');
+  assert.equal(failed.closing, null);
+  assert.equal(failed.currentApa, null);
+  assert.equal(failed.apaDraft, null);
+  assert.ok(failed.lastError);
 });
 
 test('invalid opening visual leaves prior ready state and repeated request does not retry', async () => {

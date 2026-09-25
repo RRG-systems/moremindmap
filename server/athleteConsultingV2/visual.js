@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { binding, bundles, digest, validateBundle } from './bundles.js';
 import { validatePlan } from './state.js';
+import { buildSessionMapChange } from './mapChange.js';
 import { hashCanonicalJson } from '../../src/lib/intelligenceFabric/hashing.js';
 
 export const ATHLETE_VISUAL_PLAN_VERSION = 'athlete-consulting-v2-visual-v1';
@@ -196,13 +197,17 @@ function sourcesAndObjects({ bundle, state, apa, apaHash, event }) {
     objects.push(visualObject('athlete-prior-session', 'PRIOR_SESSION', 'Earlier conversation', prior.summary,
       ['athlete-source-prior-session'], { qualifier: 'A dated discussion recap, not proof that an open action happened.', at: prior.at }));
   }
+  let mapChange = null;
   if (event === 'SESSION_FINALIZATION') {
     if (!string(state.closing?.summary)) throw new Error('ATHLETE_VISUAL_FINALIZATION_NOT_ELIGIBLE');
+    mapChange = buildSessionMapChange({ bundle, state, startMap: state.sessionStartMap });
+    sources.push(...mapChange.sources);
+    objects.push(mapChange.object);
     sources.push({ id: 'athlete-source-session-recap', label: 'Current unconfirmed closing review', classification: 'SYNTHETIC_SESSION_REVIEW_ONLY', hash: hashCanonicalJson(state.closing) });
     objects.push(visualObject('athlete-session-recap', 'SESSION_RECAP', 'Before you go', state.closing.summary,
       ['athlete-source-session-recap'], { qualifier: bounded(state.closing.continuity, 420) }));
   }
-  return { sources, objects };
+  return { sources, objects, mapChange };
 }
 
 export function buildAthleteVisualWorld({ event, bundle, state, scopeId, sessionId, triggerRequestId,
@@ -223,7 +228,7 @@ export function buildAthleteVisualWorld({ event, bundle, state, scopeId, session
   if (currentExchange && event !== 'COACHING_MOMENT') throw new Error('ATHLETE_VISUAL_EXCHANGE_EVENT_DENIED');
   const { apa, version } = normalizeCurrentApa(currentApa, bundle);
   const currentApaHash = apa === bundle.apa ? bundle.apa.artifact_sha256 : apa.artifact_sha256 || hashCanonicalJson(apa);
-  const { sources, objects } = sourcesAndObjects({ bundle, state, apa, apaHash: currentApaHash, event });
+  const { sources, objects, mapChange } = sourcesAndObjects({ bundle, state, apa, apaHash: currentApaHash, event });
   const exchange = currentExchange && typeof currentExchange === 'object'
     && string(currentExchange.athleteMessage) && string(currentExchange.coachMessage)
     ? { athleteMessage: bounded(currentExchange.athleteMessage, 5000), coachMessage: bounded(currentExchange.coachMessage, 12000),
@@ -234,6 +239,7 @@ export function buildAthleteVisualWorld({ event, bundle, state, scopeId, session
     planHash: state.plan ? hashCanonicalJson(state.plan) : null,
     draftHash: state.draft ? hashCanonicalJson(state.draft) : null,
     closingHash: state.closing ? hashCanonicalJson(state.closing) : null,
+    mapChangeHash: mapChange ? hashCanonicalJson(mapChange) : null,
     exchangeHash: exchange ? hashCanonicalJson(exchange) : null });
   return deepFreeze({ contract: 'ATHLETE_CONSULTING_V2_VISUAL_WORLD_V1', event,
     stateBinding: { sessionId, relationshipScopeHash: digest({ scopeId, ...binding(slug) }),
@@ -276,12 +282,12 @@ function matches(value, schema) {
 }
 
 const KIND_BY_BLOCK = Object.freeze({
-  PLAIN_LANGUAGE: ['BOS_ORIENTATION', 'APA_PERSPECTIVE', 'RECOMMENDATION', 'APA_OPTION', 'FUTURES', 'ACCEPTED_PLAN', 'PROPOSED_PLAN', 'APPROVED_LEARNING', 'PRIOR_SESSION', 'SESSION_RECAP'],
+  PLAIN_LANGUAGE: ['BOS_ORIENTATION', 'APA_PERSPECTIVE', 'RECOMMENDATION', 'APA_OPTION', 'FUTURES', 'ACCEPTED_PLAN', 'PROPOSED_PLAN', 'APPROVED_LEARNING', 'PRIOR_SESSION', 'SESSION_RECAP', 'MAP_CHANGE_REVEAL'],
   COMPARISON: ['APA_PERSPECTIVE', 'RECOMMENDATION', 'APA_OPTION', 'ACCEPTED_PLAN', 'PROPOSED_PLAN'],
   TIMELINE: ['PRIOR_SESSION', 'SESSION_RECAP', 'APPROVED_LEARNING'],
   FIVE_FUTURES: ['FUTURES'],
   DECISION: ['RECOMMENDATION', 'APA_OPTION', 'PROPOSED_PLAN', 'ACCEPTED_PLAN'],
-  COMMITMENTS: ['ACCEPTED_PLAN', 'PROPOSED_PLAN', 'SESSION_RECAP'],
+  COMMITMENTS: ['ACCEPTED_PLAN', 'PROPOSED_PLAN', 'SESSION_RECAP', 'MAP_CHANGE_REVEAL'],
   EVIDENCE_GAP: ['APA_PERSPECTIVE', 'FUTURES'],
 });
 
@@ -318,6 +324,7 @@ export function validateAthleteVisualPlan({ candidate, world }) {
   if (world.event === 'SESSION_OPENING' && list(candidate?.blocks).length !== 1) errors.push('ATHLETE_VISUAL_OPENING_ONE_BLOCK_REQUIRED');
   if (world.event === 'SESSION_OPENING' && !['athlete-bos', 'athlete-apa', 'athlete-plan', 'athlete-prior-session', 'athlete-learning'].some((id) => selected.has(id))) errors.push('ATHLETE_VISUAL_OPENING_ORIENTATION_MISSING');
   if (world.event === 'SESSION_FINALIZATION' && !selected.has('athlete-session-recap')) errors.push('ATHLETE_VISUAL_FINAL_RECAP_REQUIRED');
+  if (world.event === 'SESSION_FINALIZATION' && !selected.has('athlete-map-change')) errors.push('ATHLETE_VISUAL_FINAL_MAP_CHANGE_REQUIRED');
   if (world.event === 'SESSION_FINALIZATION'
     && (objectMap.has('athlete-plan') && !selected.has('athlete-plan')
       || objectMap.has('athlete-draft') && !selected.has('athlete-draft')))
@@ -363,7 +370,7 @@ export function materializeAthleteVisualPlan({ candidate, world, receipt = null 
   })), providerReceipt: receipt ? clone(receipt) : null });
 }
 
-const SYSTEM = `You are MORE's governed visual composer for one selected fictional Athlete Consulting relationship. The server chose the event and supplied exact eligible objects. The coach owns the conversation; you choose only the smallest useful visual composition. Return the strict JSON schema. OPENING: one orientation block. COACHING_MOMENT: usually no visual; render only if it materially improves this exact exchange. FINALIZATION: one or two blocks including the current unconfirmed recap AND each present athlete-plan (accepted) or athlete-draft (proposed) object, with their distinct saved statuses. If neither exists, recap alone is valid. Use only supplied object and evidence IDs. Do not invent a fact, number, result, cause, commitment, source, map update, or plan approval. An APA recommendation and a plan draft are not agreements. A coach observation is not athlete fact. Preserve uncertainty. No interactions or mutation authority. Every rendered free-text field must copy the exact server-approved strings from presentationCopy: guidance is presentationCopy.guidance; renderDecision.reason is renderReason or noRenderReason; each block title/subtitle comes from blocksByType for its type and each block reason is blockReason. Do not paraphrase or add text in these fields. The selected saved objects supply the personalized facts.`;
+const SYSTEM = `You are MORE's governed visual composer for one selected fictional Athlete Consulting relationship. The server chose the event and supplied exact eligible objects. The coach owns the conversation; you choose only the smallest useful visual composition. Return the strict JSON schema. OPENING: one orientation block. COACHING_MOMENT: usually no visual; render only if it materially improves this exact exchange. FINALIZATION: one or two blocks including athlete-map-change and the current unconfirmed recap AND each present athlete-plan (accepted) or athlete-draft (proposed) object, with their distinct saved statuses. Put athlete-map-change first so the exact server-derived before/now reveal is prominent. It may truthfully report no saved map change. Use only supplied object and evidence IDs. Do not invent a fact, number, result, cause, commitment, source, map update, or plan approval. An APA recommendation and a plan draft are not agreements. A coach observation is not athlete fact. Preserve uncertainty. No interactions or mutation authority. Every rendered free-text field must copy the exact server-approved strings from presentationCopy: guidance is presentationCopy.guidance; renderDecision.reason is renderReason or noRenderReason; each block title/subtitle comes from blocksByType for its type and each block reason is blockReason. Do not paraphrase or add text in these fields. The selected saved objects supply the personalized facts.`;
 
 export function createAthleteVisualComposer({ env = globalThis.process?.env || {}, transport = null, evidenceSink } = {}) {
   if (typeof evidenceSink !== 'function') throw new TypeError('ATHLETE_VISUAL_PRIVATE_EVIDENCE_SINK_REQUIRED');

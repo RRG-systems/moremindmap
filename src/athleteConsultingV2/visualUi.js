@@ -14,6 +14,7 @@ export function selectAthleteVisuals(bundle, state) {
   return (state.visuals || []).filter((visual) => {
     const plan = visual?.plan, binding = plan?.stateBinding;
     return EVENTS.has(visual.event) && visual.session_id === state.sessionId
+      && (visual.event !== 'SESSION_FINALIZATION' || state.closing?.visual_id === visual.id)
       && visual.after_message_id && assistantIds.has(visual.after_message_id)
       && plan?.event === visual.event && plan?.renderDecision?.render === true
       && Array.isArray(plan.blocks) && plan.blocks.length > 0
