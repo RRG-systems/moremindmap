@@ -2,7 +2,8 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import test from 'node:test';
 import { bundles } from '../server/athleteConsultingV2/bundles.js';
-import { createStore, PERSIST_LUA } from '../server/athleteConsultingV2/store.js';
+import { hash } from '../server/athleteConsultingV2/state.js';
+import { athleteConsultingV2Keys, createStore, PERSIST_LUA } from '../server/athleteConsultingV2/store.js';
 import { materializeAthleteVisualPlan } from '../server/athleteConsultingV2/visual.js';
 
 class FakeRedis {
@@ -71,6 +72,15 @@ function fixture({ coach = async (_bundle, _state, task) => noPlan(task === 'CLO
 async function act(store, slug, body, requestId = randomUUID()) {
   const before = await store.read(slug);
   return store.act(slug, { ...body, revision: before.revision, requestId });
+}
+
+function rewriteSyntheticState(redis, slug, revise) {
+  const keys = athleteConsultingV2Keys({ scopeId: 'private-visual-store-test', slug,
+    bundle: bundles[slug] });
+  const envelope = JSON.parse(redis.values.get(keys.state));
+  revise(envelope.state);
+  const { envelope_hash: _old, ...unsigned } = envelope;
+  redis.values.set(keys.state, JSON.stringify({ ...unsigned, envelope_hash: hash(unsigned) }));
 }
 
 test('mandatory opening and closing visuals persist with exact selected athlete and session', async () => {
@@ -298,4 +308,84 @@ test('store rejects a composer result that invents an object ID despite a valid 
   assert.equal(failed.status, 'ready');
   assert.deepEqual(failed.visuals, []);
   assert.ok(failed.lastError);
+});
+
+test('pre-GU06 active session without an ID continues and closes with honest unavailable comparison', async () => {
+  const redis = new FakeRedis();
+  const old = fixture({ redis }).store;
+  await act(old, 'nia', { action: 'start' });
+  rewriteSyntheticState(redis, 'nia', state => {
+    delete state.sessionId;
+    delete state.sessionStartMap;
+  });
+  const { compose } = validComposer();
+  const { store } = fixture({ redis, visualComposer: compose, apaComposer: async () => null });
+  const chat = await act(store, 'nia', { action: 'message', text: 'Compare the options.' });
+  assert.equal(chat.status, 'active');
+  assert.equal(chat.lastError, null);
+  assert.deepEqual(chat.visuals, []);
+  const closed = await act(store, 'nia', { action: 'close' });
+  assert.equal(closed.status, 'review');
+  assert.equal(closed.sessionStartMap, undefined);
+  assert.match(closed.sessionId, /^[a-f0-9-]{36}$/u);
+  assert.equal(closed.closing_reveal_ready, true);
+  const reveal = closed.visuals.at(-1).plan.blocks[0].objects[0];
+  assert.equal(reveal.kind, 'MAP_CHANGE_REVEAL');
+  assert.match(reveal.statement, /before-and-after comparison is unavailable/u);
+  assert.doesNotMatch(JSON.stringify(reveal), /changed this session|No saved APA or accepted-plan change/u);
+  assert.ok(closed.events.some(event => event.type === 'legacy_session_finalization_binding'
+    && event.not_a_session_start === true));
+  assert.equal((await store.read('nia')).closing_reveal_ready, true);
+  const finished = await act(store, 'nia', { action: 'finish' });
+  assert.equal(finished.status, 'closed');
+  assert.equal(finished.currentApa, null);
+  assert.equal(finished.plan, null);
+});
+
+test('pre-GU06 review must refresh its close before flagship finish, preserving its existing ID', async () => {
+  const redis = new FakeRedis(), old = fixture({ redis }).store;
+  await act(old, 'sofia', { action: 'start' });
+  await act(old, 'sofia', { action: 'close' });
+  const legacyId = '99999999-9999-4999-8999-999999999999';
+  rewriteSyntheticState(redis, 'sofia', state => {
+    state.sessionId = legacyId;
+    delete state.sessionStartMap;
+  });
+  const { compose } = validComposer();
+  const { store } = fixture({ redis, visualComposer: compose, apaComposer: async () => null });
+  const existing = await store.read('sofia');
+  assert.equal(existing.status, 'review');
+  assert.equal(existing.closing_reveal_ready, false);
+  await assert.rejects(() => act(store, 'sofia', { action: 'finish' }),
+    /CLOSING_REVIEW_REFRESH_REQUIRED/u);
+  const refreshed = await act(store, 'sofia', { action: 'close' });
+  assert.equal(refreshed.status, 'review');
+  assert.equal(refreshed.sessionId, legacyId);
+  assert.equal(refreshed.closing_reveal_ready, true);
+  assert.equal(refreshed.events.some(event => event.type === 'legacy_session_finalization_binding'), false);
+  assert.equal((await act(store, 'sofia', { action: 'finish' })).status, 'closed');
+});
+
+test('a malformed non-null start map fails closed instead of using the legacy fallback', async () => {
+  const redis = new FakeRedis(), old = fixture({ redis }).store;
+  await act(old, 'nia', { action: 'start' });
+  rewriteSyntheticState(redis, 'nia', state => {
+    state.sessionId = '88888888-8888-4888-8888-888888888888';
+    state.sessionStartMap = { contract: 'forged' };
+  });
+  const { compose } = validComposer();
+  const { store } = fixture({ redis, visualComposer: compose, apaComposer: async () => null });
+  const failed = await act(store, 'nia', { action: 'close' });
+  assert.equal(failed.status, 'active');
+  assert.equal(failed.closing, null);
+  assert.equal(failed.closing_reveal_ready, false);
+  assert.ok(failed.lastError);
+});
+
+test('flag-off active session keeps its established finish behavior', async () => {
+  const { store } = fixture();
+  await act(store, 'nia', { action: 'start' });
+  const finished = await act(store, 'nia', { action: 'finish' });
+  assert.equal(finished.status, 'closed');
+  assert.equal(finished.flagship_enabled, false);
 });

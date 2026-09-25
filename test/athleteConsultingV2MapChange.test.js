@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { bundles } from '../server/athleteConsultingV2/bundles.js';
 import { currentApaHash, currentApaView, publishCurrentApa } from '../server/athleteConsultingV2/currentApa.js';
-import { buildSessionMapChange, captureSessionStartMap,
+import { buildLegacySessionMapChange, buildSessionMapChange, captureSessionStartMap,
   SESSION_MAP_CHANGE_CONTRACT, SESSION_MAP_START_CONTRACT } from '../server/athleteConsultingV2/mapChange.js';
 
 const clone = value => structuredClone(value);
@@ -169,6 +169,35 @@ test('candidate gate and BOS-fit changes use exact granular receipt paths and ba
   assert.match(labels, /option/iu);
 });
 
+test('a changed One Move names both actions and the current fit instead of exposing selector IDs', () => {
+  const state = stateFor(), start = captureSessionStartMap({ bundle: bundles.nia, state });
+  const originalMove = bundles.nia.apa.move;
+  const result = publish(bundles.nia, state, { decorateCandidate(candidate, source) {
+    const original = candidate.report.candidates.find(item => item.candidate_id === originalMove.candidate_id);
+    original.refs.push(source);
+    original.gates[0].pass = false;
+    original.gates[0].reason = 'Nia confirmed this step needs a different coach agreement first.';
+    original.gates[0].refs.push(source);
+  } });
+  const changed = buildSessionMapChange({ bundle: bundles.nia, state, startMap: start });
+  const move = changed.apa.entries.find(entry => entry.path === 'move.selection');
+  assert.ok(move);
+  assert.equal(move.label, 'Your One Move');
+  assert.equal(move.before, originalMove.action);
+  assert.equal(move.now, result.record.artifact.move.action);
+  assert.equal(move.before_rationale, originalMove.why);
+  assert.equal(move.now_rationale, result.record.artifact.move.why);
+  assert.equal(move.selection.before.candidate_id, originalMove.candidate_id);
+  assert.equal(move.selection.now.candidate_id, result.record.artifact.move.candidate_id);
+  assert.ok(move.receipts.some(receipt => receipt.source_id === sourceId(firstChange)));
+  const row = changed.object.items.find(item => item.label === 'Your One Move');
+  assert.ok(row);
+  assert.match(row.value, /Ask your coach to try a next-play reset/u);
+  assert.match(row.value, /During Monday and Wednesday team practice/u);
+  assert.match(row.note, /Why this fits now:/u);
+  assert.doesNotMatch(row.value, /candidate_id|\bM[1-4]\b|\{"status"/u);
+});
+
 test('same-title accepted-plan timing edit has a meaningful before-to-now line and exact binding', () => {
   const state = stateFor();
   state.plan = acceptedPlan();
@@ -267,6 +296,22 @@ test('historical awaiting-review APA is not claimed as a new saved update', () =
   assert.equal(result.apa.entries.length, 0);
   assert.match(result.object.statement, /historical and awaiting athlete review/u);
   assert.ok(result.sources.some(source => source.classification === 'SYNTHETIC_HISTORICAL'));
+});
+
+test('legacy session closing shows current custody without inventing its missing starting map', () => {
+  const state = stateFor();
+  state.apaNeedsReview = true;
+  const result = buildLegacySessionMapChange({ bundle: bundles.nia, state });
+  assert.equal(result.comparison, 'UNAVAILABLE_START_SNAPSHOT');
+  assert.equal(result.apa.status, 'START_UNAVAILABLE');
+  assert.equal(result.apa.before, null);
+  assert.equal(result.plan.before, null);
+  assert.deepEqual(result.unchanged, { saved_apa: null, accepted_plan: null });
+  assert.match(result.object.statement, /before-and-after comparison is unavailable/u);
+  assert.match(result.object.items[0].value, /historical, awaiting review/u);
+  assert.equal(result.sources[0].classification, 'SYNTHETIC_HISTORICAL');
+  assert.equal(result.sources.some(source => source.id === 'athlete-source-map-start'), false);
+  assert.doesNotMatch(JSON.stringify(result.object), /changed this session|No saved APA or accepted-plan change/u);
 });
 
 test('tampered, cross-athlete and forked start snapshots fail closed', () => {

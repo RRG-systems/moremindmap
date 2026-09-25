@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { binding, bundles, digest, validateBundle } from './bundles.js';
 import { validatePlan } from './state.js';
-import { buildSessionMapChange } from './mapChange.js';
+import { buildLegacySessionMapChange, buildSessionMapChange } from './mapChange.js';
 import { hashCanonicalJson } from '../../src/lib/intelligenceFabric/hashing.js';
 
 export const ATHLETE_VISUAL_PLAN_VERSION = 'athlete-consulting-v2-visual-v1';
@@ -200,7 +200,9 @@ function sourcesAndObjects({ bundle, state, apa, apaHash, event }) {
   let mapChange = null;
   if (event === 'SESSION_FINALIZATION') {
     if (!string(state.closing?.summary)) throw new Error('ATHLETE_VISUAL_FINALIZATION_NOT_ELIGIBLE');
-    mapChange = buildSessionMapChange({ bundle, state, startMap: state.sessionStartMap });
+    mapChange = state.sessionStartMap == null
+      ? buildLegacySessionMapChange({ bundle, state })
+      : buildSessionMapChange({ bundle, state, startMap: state.sessionStartMap });
     sources.push(...mapChange.sources);
     objects.push(mapChange.object);
     sources.push({ id: 'athlete-source-session-recap', label: 'Current unconfirmed closing review', classification: 'SYNTHETIC_SESSION_REVIEW_ONLY', hash: hashCanonicalJson(state.closing) });
@@ -255,7 +257,9 @@ export function buildAthleteVisualWorld({ event, bundle, state, scopeId, session
       values: 'Use only supplied object and evidence IDs. Never invent facts, numbers, commitments, outcomes or causes.',
       plan: 'A recommendation and unapproved draft are not an agreed plan. A visual never approves or changes a plan.',
       coach: 'A Coach Alex observation is attributed and unverified until appropriately confirmed; never promote it to athlete fact.',
-      map: state.apaNeedsReview === true
+      map: mapChange?.comparison === 'UNAVAILABLE_START_SNAPSHOT'
+        ? 'This earlier session has no saved start map. Show only the current saved state and explicitly say before-and-after comparison is unavailable.'
+        : state.apaNeedsReview === true
         ? 'The earlier APA awaits athlete review after a confirmed correction or retraction. Do not present its claims as current. Only a separate validated current APA publication can clear this.'
         : 'This visual cannot revise the BOS or APA; only a separate validated current APA publication can do that.',
       authority: 'No interaction, customer mutation, message, billing, or external-action authority.',

@@ -42,12 +42,15 @@ const output = (task) => ({ reply: `Synthetic ${task} response.`, plan: null,
   plan_change: 'none', retire_draft: false,
   learning: task === 'CHAT' ? ['One precise cue helps me reset.'] : [], recap: '' });
 function fixture({ redis = new FakeRedis(), scopeId = 'leadership-synthetic-scope-A',
-  modelInputs = [] } = {}) {
+  modelInputs = [], uniqueSuggestions = false } = {}) {
+  let suggestion = 0;
   const store = createStore({ redis, bundles, scopeId, localAction: applyLiveCapture,
     coach: async (_bundle, state, task) => {
       modelInputs.push({ task, memory: structuredClone(state.governedMemory),
         recent: state.messages.filter(message => message.coach_note_handoff !== 'next_opening').slice(-50) });
-      return output(task);
+      return uniqueSuggestions && task === 'CHAT'
+        ? { ...output(task), learning: [`Synthetic approved preference ${++suggestion}.`] }
+        : output(task);
     } });
   const keys = slug => athleteConsultingV2Keys({ scopeId, slug, bundle: bundles[slug] });
   const raw = slug => JSON.parse(redis.values.get(keys(slug).state));
@@ -203,4 +206,41 @@ test('an older-than-50 saved fact reaches later model memory but client projecti
     ['event_id', 'event_type', 'recorded_at', 'text']);
   assert.equal(JSON.stringify(state.personalMemory).includes('scope_hash'), false);
   assert.equal(raw('nia').state.rslEvents.length, 1);
+});
+
+test('dense preferences cannot hide a corrected older fact from topical model input or correction picker', async () => {
+  const { store, modelInputs } = fixture({ uniqueSuggestions: true });
+  await act(store, 'nia', { action: 'start' });
+  let state = await act(store, 'nia', { action: 'message', speaker: 'athlete',
+    text: 'I have two school conflicts this week.' });
+  state = await act(store, 'nia', { action: 'confirm_fact',
+    sourceMessageId: latestAthleteMessage(state) });
+  const originalId = state.personalMemory.items[0].event_id;
+  state = await act(store, 'nia', { action: 'message', speaker: 'athlete',
+    text: 'Correction: I have only one school conflict this week.' });
+  state = await act(store, 'nia', { action: 'confirm_fact',
+    sourceMessageId: latestAthleteMessage(state), targetEventId: originalId });
+  const correctedId = state.personalMemory.items[0].event_id;
+  for (let index = 0; index < 14; index++) {
+    state = await act(store, 'nia', { action: 'message', speaker: 'athlete',
+      text: `Synthetic practice check-in ${index}.` });
+    state = await act(store, 'nia', { action: 'remember',
+      items: [state.suggestedLearning.at(-1)] });
+  }
+  for (let index = 0; index < 55; index++)
+    state = await act(store, 'nia', { action: 'capture_demo', capture: {
+      subject: 'nia', role: 'athlete', source: 'Nia Brooks (synthetic)', kind: 'text',
+      text: `Later synthetic diary ${index}.`, attachments: [], reviewed: true } });
+  state = await act(store, 'nia', { action: 'message', speaker: 'athlete',
+    text: 'How should I handle my school conflict this week?' });
+  const call = modelInputs.at(-1);
+  assert.equal(call.recent.some(message => /only one school conflict|two school conflicts/u.test(message.text)), false);
+  assert.ok(call.memory.items.length <= 12);
+  assert.ok(call.memory.items.some(item => item.event_id === correctedId
+    && /only one school conflict/u.test(item.payload.text)));
+  assert.equal(call.memory.items.some(item => item.event_id === originalId
+    || /two school conflicts/u.test(item.payload?.text || '')), false);
+  assert.equal(state.personalMemory.items.some(item => item.event_id === correctedId), true);
+  assert.equal(state.personalMemory.items.some(item => item.event_id === originalId), false);
+  assert.equal(state.personalMemory.omitted_count, 0);
 });

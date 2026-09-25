@@ -6,7 +6,8 @@ import { hash, initial, requireThat, validatePlan, applyOutput, applyLocalAction
   pendingCoachNoteMessages, reviewedCoachNoteMessages, coachNoteHandoffStatus } from './state.js';
 import { assertCurrentApaConfirmedSource, currentApaView, publishCurrentApa } from './currentApa.js';
 import { createAthleteRslScope, createAthleteRslEvent, deriveAthleteRslEvents,
-  replayAthleteRsl, athleteRslRetrievalContext, validateAthleteRslSourceMessages } from './rsl.js';
+  replayAthleteRsl, athleteRslRetrievalContext, athleteRslActiveCorrectionTargets,
+  validateAthleteRslSourceMessages } from './rsl.js';
 import { buildAthleteVisualWorld, materializeAthleteVisualPlan,
   validateAthleteVisualPlan } from './visual.js';
 import { captureSessionStartMap } from './mapChange.js';
@@ -39,6 +40,24 @@ function validViewContext(view, context) {
   return keys.every(key => ['section', 'reading', 'objectId'].includes(key))
     && (context.reading === undefined || SPORT_READINGS.has(context.reading))
     && (context.objectId === undefined || SPORT_OBJECT_IDS.has(context.objectId));
+}
+
+function closingRevealReady(state, bundle) {
+  const id = state.closing?.visual_id;
+  if (!id || !state.sessionId) return false;
+  const visual = (state.visuals || []).find(item => item.id === id
+    && item.event === 'SESSION_FINALIZATION' && item.session_id === state.sessionId);
+  const plan = visual?.plan, bound = plan?.stateBinding;
+  const map = plan?.blocks?.flatMap(block => block.objects || [])
+    .find(item => item.id === 'athlete-map-change' && item.kind === 'MAP_CHANGE_REVEAL');
+  return Boolean(visual?.after_message_id && state.messages.some(message => message.id === visual.after_message_id
+    && message.role === 'assistant') && plan?.renderDecision?.render === true
+    && plan?.event === 'SESSION_FINALIZATION' && plan?.interactions?.length === 0
+    && bound?.sessionId === state.sessionId && bound.mm === bundle.person.mm
+    && bound.bosHash === bundle.bos.artifact_sha256
+    && bound.baselineApaHash === bundle.apa.artifact_sha256
+    && bound.currentApaHash === currentApaView(bundle, state.currentApa || null).artifact.artifact_sha256
+    && bound.triggerHash === visual.source_hash && map);
 }
 
 // The owner check, expected-state check, archive and replacement are one Redis operation.
@@ -297,16 +316,16 @@ export function createStore({ redis, bundles, coach, scopeId, localAction = appl
       const { providerReceipt: _providerReceipt, ...plan } = sourcePlan;
       return { ...surface, plan };
     });
-    const modelMemory = athleteRslRetrievalContext({ scope,
+    const correctionTargets = athleteRslActiveCorrectionTargets({ scope,
       events: effectiveRslEvents({ rslScope: scope, bundle }, state) });
-    // The UI can offer exact correction targets without receiving the private
-    // model retrieval packet, lineage hashes, or duplicate plan snapshots.
+    // The UI's active correction picker is independent of the smaller,
+    // question-ranked private model packet. Neither receives old superseded facts.
     view.personalMemory = { contract: 'athlete_consulting_v2_memory_ui_v1',
-      items: modelMemory.items.filter((item) => ['ATHLETE_STATEMENT', 'CORRECTION'].includes(item.event_type))
-        .map((item) => ({ event_id: item.event_id, event_type: item.event_type,
-          recorded_at: item.recorded_at, text: item.payload.text })) };
+      items: correctionTargets.items,
+      omitted_count: correctionTargets.omitted_count };
     view.coachNoteHandoff = coachNoteHandoffStatus(state, bundle);
     view.flagship_enabled = Boolean(visualComposer && apaComposer);
+    view.closing_reveal_ready = view.flagship_enabled && closingRevealReady(state, bundle);
     return view;
   };
   function middleVisualEligible(state, body) {
@@ -319,6 +338,9 @@ export function createStore({ redis, bundles, coach, scopeId, localAction = appl
   }
   async function composeVisual(ctx, state, task, body) {
     if (!visualComposer) return;
+    // A pre-flagship session without a session ID may continue its chat; a
+    // fresh visual binding is assigned only when that session is finalized.
+    if (task === 'CHAT' && state.sessionStartMap == null && !state.sessionId) return;
     const event = task === 'OPENING' ? 'SESSION_OPENING'
       : task === 'CLOSE' ? 'SESSION_FINALIZATION'
         : middleVisualEligible(state, body) ? 'COACHING_MOMENT' : null;
@@ -417,7 +439,8 @@ export function createStore({ redis, bundles, coach, scopeId, localAction = appl
             ...captureContextMessage(message), coach_note_handoff: 'next_opening',
           })));
           inputState.governedMemory = athleteRslRetrievalContext({ scope: ctx.rslScope,
-            events: effectiveRslEvents(ctx, state) });
+            events: effectiveRslEvents(ctx, state),
+            queryText: task === 'CHAT' ? body.text : '' });
           output = await coach(clone(ctx.bundle), inputState, task);
         }
         catch (error) { failure = error; }
@@ -436,6 +459,13 @@ export function createStore({ redis, bundles, coach, scopeId, localAction = appl
             if (task === 'OPENING') {
               staged.sessionId = nextSessionId;
               staged.sessionStartMap = sessionStartMap;
+            }
+            if (task === 'CLOSE' && visualComposer && staged.sessionStartMap == null
+              && !staged.sessionId) {
+              staged.sessionId = randomUUID();
+              staged.events.push({ type: 'legacy_session_finalization_binding',
+                session_id: staged.sessionId, request_id: body.requestId,
+                at: new Date().toISOString(), not_a_session_start: true });
             }
             await composeVisual(ctx, staged, task, body);
             await lease.assertOwned();
@@ -567,6 +597,10 @@ export function createStore({ redis, bundles, coach, scopeId, localAction = appl
         const before = clone(state);
         appendRslAction(ctx, before, state, body);
       } else {
+        if (body.action === 'finish' && visualComposer && apaComposer
+          && state.status !== 'closed')
+          requireThat(state.status === 'review' && closingRevealReady(state, ctx.bundle),
+            'CLOSING_REVIEW_REFRESH_REQUIRED');
         const before = clone(state);
         localAction(state, body, ctx.bundle);
         appendRslAction(ctx, before, state, body);

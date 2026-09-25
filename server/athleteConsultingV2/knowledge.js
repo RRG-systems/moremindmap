@@ -21,9 +21,14 @@ export function selectAthleteKnowledge({ task, view, text = '' }) {
   const query = String(text).toLowerCase();
   const rank = new Map([[14, 100]]); // Evidence/uncertainty governs every interpretation.
   const add = (id, score, pattern) => { if (pattern.test(query)) rank.set(id, Math.max(rank.get(id) || 0, score)); };
-  add(13, 90, /\b(plan|step|move|try|change|experiment)\b/u);
-  add(12, 90, /\b(future|path|scenario|could happen|trajectory)\b/u);
-  add(5, 85, /\b(pressure|setback|recover|mindset|stress)\b/u);
+  // The available-source list is an honest routing inventory: each included
+  // authority has an explicit, applicable path into the bounded top-three set.
+  add(1, 85, /\b(eight[ -]?vectors?|personality vectors?|personality dimensions?)\b/u);
+  add(3, 85, /\b(higher[ -]?order (?:behavioral )?attributes?|behavioral attributes?)\b/u);
+  add(4, 85, /\b(causal (?:behavioral )?dynamics?|behavioral causes?|behavioral triggers?)\b/u);
+  add(13, 90, /\b(plans?|steps?|moves?|try|changes?|experiments?)\b/u);
+  add(12, 90, /\b(futures?|paths?|scenarios?|trajector(?:y|ies)|could happen)\b/u);
+  add(5, 85, /\b(pressure|conflicts?|setbacks?|recover(?:y|ies|ing|ed)?|mindset|stress)\b/u);
   add(6, 85, /\b(communicat|conversation|team|coach)\w*/u);
   add(10, 85, /\b(think|decid|focus|cognitive|learn)\w*/u);
   add(11, 85, /\b(energy|fatigue|rest|pace)\b/u);

@@ -84,7 +84,9 @@ function sourceMap(bundle, state) {
   const material = materialFields(apa.artifact);
   return { version: apa.version, artifact_hash: apa.artifact.artifact_sha256,
     receipt_hash: apa.receipt?.receipt_hash || null,
-    fields: material.fields, candidate_ids: material.candidate_ids };
+    fields: material.fields, candidate_ids: material.candidate_ids,
+    move_copy: apa.artifact.move ? { action: apa.artifact.move.action,
+      why: apa.artifact.move.why } : null };
 }
 
 export function captureSessionStartMap({ bundle, state }) {
@@ -112,6 +114,9 @@ function verifyStart(bundle, state, startMap) {
     && startMap.apa.version >= 0 && typeof startMap.apa_needs_review === 'boolean'
     && object(startMap.apa.fields)
     && Array.isArray(startMap.apa.candidate_ids)
+    && (startMap.apa.move_copy === null || (object(startMap.apa.move_copy)
+      && typeof startMap.apa.move_copy.action === 'string'
+      && typeof startMap.apa.move_copy.why === 'string'))
     && /^[a-f0-9]{64}$/u.test(startMap.apa.artifact_hash || ''),
   'MAP_CHANGE_START_INVALID');
   bounded(startMap);
@@ -136,7 +141,7 @@ function display(value, present) {
 }
 
 function label(path) {
-  if (path === 'move.selection') return 'One Move selection';
+  if (path === 'move.selection') return 'Your One Move';
   const parts = path.split('.');
   if (parts[0] === 'confirmation' && parts[1] === 'goals')
     return `${parts[2]} goal`;
@@ -164,8 +169,15 @@ function changedFields(before, now, receipts) {
     if (beforePresent === nowPresent && same(oldValue, newValue)) continue;
     const lineage = supported.get(path);
     ensure(lineage?.length, 'MAP_CHANGE_UNRECEIPTED_FIELD');
-    entries.push({ path, label: label(path), before: display(oldValue, beforePresent),
-      now: display(newValue, nowPresent), receipts: lineage.map(receipt => ({
+    entries.push({ path, label: label(path),
+      before: path === 'move.selection' ? before.move_copy?.action || 'No One Move suggestion'
+        : display(oldValue, beforePresent),
+      now: path === 'move.selection' ? now.move_copy?.action || 'No One Move suggestion'
+        : display(newValue, nowPresent),
+      ...(path === 'move.selection' ? { before_rationale: before.move_copy?.why || null,
+        now_rationale: now.move_copy?.why || null,
+        selection: { before: clone(oldValue), now: clone(newValue) } } : {}),
+      receipts: lineage.map(receipt => ({
         version: receipt.version, receipt_hash: receipt.receipt_hash,
         source_id: receipt.source_id, source_message_id: receipt.source_message_id,
         reason: receipt.reason, at: receipt.at })) });
@@ -295,7 +307,9 @@ export function buildSessionMapChange({ bundle, state, startMap }) {
           : 'No published APA change this session.' },
     ...representatives.map(entry => ({ label: short(entry.label, 90),
       value: shortPair(entry.before, entry.now),
-      note: short(`Why: ${entry.receipts.at(-1).reason}`, 210) })),
+      note: entry.path === 'move.selection' && entry.now_rationale
+        ? `${short(`Why it changed: ${entry.receipts.at(-1).reason}`, 99)} · ${short(`Why this fits now: ${entry.now_rationale}`, 106)}`
+        : short(`Why: ${entry.receipts.at(-1).reason}`, 210) })),
     { label: 'Accepted plan', value: planPreview,
       note: planChanged ? short(nowPlan?.why || 'The previous accepted plan is no longer saved.', 210)
         : 'No accepted-plan change this session.' },
@@ -333,4 +347,50 @@ export function buildSessionMapChange({ bundle, state, startMap }) {
         : needsReview ? 'The historical APA is not current coaching truth.' : null,
       items, sourceIds: sources.map(source => source.id) } };
   return bounded(result);
+}
+
+// A session already underway before GU-06 has no trustworthy starting map.
+// Show the current saved state at closing, but never manufacture a before map
+// or claim that anything did (or did not) change during that session.
+export function buildLegacySessionMapChange({ bundle, state }) {
+  const sessionBinding = binding(bundle, state);
+  ensure(UUID.test(state.sessionId || '') && state.sessionStartMap == null,
+    'MAP_CHANGE_LEGACY_SESSION_INVALID');
+  const current = currentApaView(bundle, state.currentApa || null);
+  const apa = sourceMap(bundle, state);
+  const plan = acceptedPlan(state.plan);
+  const needsReview = state.apaNeedsReview === true;
+  const pending = pendingApa(bundle, state, current);
+  const sources = [{ id: 'athlete-source-map-final-apa',
+    label: needsReview ? 'Historical APA awaiting athlete review' : 'Current saved APA',
+    classification: needsReview ? 'SYNTHETIC_HISTORICAL' : 'SYNTHETIC_SAVED',
+    hash: apa.artifact_hash }];
+  if (plan) sources.push({ id: 'athlete-source-accepted-plan',
+    label: 'Exact accepted plan', classification: 'SYNTHETIC_APPROVED', hash: plan.hash });
+  if (pending) sources.push({ id: 'athlete-source-pending-apa',
+    label: 'Unpublished APA proposal', classification: 'SYNTHETIC_PROPOSED_ONLY',
+    hash: pending.artifact_hash });
+  const object = { id: 'athlete-map-change', kind: 'MAP_CHANGE_REVEAL',
+    title: 'Your map at this closing',
+    statement: 'This session began before map-change tracking. Its starting map was not saved, so a before-and-after comparison is unavailable.',
+    qualifier: 'Only the current saved state is shown. No change or unchanged claim is made for this session.',
+    items: [{ label: 'Saved APA',
+      value: needsReview ? `Version ${apa.version} · historical, awaiting review` : `Current saved version ${apa.version}`,
+      note: 'The session-start version is unknown.' },
+    { label: 'Accepted plan', value: plan?.title || 'No accepted plan currently saved',
+      note: 'The session-start plan is unknown.' },
+    ...(pending ? [{ label: 'APA proposal', value: `Version ${pending.proposed_version} · not published`,
+      note: 'This proposed reading is separate from the saved APA.' }] : [])],
+    sourceIds: sources.map(source => source.id) };
+  return bounded({ contract: SESSION_MAP_CHANGE_CONTRACT,
+    comparison: 'UNAVAILABLE_START_SNAPSHOT',
+    binding: { ...sessionBinding, session_id: state.sessionId },
+    apa: { status: 'START_UNAVAILABLE', before: null,
+      now: { version: apa.version, artifact_hash: apa.artifact_hash, needs_review: needsReview },
+      entries: [], receipts: [] },
+    plan: { status: 'START_UNAVAILABLE', before: null, now: clone(plan),
+      entries: [], reason: null },
+    pendingApa: pending,
+    unchanged: { saved_apa: null, accepted_plan: null },
+    sources, object });
 }

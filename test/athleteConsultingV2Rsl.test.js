@@ -2,7 +2,8 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { hashCanonicalJson } from '../src/lib/intelligenceFabric/hashing.js';
 import {
-  athleteRslRetrievalContext, createAthleteRslEvent, createAthleteRslScope,
+  athleteRslActiveCorrectionTargets, athleteRslRetrievalContext,
+  createAthleteRslEvent, createAthleteRslScope,
   deriveAthleteRslEvents, replayAthleteRsl, validateAthleteRslSourceMessages,
 } from '../server/athleteConsultingV2/rsl.js';
 
@@ -187,4 +188,81 @@ test('retrieval is bounded, status-labeled, and omits complete items rather than
   assert.equal(context.items.every((item) => /Athlete-reported, unverified detail/u.test(item.payload.text)), true);
   assert.throws(() => athleteRslRetrievalContext({ scope, events, maxItems: 99 }),
     /ATHLETE_RSL_CONTEXT_LIMIT_INVALID/u);
+  assert.throws(() => athleteRslRetrievalContext({ scope, events, queryText: 'x'.repeat(10001) }),
+    /ATHLETE_RSL_CONTEXT_LIMIT_INVALID/u);
+});
+
+test('dense approved preferences cannot starve a corrected athlete fact or resurrect its superseded source', () => {
+  const obsolete = statement('practice-old', 'My synthetic practice starts early on Tuesday.');
+  const revised = correction('practice-new', obsolete.event_id,
+    'My synthetic practice schedule now starts later on Thursday.');
+  const preferences = Array.from({ length: 14 }, (_, index) => createAthleteRslEvent({
+    scope, type: 'APPROVED_LEARNING', sourceId: `preference-${index}`, recordedAt: at,
+    text: `Athlete-approved fictional preference ${index}: use a concise question.`,
+    authority: 'ATHLETE_LEARNING_CONFIRMATION',
+  }));
+  const plan = acceptedPlan('dense-plan');
+  const accepted = createAthleteRslEvent({ scope, type: 'ACCEPTED_PLAN',
+    sourceId: plan.id, recordedAt: plan.accepted_at, plan,
+    authority: 'PROTECTED_PLAN_APPROVAL' });
+  const events = [obsolete, revised, ...preferences, accepted];
+  const context = athleteRslRetrievalContext({ scope, events,
+    queryText: 'When does my practice schedule start now?' });
+  assert.equal(context.items.length, 12);
+  assert.equal(context.omitted_count, 4);
+  assert.equal(context.scope_hash, scope.scope_hash);
+  assert.equal(context.items[0].event_id, revised.event_id);
+  assert.equal(context.items[0].epistemic_status, 'ATHLETE_CORRECTED_REPORT');
+  assert.equal(context.items.some((item) => item.event_id === accepted.event_id), true);
+  assert.equal(context.items.some((item) => item.event_id === obsolete.event_id
+    || item.payload?.text?.includes('early on Tuesday')), false);
+  assert.equal(context.raw_transcript_included, false);
+  assert.equal(context.coach_observation_promoted, false);
+
+  const targets = athleteRslActiveCorrectionTargets({ scope, events });
+  assert.deepEqual(targets.items, [{ event_id: revised.event_id, event_type: 'CORRECTION',
+    recorded_at: at, text: revised.payload.text }]);
+  assert.equal(targets.omitted_count, 0);
+  assert.equal(targets.scope_hash, scope.scope_hash);
+  assert.equal(targets.raw_transcript_included, false);
+  assert.equal(targets.coach_observation_promoted, false);
+  const otherScope = createAthleteRslScope({ scopeId: 'darren-demo-leadership-B', bundle: nia });
+  assert.throws(() => athleteRslActiveCorrectionTargets({ scope: otherScope, events }),
+    /ATHLETE_RSL_EVENT_SCOPE_DENIED/u);
+});
+
+test('relevance ranks the topical active correction while keeping correction targets independent', () => {
+  const school = statement('school-old', 'The synthetic school day ends early.');
+  const schoolCorrection = correction('school-new', school.event_id,
+    'The synthetic school day now ends at four.');
+  const practice = statement('practice-prior', 'Practice was on Tuesday.');
+  const practiceCorrection = correction('practice-current', practice.event_id,
+    'The synthetic practice schedule moved to Thursday.');
+  const events = [school, schoolCorrection, practice, practiceCorrection];
+  const context = athleteRslRetrievalContext({ scope, events, maxItems: 1,
+    queryText: 'Tell me about my practice schedule.' });
+  assert.deepEqual(context.items.map((item) => item.event_id), [practiceCorrection.event_id]);
+  assert.equal(context.omitted_count, 1);
+  const targets = athleteRslActiveCorrectionTargets({ scope, events, maxItems: 1 });
+  assert.equal(targets.items.length, 1);
+  assert.equal(targets.omitted_count, 1);
+  assert.equal(targets.items[0].event_type, 'CORRECTION');
+  assert.equal(targets.items.some((item) => item.event_id === school.event_id
+    || item.event_id === practice.event_id), false);
+  assert.throws(() => athleteRslActiveCorrectionTargets({ scope, events, maxItems: 65 }),
+    /ATHLETE_RSL_TARGET_LIMIT_INVALID/u);
+});
+
+test('a topical active athlete report can outrank many unrelated preferences', () => {
+  const report = statement('recovery-report', 'My synthetic recovery day is Friday.');
+  const preferences = Array.from({ length: 14 }, (_, index) => createAthleteRslEvent({
+    scope, type: 'APPROVED_LEARNING', sourceId: `other-preference-${index}`, recordedAt: at,
+    text: `Athlete-approved fictional preference ${index}: ask one brief question.`,
+    authority: 'ATHLETE_LEARNING_CONFIRMATION',
+  }));
+  const context = athleteRslRetrievalContext({ scope, events: [report, ...preferences],
+    queryText: 'What is my recovery day?' });
+  assert.equal(context.items[0].event_id, report.event_id);
+  assert.equal(context.items[0].epistemic_status, 'ATHLETE_REPORTED_UNVERIFIED');
+  assert.equal(context.items.some((item) => item.payload.text.includes('recovery day')), true);
 });

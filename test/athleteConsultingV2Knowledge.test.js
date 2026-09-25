@@ -8,7 +8,13 @@ import { bundles } from '../server/athleteConsultingV2/bundles.js';
 test('athlete knowledge selects only bounded applicable BOS reasoning sources', () => {
   assert.deepEqual(selectAthleteKnowledge({ task: 'OPENING', view: 'home' }), [14, 15]);
   assert.deepEqual(selectAthleteKnowledge({ task: 'CHAT', view: 'sport', text: 'What future path and move?' }), [14, 12, 13]);
+  assert.deepEqual(selectAthleteKnowledge({ task: 'CHAT', view: 'sport', text: 'Explain my Five Futures and One Move' }), [14, 12, 13]);
   assert.deepEqual(selectAthleteKnowledge({ task: 'CHAT', view: 'plan', text: 'one move' }), [14, 13]);
+  assert.deepEqual(selectAthleteKnowledge({ task: 'CHAT', view: 'home', text: 'Explain the eight vectors in my BOS' }), [14, 1, 15]);
+  assert.deepEqual(selectAthleteKnowledge({ task: 'CHAT', view: 'home', text: 'Which higher-order behavioral attributes apply?' }), [14, 3]);
+  assert.deepEqual(selectAthleteKnowledge({ task: 'CHAT', view: 'home', text: 'Discuss causal behavioral dynamics without certainty' }), [14, 4]);
+  assert.deepEqual(selectAthleteKnowledge({ task: 'CHAT', view: 'sport', text: 'How do I recover from setbacks?' }), [14, 5]);
+  assert.deepEqual(selectAthleteKnowledge({ task: 'CHAT', view: 'home', text: 'How do I handle conflict?' }), [14, 5]);
 });
 
 test('retrieval passes exact pinned hashes and records only actual bounded source coverage', async () => {
@@ -36,6 +42,20 @@ test('actual pinned retrieval includes the epistemic and whole-person doctrine s
   assert.match(evidence.excerpt, /Contradiction Protocol/u);
   assert.match(synthesis.excerpt, /Synthesis Algorithm/u);
   assert.equal(result.receipt.sources.length, 2);
+});
+
+test('each advertised foundational source can be retrieved at its pinned hash on an applicable request', async () => {
+  for (const [id, text] of [
+    [1, 'Explain the eight vectors in my BOS'],
+    [3, 'Which higher-order behavioral attributes apply?'],
+    [4, 'Discuss causal behavioral dynamics without certainty'],
+  ]) {
+    const result = await retrieveAthleteKnowledge({ task: 'CHAT', view: 'home', text });
+    const source = BOS_LIBRARY.find((entry) => entry.id === id);
+    assert.ok(result.context.blocks.some((block) => block.id === id && block.sha256 === source.sha256));
+    assert.ok(result.receipt.sources.some((receipt) => receipt.id === id && receipt.source_sha256 === source.sha256));
+    assert.ok(result.context.blocks.length <= 3);
+  }
 });
 
 test('failed knowledge retrieval records a private failure and never calls the model', async () => {

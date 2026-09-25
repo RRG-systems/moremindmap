@@ -11,6 +11,9 @@ const MAX_EVENTS = 512;
 const MAX_TEXT = 1200;
 const MAX_CONTEXT_ITEMS = 16;
 const MAX_CONTEXT_CHARS = 6000;
+const MAX_TARGET_ITEMS = 64;
+const MAX_TARGET_CHARS = 16000;
+const MAX_QUERY_CHARS = 10000;
 const HASH = /^[a-f0-9]{64}$/u;
 const TYPES = deepFreeze({
   APPROVED_LEARNING: { authority: 'ATHLETE_LEARNING_CONFIRMATION', epistemic: 'ATHLETE_APPROVED_PREFERENCE' },
@@ -237,30 +240,92 @@ export function replayAthleteRsl({ scope, events }) {
     active_events: [...active.values()], lineage });
 }
 
-// Whole items are omitted rather than truncating meaning or stripping status.
-// This output is a private model-context candidate, never a client/public feed.
-export function athleteRslRetrievalContext({ scope, events, maxItems = 12,
-  maxChars = MAX_CONTEXT_CHARS }) {
-  requireThat(Number.isInteger(maxItems) && maxItems >= 1 && maxItems <= MAX_CONTEXT_ITEMS
-    && Number.isInteger(maxChars) && maxChars >= 200 && maxChars <= MAX_CONTEXT_CHARS,
-  'ATHLETE_RSL_CONTEXT_LIMIT_INVALID');
-  const replay = replayAthleteRsl({ scope, events });
-  const priority = { ACCEPTED_PLAN: 0, APPROVED_LEARNING: 1,
-    CORRECTION: 2, ATHLETE_STATEMENT: 3 };
-  const candidates = replay.active_events.slice().sort((a, b) =>
-    priority[a.event_type] - priority[b.event_type]
-    || b.recorded_at.localeCompare(a.recorded_at) || a.event_id.localeCompare(b.event_id));
+const QUERY_STOP_WORDS = new Set(['about', 'after', 'again', 'also', 'been', 'could',
+  'from', 'have', 'into', 'more', 'that', 'their', 'them', 'there', 'these', 'this',
+  'what', 'when', 'where', 'which', 'with', 'would', 'your']);
+
+function terms(value) {
+  return new Set((String(value || '').toLowerCase().match(/\p{L}[\p{L}\p{N}_-]{2,}/gu) || [])
+    .filter((term) => !QUERY_STOP_WORDS.has(term)).slice(-128));
+}
+
+function relevance(event, queryTerms) {
+  if (!queryTerms.size) return 0;
+  const payload = event.payload;
+  const value = event.event_type === 'ACCEPTED_PLAN'
+    ? [payload.plan.title, payload.plan.why, payload.plan.review,
+      ...payload.plan.steps.flatMap((step) => [step.action, step.when, step.notice])].join(' ')
+    : payload.text;
+  const eventTerms = terms(value);
+  let score = 0;
+  for (const term of queryTerms) if (eventTerms.has(term)) score++;
+  return score;
+}
+
+function packWholeItems(candidates, maxItems, maxChars, project) {
   const items = [];
   let chars = 0;
   for (const event of candidates) {
-    const item = { event_id: event.event_id, lineage_root_id: event.lineage_root_id,
-      event_type: event.event_type, epistemic_status: event.epistemic_status,
-      recorded_at: event.recorded_at, payload: clone(event.payload) };
+    const item = project(event);
     const size = canonicalJson(item).length;
     if (items.length < maxItems && chars + size <= maxChars) { items.push(item); chars += size; }
   }
+  return { items, omitted_count: candidates.length - items.length };
+}
+
+// A correction is reserved before preferences can fill the finite context.
+// Query overlap is only a deterministic ranking hint: it grants no authority
+// and cannot resurrect a superseded event removed by replay.
+// Whole items are omitted rather than truncating meaning or stripping status.
+// This output is a private model-context candidate, never a client/public feed.
+export function athleteRslRetrievalContext({ scope, events, maxItems = 12,
+  maxChars = MAX_CONTEXT_CHARS, queryText = '' }) {
+  requireThat(Number.isInteger(maxItems) && maxItems >= 1 && maxItems <= MAX_CONTEXT_ITEMS
+    && Number.isInteger(maxChars) && maxChars >= 200 && maxChars <= MAX_CONTEXT_CHARS
+    && typeof queryText === 'string' && queryText.length <= MAX_QUERY_CHARS,
+  'ATHLETE_RSL_CONTEXT_LIMIT_INVALID');
+  const replay = replayAthleteRsl({ scope, events });
+  const priority = { ACCEPTED_PLAN: 0, CORRECTION: 1,
+    APPROVED_LEARNING: 2, ATHLETE_STATEMENT: 3 };
+  const queryTerms = terms(queryText);
+  const scores = new Map(replay.active_events.map((event) =>
+    [event.event_id, relevance(event, queryTerms)]));
+  const order = (a, b) => (scores.get(b.event_id) - scores.get(a.event_id))
+    || priority[a.event_type] - priority[b.event_type]
+    || b.recorded_at.localeCompare(a.recorded_at) || a.event_id.localeCompare(b.event_id);
+  const correction = replay.active_events.filter((event) => event.event_type === 'CORRECTION')
+    .sort(order)[0];
+  const candidates = [correction, ...replay.active_events.filter((event) => event !== correction)
+    .sort(order)].filter(Boolean);
+  const { items, omitted_count } = packWholeItems(candidates, maxItems, maxChars, (event) =>
+    ({ event_id: event.event_id, lineage_root_id: event.lineage_root_id,
+      event_type: event.event_type, epistemic_status: event.epistemic_status,
+      recorded_at: event.recorded_at, payload: clone(event.payload) }));
   return deepFreeze({ contract: 'athlete_consulting_v2_rsl_context_v1',
     scope_hash: scope.scope_hash, source_watermark: replay.head_hash,
-    items, omitted_count: candidates.length - items.length,
+    items, omitted_count,
     raw_transcript_included: false, coach_observation_promoted: false });
+}
+
+// The authenticated correction picker must not depend on model-context
+// truncation. It contains only active, scope-validated athlete reports; the
+// caller must also verify their saved source messages before showing them.
+export function athleteRslActiveCorrectionTargets({ scope, events, maxItems = 32,
+  maxChars = MAX_TARGET_CHARS }) {
+  requireThat(Number.isInteger(maxItems) && maxItems >= 1 && maxItems <= MAX_TARGET_ITEMS
+    && Number.isInteger(maxChars) && maxChars >= 200 && maxChars <= MAX_TARGET_CHARS,
+  'ATHLETE_RSL_TARGET_LIMIT_INVALID');
+  const replay = replayAthleteRsl({ scope, events });
+  const candidates = replay.active_events.filter((event) =>
+    ['ATHLETE_STATEMENT', 'CORRECTION'].includes(event.event_type))
+    .sort((a, b) => b.recorded_at.localeCompare(a.recorded_at)
+      || Number(b.event_type === 'CORRECTION') - Number(a.event_type === 'CORRECTION')
+      || a.event_id.localeCompare(b.event_id));
+  const { items, omitted_count } = packWholeItems(candidates, maxItems, maxChars,
+    (event) => ({ event_id: event.event_id, event_type: event.event_type,
+      recorded_at: event.recorded_at, text: event.payload.text }));
+  return deepFreeze({ contract: 'athlete_consulting_v2_rsl_correction_targets_v1',
+    scope_hash: scope.scope_hash, source_watermark: replay.head_hash,
+    items, omitted_count, raw_transcript_included: false,
+    coach_observation_promoted: false });
 }
