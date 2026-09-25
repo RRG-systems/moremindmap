@@ -8,7 +8,7 @@ export async function api(path, body, proof) {
       : body.action === 'capture_demo' ? body.capture?.role === 'coach' ? 'instructor' : 'athlete'
       : body.action === 'approve' ? body.actor === 'athlete' ? 'athlete' : 'instructor'
       : ['draft','discard','reset'].includes(body.action) ? 'shared_editor'
-        : ['feedback','remember','forget','finish'].includes(body.action) ? 'athlete' : 'conversation';
+        : ['feedback','remember','forget','finish','confirm_fact','update_apa','publish_apa','discard_apa'].includes(body.action) ? 'athlete' : 'conversation';
     if (!proof?.actors?.[role]) throw Error('Reopen through Leadership to continue.');
     requestBody = {...body, revision:proof.revision, actor_capability:proof.actors[role], state_hash:proof.state_hash, proof_revision:proof.revision};
   }

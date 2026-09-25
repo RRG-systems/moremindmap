@@ -1,0 +1,17 @@
+.athlete-continuity{display:flex;justify-content:space-between;gap:1.5rem;align-items:flex-start;margin:1rem 1.5rem 0;padding:1.1rem 1.25rem;border:1px solid #d8e8e0;border-radius:1rem;background:#f5fbf7;color:#16362d}
+.athlete-continuity h2{font-size:1.15rem;margin:.3rem 0}
+.athlete-continuity p{max-width:55ch;margin:.3rem 0;font-size:.9rem;line-height:1.45;color:#345448}
+.athlete-continuity-actions{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:flex-end;max-width:30rem}
+.athlete-continuity-actions button{font-size:.82rem;white-space:nowrap;border-color:#a9cbb9}
+.athlete-continuity-summary{font-weight:600}
+.athlete-statement-actions{margin-top:.25rem}
+.athlete-statement-actions button{font-size:.75rem}
+.athlete-continuity-dialog{max-width:min(36rem,calc(100vw - 2rem));width:100%;border:1px solid #b9d6c8;border-radius:1rem;padding:1.2rem;box-shadow:0 1rem 3rem #0003}
+.athlete-continuity-dialog::backdrop{background:#07150f9c}
+.athlete-continuity-dialog header{display:flex;align-items:start;justify-content:space-between;gap:1rem}
+.athlete-continuity-dialog h2{margin:.2rem 0 1rem}
+.athlete-continuity-dialog form{display:grid;gap:.85rem}
+.athlete-continuity-dialog label{display:grid;gap:.35rem;font-weight:600}
+.athlete-continuity-dialog select,.athlete-continuity-dialog textarea{width:100%;border:1px solid #9fb8ae;border-radius:.45rem;padding:.65rem;background:#fff;color:#172a23}
+.athlete-continuity-dialog textarea{min-height:6rem}
+@media(max-width:900px){.athlete-continuity{display:block;margin:1rem;padding:1rem}.athlete-continuity-actions{justify-content:flex-start;margin-top:1rem}}

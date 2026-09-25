@@ -303,6 +303,7 @@ export default function BusinessTwinApp({ viewModel, onContextChange = null, pag
       contract: 'page-context-envelope-v1',
       room: 'YOUR_SPORT',
       destination: active,
+      drawerObjectId: drawerObjectId || null,
       visibleObjectIds,
       stateHash: viewModel.stateHash || viewModel.state_hash || viewModel.realizationIdentity || null,
     })

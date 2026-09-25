@@ -18,3 +18,12 @@ html:has(.apa-v2){scrollbar-gutter:stable}
 
 /* Preserve short, explicit setup/test/review lines when supplied by the report. */
 .apa-v2 .apa-detail > p { white-space: pre-line; }
+
+/* Keep publication currency visible while the five-box report scrolls. */
+.apa-currency-strip{position:sticky;top:0;z-index:20;padding:.45rem 1rem;border-bottom:1px solid #46947a;background:#09251d;color:#aff2cd;font-size:.72rem;font-weight:800;letter-spacing:.075em;line-height:1.4;text-transform:uppercase}
+.apa-currency-stale{border-color:#b88645;background:#32210e;color:#ffe3ad}
+.apa-refresh-failure{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.75rem 1rem;border-bottom:1px solid #b88645;background:#2a1d12}
+.apa-refresh-failure p{margin:0;color:#ffe7c0;font-size:.82rem;line-height:1.5}
+.apa-refresh-failure button{flex-shrink:0;border:1px solid #c99759;border-radius:.4rem;background:transparent;color:#ffe7c0;padding:.5rem .7rem}
+.apa-move-currency{padding:.75rem 1rem;border:1px solid #c99759;border-radius:.5rem;background:#332211;color:#ffe6ba!important;font-weight:700}
+@media(max-width:760px){.apa-refresh-failure{display:block}.apa-refresh-failure button{margin-top:.6rem}}

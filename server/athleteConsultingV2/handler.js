@@ -10,6 +10,8 @@ import { getSubscriptionRedis } from '../../api/engine/subscriptionV1/internalDe
 import { bundles, athletes, binding, digest } from './bundles.js';
 import { createStore } from './store.js';
 import { createCoach } from './coach.js';
+import { createAthleteVisualComposer } from './visual.js';
+import { createApaComposer } from './apaComposer.js';
 import { applyLiveCapture } from './capture.js';
 import { CoachVoiceTranscriptionFailure, transcribeCoachVoice, validateCoachVoice } from './transcription.js';
 
@@ -39,10 +41,11 @@ const expectedRole = body => body.action === 'transcribe_coach_voice' ? 'instruc
   : body.action === 'approve'
   ? body.actor === 'athlete' ? 'athlete' : body.actor === 'coach' ? 'instructor' : null
   : ['draft', 'discard', 'reset'].includes(body.action) ? 'shared_editor'
-    : ['feedback', 'remember', 'forget', 'finish'].includes(body.action) ? 'athlete' : 'conversation';
+    : ['feedback', 'remember', 'forget', 'finish', 'confirm_fact', 'update_apa', 'publish_apa', 'discard_apa'].includes(body.action) ? 'athlete' : 'conversation';
 
 export function createAthleteConsultingV2Handler({ env = globalThis.process?.env || {}, redis: injectedRedis, authenticate,
   coach: injectedCoach, transport, transcribe: injectedTranscribe,
+  visualComposer: injectedVisualComposer, apaComposer: injectedApaComposer,
   logVoiceFailure = (event) => console.error(JSON.stringify(event)) } = {}) {
   return async (req, res) => {
     try {
@@ -72,7 +75,11 @@ export function createAthleteConsultingV2Handler({ env = globalThis.process?.env
         const key = `more:athlete-consulting-demo:v2:${scopeHash}:provider:${event.id}:${safeKind}`;
         if (await redis.set(key, raw, 'EX', 30 * 86400, 'NX') !== 'OK') throw Error('EVIDENCE_ALREADY_EXISTS');
       };
-      const store = createStore({ redis, bundles, scopeId, localAction: applyLiveCapture, coach: injectedCoach || createCoach({ env, evidenceSink, transport: transport || null }) });
+      const flagship = env.ATHLETE_CONSULTING_FLAGSHIP_ENABLED === 'true';
+      const store = createStore({ redis, bundles, scopeId, localAction: applyLiveCapture,
+        coach: injectedCoach || createCoach({ env, evidenceSink, transport: transport || null }),
+        visualComposer: flagship ? injectedVisualComposer || createAthleteVisualComposer({ env, evidenceSink }) : null,
+        apaComposer: flagship ? injectedApaComposer || createApaComposer({ env, evidenceSink }) : null });
       const actors = deriveAthleteConsultingActorCapabilities({ capabilityToken: auth.capability_token, fixtureId: slug });
       async function responseState(state) {
         const hash = digest(state);
@@ -82,6 +89,7 @@ export function createAthleteConsultingV2Handler({ env = globalThis.process?.env
       if (kind === 'state' && method === 'GET') return send(res, 200, await responseState(await store.read(slug)));
       if (!['action','transcribe'].includes(kind) || method !== 'POST') return send(res, 404, { error: 'NOT_FOUND' });
       const body = await bodyOf(req);
+      if (!flagship && ['confirm_fact', 'update_apa', 'publish_apa', 'discard_apa'].includes(body.action)) return send(res, 404, { error: 'NOT_FOUND' });
       if (kind === 'transcribe' && (env.ATHLETE_COACH_CONNECT_VOICE_TRANSCRIPTION_ENABLED !== 'true'
         || body.action !== 'transcribe_coach_voice')) return send(res, 404, { error: 'VOICE_TRANSCRIPTION_DISABLED' });
       const role = expectedRole(body);
@@ -123,7 +131,7 @@ export function createAthleteConsultingV2Handler({ env = globalThis.process?.env
       return send(res, 200, await responseState(await store.act(slug, operation)));
     } catch (error) {
       const code = /^[A-Z0-9_]+$/u.test(error.message) ? error.message : 'REQUEST_FAILED';
-      const publicCodes = new Set(['CAPTURE_REVIEW_REQUIRED','CAPTURE_MEDIA_TOO_LARGE','CAPTURE_MEDIA_INVALID','CAPTURE_DEMO_MEDIA_FULL','CAPTURE_TEXT_REQUIRED','STATE_CHANGED_RELOAD','REQUEST_ID_REUSED','PLEASE_WAIT','INVALID_PLAN','MESSAGE_REQUIRED','PLAN_CHANGED_REVIEW_LATEST','REQUEST_TOO_LARGE','SESSION_STATE_CHANGED','LEARNING_CHANGED','NO_ACTIVE_SESSION','ATHLETE_V2_STATE_TOO_LARGE','VOICE_AUDIO_INVALID','VOICE_TRANSCRIPTION_DISABLED','VOICE_TRANSCRIPTION_UNAVAILABLE']);
+      const publicCodes = new Set(['CAPTURE_REVIEW_REQUIRED','CAPTURE_MEDIA_TOO_LARGE','CAPTURE_MEDIA_INVALID','CAPTURE_DEMO_MEDIA_FULL','CAPTURE_TEXT_REQUIRED','STATE_CHANGED_RELOAD','REQUEST_ID_REUSED','PLEASE_WAIT','INVALID_PLAN','MESSAGE_REQUIRED','PLAN_CHANGED_REVIEW_LATEST','REQUEST_TOO_LARGE','SESSION_STATE_CHANGED','LEARNING_CHANGED','NO_ACTIVE_SESSION','ATHLETE_V2_STATE_TOO_LARGE','VOICE_AUDIO_INVALID','VOICE_TRANSCRIPTION_DISABLED','VOICE_TRANSCRIPTION_UNAVAILABLE','ATHLETE_FACT_SOURCE_REQUIRED','ATHLETE_RSL_TARGET_NOT_ACTIVE','CURRENT_APA_STALE_VERSION','CURRENT_APA_ATHLETE_CONFIRMATION_REQUIRED','CURRENT_APA_DRAFT_CHANGED','VIEW_CONTEXT_INVALID']);
       return send(res, code === 'PLEASE_WAIT' ? 409 : 422, { error: publicCodes.has(code) ? code : 'REQUEST_FAILED', message: 'Your saved conversation and plan are safe. Reopen through Leadership if your access has expired.' });
     }
   };

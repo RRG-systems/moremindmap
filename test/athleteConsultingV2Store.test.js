@@ -101,6 +101,58 @@ test('keys isolate sessions, selected athletes and exact report versions inside 
   await assert.rejects(() => first.store.read('../sofia'), /UNKNOWN_ATHLETE/u);
 });
 
+test('visible section context is allowlisted navigation only, not a client evidence packet', async () => {
+  const { store } = fixture();
+  const opened = await act(store, { action: 'start', view: 'sport',
+    viewContext: { section: 'where' } });
+  assert.deepEqual(opened.viewContext, { section: 'where' });
+  const apa = await act(store, { action: 'message', view: 'sport',
+    viewContext: { section: 'futures', reading: 'historical', objectId: 'future-better_future' },
+    text: 'Can we discuss this possible path?' });
+  assert.deepEqual(apa.viewContext,
+    { section: 'futures', reading: 'historical', objectId: 'future-better_future' });
+  const bos = await act(store, { action: 'message', view: 'you',
+    viewContext: { section: 'pressure' }, text: 'And this chapter?' });
+  assert.deepEqual(bos.viewContext, { section: 'pressure' });
+  const before = await store.read('nia');
+  await assert.rejects(act(store, { action: 'message', view: 'sport',
+    viewContext: { section: 'where', inventedFact: 'use this as truth' },
+    text: 'Can we talk about sport?' }), /VIEW_CONTEXT_INVALID/u);
+  assert.deepEqual(await store.read('nia'), before);
+  await assert.rejects(act(store, { action: 'message', view: 'you',
+    viewContext: { section: 'where' }, text: 'And me?' }), /VIEW_CONTEXT_INVALID/u);
+  await assert.rejects(act(store, { action: 'message', view: 'you',
+    viewContext: { section: 'pressure', reading: 'current' }, text: 'And me?' }),
+  /VIEW_CONTEXT_INVALID/u);
+  await assert.rejects(act(store, { action: 'message', view: 'sport',
+    viewContext: { section: 'where', objectId: 'untrusted-fact' }, text: 'And sport?' }),
+  /VIEW_CONTEXT_INVALID/u);
+  assert.deepEqual(await store.read('nia'), before);
+});
+
+test('explicit athlete reality and correction survive later sessions without promoting coach notes', async () => {
+  const { store } = fixture();
+  await act(store, { action: 'start' });
+  const first = await act(store, { action: 'message', speaker: 'athlete', text: 'I cannot train on two school days.' });
+  const sourceMessageId = first.messages.filter((message) => message.role === 'user').at(-1).id;
+  const remembered = await act(store, { action: 'confirm_fact', sourceMessageId });
+  const prior = remembered.personalMemory.items.find((item) => item.event_type === 'ATHLETE_STATEMENT');
+  assert.match(prior.text, /two school days/u);
+  const second = await act(store, { action: 'message', speaker: 'athlete', text: 'Correction: only one school day is unavailable.' });
+  const correctionMessageId = second.messages.filter((message) => message.role === 'user').at(-1).id;
+  const corrected = await act(store, { action: 'confirm_fact', sourceMessageId: correctionMessageId,
+    targetEventId: prior.event_id });
+  assert.equal(corrected.personalMemory.items.some((item) => item.event_id === prior.event_id), false);
+  assert.equal(corrected.personalMemory.items.filter((item) => item.event_type === 'CORRECTION').length, 1);
+  await act(store, { action: 'finish' });
+  const reopened = await act(store, { action: 'start' });
+  assert.match(JSON.stringify(reopened.personalMemory), /only one school day/u);
+  assert.doesNotMatch(JSON.stringify(reopened.personalMemory), /two school days/u);
+  assert.equal((await store.read('sofia')).personalMemory.items.length, 0);
+  await assert.rejects(() => act(store, { action: 'confirm_fact', sourceMessageId: 'sofia-message' }),
+    /ATHLETE_FACT_SOURCE_REQUIRED/u);
+});
+
 test('shared lease prevents cross-worker duplicate calls and polling does not recover active work', async () => {
   const waiting = deferred(), entered = deferred(); let calls = 0;
   const first = fixture({ coach: async () => { calls++; entered.resolve(); return waiting.promise; } });

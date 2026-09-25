@@ -3,7 +3,7 @@ import { randomUUID, createHash } from 'node:crypto';
 // The Founder-locked state rules, with complete boundary validation before mutation.
 export const hash = (value) => createHash('sha256').update(JSON.stringify(value)).digest('hex');
 export const requireThat = (value, message) => { if (!value) throw new Error(message); };
-export const initial = (bundle) => ({ version: 2, mm: bundle.person.mm, revision: 0, status: 'ready', speaker: 'athlete', view: 'home', messages: [], opening: null, plan: null, draft: null, learning: [], feedback: [], suggestedLearning: [], sessions: [], events: [], closing: null, lastError: null, processed: [] });
+export const initial = (bundle) => ({ version: 2, mm: bundle.person.mm, revision: 0, status: 'ready', speaker: 'athlete', view: 'home', viewContext: null, messages: [], opening: null, plan: null, draft: null, learning: [], feedback: [], suggestedLearning: [], sessions: [], events: [], closing: null, lastError: null, processed: [], currentApa: null, apaDraft: null, apaNeedsReview: false, apaReviewRequirements: [], rslEvents: [], sessionId: null, visuals: [] });
 const object = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
 const text = (value) => typeof value === 'string';
 
@@ -83,7 +83,7 @@ export function applyOutput(state, output, task) {
   // An opening can carry a reviewed coach note, but cannot silently retire a
   // human's pending plan choice or stage learning on that note's authority.
   if (task !== 'OPENING' && output.retire_draft && next.draft) { next.events.push({ type: 'draft_declined', draft: next.draft }); next.draft = null; }
-  if (output.plan && task === 'CHAT') draft(next, output.plan);
+  if (output.plan && ['CHAT', 'CLOSE'].includes(task)) draft(next, output.plan);
   if (task !== 'OPENING' && output.learning.length) next.suggestedLearning = [...new Set(output.learning)].slice(0, 4);
   next.messages.push({ id: randomUUID(), role: 'assistant', text: output.reply, at: new Date().toISOString() });
   if (task === 'OPENING') { next.opening = output.reply; next.status = 'active'; next.sessionStart = next.messages.length - 1; }
