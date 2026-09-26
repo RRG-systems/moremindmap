@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import nia from '../server/athleteConsultingV2/fixtures/nia.json' with { type: 'json' };
 import sofia from '../server/athleteConsultingV2/fixtures/sofia.json' with { type: 'json' };
 import { selectMove } from '../server/athleteAcademyV1/apa/contract.js';
+import { APA_NARRATIVE_FIELDS } from '../server/athleteConsultingV2/apaNarrative.js';
 import { currentApaView, publishCurrentApa, assertCurrentApaConfirmedSource,
   inactiveCurrentApaSourceIds,
   assertActiveApaReferences, CURRENT_APA_CONTRACT } from '../server/athleteConsultingV2/currentApa.js';
@@ -173,6 +174,8 @@ test('correction supersedes source, retains original baseline and chains version
   next.candidate.report.futures[0].conditions = 'If Thursday remains the short passing practice, a concise cue may fit.';
   next.candidate.report.futures[0].refs = next.candidate.report.futures[0].refs.filter(id => id !== sourceId(firstChangeId));
   next.candidate.report.futures[0].refs.push(sourceId(secondChangeId));
+  next.candidate.narrative_updates = APA_NARRATIVE_FIELDS.map(field => ({ field,
+    value: clone(next.candidate.report[field]), refs: [sourceId(secondChangeId)] }));
   const second = publishCurrentApa(next);
   assert.equal(second.record.version, 2);
   assert.equal(second.receipt.prior_hash, first.receipt.receipt_hash);
@@ -228,6 +231,8 @@ test('later revisions cannot resurrect an earlier superseded source', () => {
   correction.candidate.report.futures[0].conditions = 'Thursday offers a shorter passing cue.';
   correction.candidate.report.futures[0].refs = correction.candidate.report.futures[0].refs.filter(id => id !== sourceId(firstChangeId));
   correction.candidate.report.futures[0].refs.push(sourceId(secondChangeId));
+  correction.candidate.narrative_updates = APA_NARRATIVE_FIELDS.map(field => ({ field,
+    value: clone(correction.candidate.report[field]), refs: [sourceId(secondChangeId)] }));
   const second = publishCurrentApa(correction);
   assert.deepEqual(inactiveCurrentApaSourceIds(second.record), [sourceId(firstChangeId)]);
   const later = setup(nia, { messageId: thirdMessageId, changeId: thirdChangeId,

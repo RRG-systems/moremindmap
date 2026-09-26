@@ -2,6 +2,8 @@ import { createHash } from 'node:crypto';
 import { validateBundle } from './bundles.js';
 import { CANDIDATE_SCHEMA, REPORT_SCHEMA } from '../athleteAcademyV1/apa/schema.js';
 import { validateReport, selectMove } from '../athleteAcademyV1/apa/contract.js';
+import { APA_NARRATIVE_FIELDS, validateApaNarrativeCandidate,
+  verifyApaNarrativeProvenance, verifyApaNarrativeReceipt } from './apaNarrative.js';
 
 // This record lives INSIDE the existing scope-, athlete-, BOS- and baseline-APA-
 // bound v2 state envelope. It never replaces the approved source artifact.
@@ -12,7 +14,20 @@ const DATE = /^\d{4}-\d{2}-\d{2}$/u;
 const own = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
 const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 const clone = value => structuredClone(value);
-const ensure = (condition, code) => { if (!condition) throw new Error(code); };
+const ensure = (condition, code, path = null) => {
+  if (!condition) {
+    const error = new Error(code);
+    if (path !== null) error.validation_path = path;
+    throw error;
+  }
+};
+const checkedAt = (path, operation) => {
+  try { return operation(); }
+  catch (error) {
+    if (error instanceof Error && !error.validation_path) error.validation_path = path;
+    throw error;
+  }
+};
 const normalized = value => typeof value === 'string' ? value.trim().replace(/\s+/gu, ' ') : value;
 
 function canonical(value) {
@@ -28,7 +43,7 @@ export const inactiveCurrentApaSourceIds = (record = null, additionalSupersedes 
     ...additionalSupersedes])];
 export function assertActiveApaReferences(report, inactiveSourceIds = []) {
   const refs = new Set(sourceRefs(report));
-  ensure(inactiveSourceIds.every(id => !refs.has(id)), 'CURRENT_APA_SUPERSEDED_SOURCE_STILL_ACTIVE');
+  ensure(inactiveSourceIds.every(id => !refs.has(id)), 'CURRENT_APA_SUPERSEDED_SOURCE_STILL_ACTIVE', 'report');
   return true;
 }
 const validDate = value => {
@@ -68,7 +83,7 @@ function verifyConfirmation(confirmation, baseline) {
     && confirmation.confirmed === true && confirmation.assessment_date === baseline.confirmation.assessment_date
     && ['assessment_date', 'review_date', 'horizon_date'].every(key => validDate(confirmation[key]))
     && confirmation.review_date > confirmation.assessment_date
-    && confirmation.horizon_date >= confirmation.review_date, 'CURRENT_APA_CONFIRMATION_INVALID');
+    && confirmation.horizon_date >= confirmation.review_date, 'CURRENT_APA_CONFIRMATION_INVALID', 'confirmation');
 }
 
 function verifyArtifact(artifact, bundle, version) {
@@ -85,10 +100,60 @@ function verifyArtifact(artifact, bundle, version) {
     && same(artifact.bos_sources, bundle.apa.bos_sources), 'CURRENT_APA_SOURCES_CHANGED');
   ensure(matchesSchema(artifact.report, REPORT_SCHEMA), 'CURRENT_APA_REPORT_SCHEMA_INVALID');
   validateReport(artifact.report, artifact);
+  verifyApaNarrativeProvenance(artifact);
   const selected = selectMove(artifact.report);
   ensure(same({ status: artifact.status, move: artifact.move, receipt: artifact.receipt }, selected),
     'CURRENT_APA_MOVE_SELECTION_CHANGED');
   return artifact;
+}
+
+// Replay only the new companion-governed narrative surface from the sealed
+// baseline. Legacy publications froze these fields, so they have no invented
+// field-level citations. Before-values and provenance must match this replay,
+// not merely a caller-recomputed receipt hash.
+function verifyNarrativeHistory(bundle, record, artifact) {
+  const values = Object.fromEntries(APA_NARRATIVE_FIELDS.map(field => [field, clone(bundle.apa.report[field])]));
+  const provenance = verifyApaNarrativeProvenance(bundle.apa);
+  let previousContentHash = bundle.apa.artifact_sha256;
+  let governed = false;
+  const inactive = new Set();
+  for (const [index, receipt] of record.receipts.entries()) {
+    for (const id of receipt.supersedes || []) inactive.add(id);
+    const sources = artifact.sources.slice(0, bundle.apa.sources.length + index + 1);
+    governed ||= own(receipt, 'narrative_changes');
+    ensure(!governed || own(receipt, 'narrative_changes'),
+      'APA_NARRATIVE_PROVENANCE_INVALID', 'narrative_provenance');
+    if (governed || own(receipt, 'prior_version') || own(receipt, 'prior_artifact_sha256'))
+      ensure(receipt.prior_version === index && receipt.prior_artifact_sha256 === previousContentHash,
+        'CURRENT_APA_RECEIPT_TAMPERED');
+    verifyApaNarrativeReceipt(receipt, { sources, priorVersion: index,
+      priorArtifactSha256: previousContentHash, inactiveSourceIds: [...inactive] });
+    if (governed && receipt.supersedes?.length) {
+      const reviewed = new Set(receipt.narrative_changes.map(change => change.field));
+      for (const [fieldIndex, before] of provenance.fields.entries())
+        ensure((before.status !== 'BASELINE_UNCITED_AT_FIELD_LEVEL'
+            && !before.refs.some(id => inactive.has(id))) || reviewed.has(before.field),
+        'APA_NARRATIVE_PROVENANCE_INVALID', `narrative_provenance.fields.${fieldIndex}`);
+    }
+    for (const change of receipt.narrative_changes || []) {
+      const fieldIndex = APA_NARRATIVE_FIELDS.indexOf(change.field), before = provenance.fields[fieldIndex];
+      const uncited = before.status === 'BASELINE_UNCITED_AT_FIELD_LEVEL';
+      ensure(same(change.before, values[change.field])
+        && same(change.before_provenance, uncited ? null : before)
+        && same(change.before_refs, uncited ? null : before.refs),
+      'APA_NARRATIVE_PROVENANCE_INVALID', `narrative_provenance.fields.${fieldIndex}`);
+      values[change.field] = clone(change.after);
+      provenance.fields[fieldIndex] = { field: change.field, status: 'SOURCE_BOUND',
+        value_sha256: currentApaHash(change.after), refs: clone(change.after_refs),
+        source_id: change.source_id, source_message_id: change.source_message_id, version: receipt.version };
+    }
+    previousContentHash = receipt.content_hash;
+  }
+  ensure(!artifact.narrative_provenance || governed,
+    'APA_NARRATIVE_PROVENANCE_INVALID', 'narrative_provenance');
+  ensure(APA_NARRATIVE_FIELDS.every(field => same(values[field], artifact.report[field]))
+    && same(provenance, verifyApaNarrativeProvenance(artifact)),
+  'APA_NARRATIVE_PROVENANCE_INVALID', 'narrative_provenance');
 }
 
 export function currentApaView(bundle, record = null) {
@@ -123,6 +188,7 @@ export function currentApaView(bundle, record = null) {
       && source.at === receipt.at && same(source.supersedes, receipt.supersedes),
     'CURRENT_APA_RECEIPT_TAMPERED');
   }
+  verifyNarrativeHistory(bundle, record, artifact);
   return { artifact,
     baseline_hash: expected.baseline_hash, version: record.version, receipt: record.receipts.at(-1) };
 }
@@ -159,62 +225,64 @@ function sourceFromChange(change, state, artifact, bundle) {
 function materialDifferences(previous, next, source, inactiveSourceIds) {
   const changed = [];
   const inactive = new Set(inactiveSourceIds);
-  const frozen = (before, after) => ensure(same(before, after), 'CURRENT_APA_UNCITED_FIELD_CHANGED');
-  const cited = (path, before, after, refs, additionalRefs = null) => {
+  const frozen = (before, after, path) => ensure(same(before, after), 'CURRENT_APA_UNCITED_FIELD_CHANGED', path);
+  const cited = (path, before, after, refs, additionalRefs = null, diagnosticPath = path) => {
     if (same(normalized(before), normalized(after))) return;
     ensure(Array.isArray(refs) && refs.includes(source.id)
       && (additionalRefs === null || additionalRefs.includes(source.id)),
-    'CURRENT_APA_CHANGE_NOT_SOURCE_BOUND');
+    'CURRENT_APA_CHANGE_NOT_SOURCE_BOUND', diagnosticPath);
     changed.push({ path });
   };
-  const citations = (before, after) => {
+  const citations = (before, after, path) => {
     ensure(Array.isArray(before) && Array.isArray(after)
       && before.every(id => inactive.has(id) || after.includes(id))
       && after.every(id => before.includes(id) || id === source.id),
-    'CURRENT_APA_SOURCE_REFERENCES_CHANGED');
+    'CURRENT_APA_SOURCE_REFERENCES_CHANGED', path);
   };
-  // These visible fields have no per-claim citation slot in the locked APA
-  // schema. They cannot quietly change as a side effect of another cited edit.
-  frozen(previous.confirmation.priority, next.confirmation.priority);
-  frozen(previous.confirmation.review_date, next.confirmation.review_date);
-  frozen(previous.confirmation.horizon_date, next.confirmation.horizon_date);
-  for (const field of ['headline', 'opening', 'connection', 'main_obstacle', 'what_we_dont_know'])
-    frozen(previous.report[field], next.report[field]);
-  for (const domain of next.report.domains) {
+  // Date and priority agreement stays historical. Visible narrative fields
+  // are governed separately by the exact operation companion and provenance.
+  frozen(previous.confirmation.priority, next.confirmation.priority, 'confirmation.priority');
+  frozen(previous.confirmation.review_date, next.confirmation.review_date, 'confirmation.review_date');
+  frozen(previous.confirmation.horizon_date, next.confirmation.horizon_date, 'confirmation.horizon_date');
+  for (const [index, domain] of next.report.domains.entries()) {
     const prior = previous.report.domains.find(item => item.id === domain.id);
-    ensure(prior, 'CURRENT_APA_STRUCTURE_CHANGED');
-    citations(prior.refs, domain.refs);
-    frozen(prior.bos_refs, domain.bos_refs);
+    ensure(prior, 'CURRENT_APA_STRUCTURE_CHANGED', `report.domains.${index}`);
+    citations(prior.refs, domain.refs, `report.domains.${index}.refs`);
+    frozen(prior.bos_refs, domain.bos_refs, `report.domains.${index}.bos_refs`);
     cited(`confirmation.goals.${domain.id}`, previous.confirmation.goals[domain.id],
       next.confirmation.goals[domain.id], domain.refs);
     for (const field of ['goal', 'strength', 'gap', 'help', 'detail', 'bos_connection', 'unknowns'])
-      cited(`report.domains.${domain.id}.${field}`, prior[field], domain[field], domain.refs);
+      cited(`report.domains.${domain.id}.${field}`, prior[field], domain[field], domain.refs,
+        null, `report.domains.${index}.${field}`);
   }
-  for (const future of next.report.futures) {
+  for (const [index, future] of next.report.futures.entries()) {
     const prior = previous.report.futures.find(item => item.role === future.role);
-    ensure(prior, 'CURRENT_APA_STRUCTURE_CHANGED');
-    citations(prior.refs, future.refs);
-    frozen(prior.bos_refs, future.bos_refs);
+    ensure(prior, 'CURRENT_APA_STRUCTURE_CHANGED', `report.futures.${index}`);
+    citations(prior.refs, future.refs, `report.futures.${index}.refs`);
+    frozen(prior.bos_refs, future.bos_refs, `report.futures.${index}.bos_refs`);
     for (const field of ['headline', 'what', 'conditions', 'first_sign', 'details', 'sufficient_evidence'])
-      cited(`report.futures.${future.role}.${field}`, prior[field], future[field], future.refs);
+      cited(`report.futures.${future.role}.${field}`, prior[field], future[field], future.refs,
+        null, `report.futures.${index}.${field}`);
   }
   ensure(same(previous.report.candidates.map(item => item.candidate_id),
-    next.report.candidates.map(item => item.candidate_id)), 'CURRENT_APA_STRUCTURE_CHANGED');
+    next.report.candidates.map(item => item.candidate_id)), 'CURRENT_APA_STRUCTURE_CHANGED', 'report.candidates');
   for (const [index, candidate] of next.report.candidates.entries()) {
     const prior = previous.report.candidates[index];
-    citations(prior.refs, candidate.refs);
-    frozen(prior.bos_refs, candidate.bos_refs);
+    citations(prior.refs, candidate.refs, `report.candidates.${index}.refs`);
+    frozen(prior.bos_refs, candidate.bos_refs, `report.candidates.${index}.bos_refs`);
     for (const field of ['domain', 'action', 'why', 'when', 'who', 'action_signal', 'progress_signal',
       'review', 'review_schedule', 'stop_or_change', 'bos_fit', 'selection_signals'])
-      cited(`report.candidates.${candidate.candidate_id}.${field}`, prior[field], candidate[field], candidate.refs);
+      cited(`report.candidates.${candidate.candidate_id}.${field}`, prior[field], candidate[field], candidate.refs,
+        null, `report.candidates.${index}.${field}`);
     ensure(same(prior.gates.map(gate => gate.id), candidate.gates.map(gate => gate.id)),
-      'CURRENT_APA_STRUCTURE_CHANGED');
+      'CURRENT_APA_STRUCTURE_CHANGED', `report.candidates.${index}.gates`);
     for (const [gateIndex, gate] of candidate.gates.entries()) {
       const priorGate = prior.gates[gateIndex];
-      citations(priorGate.refs, gate.refs);
+      citations(priorGate.refs, gate.refs, `report.candidates.${index}.gates.${gateIndex}.refs`);
       for (const field of ['pass', 'reason'])
         cited(`report.candidates.${candidate.candidate_id}.gates.${gate.id}.${field}`,
-          priorGate[field], gate[field], candidate.refs, gate.refs);
+          priorGate[field], gate[field], candidate.refs, gate.refs,
+          `report.candidates.${index}.gates.${gateIndex}.${field}`);
     }
   }
   if (!same({ status: previous.status, candidate_id: previous.move?.candidate_id || null },
@@ -248,38 +316,45 @@ export function publishCurrentApa({ bundle, record = null, state, confirmedChang
     bundle, record, state, confirmedChange, expectedVersion,
   });
   ensure(object(candidate) && object(candidate.confirmation) && object(candidate.report),
-    'CURRENT_APA_CANDIDATE_INVALID');
+    'CURRENT_APA_CANDIDATE_INVALID', 'report');
   const confirmation = clone(candidate.confirmation), report = clone(candidate.report);
   verifyConfirmation(confirmation, bundle.apa);
-  ensure(matchesSchema(report, REPORT_SCHEMA), 'CURRENT_APA_REPORT_SCHEMA_INVALID');
-  ensure(same(report.coach_view, prior.artifact.report.coach_view), 'CURRENT_APA_COACH_VIEW_UNVERIFIED');
+  ensure(matchesSchema(report, REPORT_SCHEMA), 'CURRENT_APA_REPORT_SCHEMA_INVALID', 'report');
+  ensure(same(report.coach_view, prior.artifact.report.coach_view), 'CURRENT_APA_COACH_VIEW_UNVERIFIED', 'report.coach_view');
   const sources = [...clone(prior.artifact.sources), source];
   const packet = { confirmation, sources, bos_sources: bundle.apa.bos_sources };
-  validateReport(report, packet);
+  checkedAt('report', () => validateReport(report, packet));
   assertActiveApaReferences(report, inactiveSourceIds);
-  const selected = selectMove(report);
+  const selected = checkedAt('report.candidates', () => selectMove(report));
   const nextSurface = { confirmation, report, ...selected };
   const changes = materialDifferences(prior.artifact, nextSurface, source, inactiveSourceIds);
+  const version = prior.version + 1;
+  const narrative = validateApaNarrativeCandidate({ priorArtifact: prior.artifact, candidate,
+    sourceId: source.id, sourceMessageId: source.source_message_id, sourceVersion: version,
+    inactiveSourceIds, supersedes: confirmedChange.supersedes });
+  changes.push(...narrative.material_paths.map(path => ({ path })));
   if (!changes.length) return { record, changed: false, receipt: null };
   const anyNewReference = report.domains.some(item => item.refs.includes(source.id))
     || report.futures.some(item => item.refs.includes(source.id))
-    || report.candidates.some(item => item.refs.includes(source.id));
-  ensure(anyNewReference, 'CURRENT_APA_CHANGE_NOT_SOURCE_BOUND');
-  const version = prior.version + 1;
+    || report.candidates.some(item => item.refs.includes(source.id)) || narrative.changes.length > 0;
+  ensure(anyNewReference, 'CURRENT_APA_CHANGE_NOT_SOURCE_BOUND', 'report');
   const body = { version: bundle.apa.version, current_apa_contract: CURRENT_APA_CONTRACT,
     current_apa_version: version, synthetic: true, mm: bundle.person.mm,
     identity: clone(bundle.apa.identity), baseline_artifact_sha256: bundle.apa.artifact_sha256,
     bos_sha256: bundle.bos.artifact_sha256, source_sha256: currentApaHash({ confirmation, sources }),
     confirmation, sources, bos_sources: clone(bundle.apa.bos_sources),
-    existing_plan: clone(bundle.apa.existing_plan), report, ...selected,
+    existing_plan: clone(bundle.apa.existing_plan), report,
+    narrative_provenance: narrative.provenance, ...selected,
     created_at: confirmedChange.confirmed_at };
   const artifact = { ...body, artifact_sha256: currentApaHash(body) };
   verifyArtifact(artifact, bundle, version);
   const priorHash = prior.receipt?.receipt_hash || bundle.apa.artifact_sha256;
   const receiptBody = { version, prior_hash: priorHash, content_hash: artifact.artifact_sha256,
+    prior_version: prior.version, prior_artifact_sha256: prior.artifact.artifact_sha256,
     change_id: confirmedChange.id, source_id: source.id, source_message_id: source.source_message_id,
     kind: confirmedChange.kind, supersedes: [...confirmedChange.supersedes],
-    material_paths: changes.map(item => item.path), reason: confirmedChange.reason.trim(),
+    material_paths: [...new Set(changes.map(item => item.path))], narrative_changes: narrative.changes,
+    reason: confirmedChange.reason.trim(),
     at: confirmedChange.confirmed_at };
   const receipt = { ...receiptBody, receipt_hash: currentApaHash(receiptBody) };
   const next = { contract: CURRENT_APA_CONTRACT, binding: binding(bundle), version,

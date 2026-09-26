@@ -43,9 +43,18 @@ const coachOutput = { reply: 'A synthetic coaching response.', plan: null, plan_
 const sourceId = change => `APA:CURRENT:${change.id}`;
 const clone = value => structuredClone(value);
 
+function reviewedCorrectionNarratives(candidate, prior, change) {
+  if (change.kind !== 'correction') return;
+  candidate.narrative_updates = ['headline', 'opening', 'connection', 'main_obstacle', 'what_we_dont_know']
+    .map(field => ({ field, value: clone(candidate.report[field]),
+      refs: [...(prior.narrative_provenance?.fields.find(item => item.field === field)?.refs || [])
+        .filter(id => !change.supersedes.includes(id)), sourceId(change)] }));
+}
+
 function candidateFor({ bundle, record, confirmedChange }, material = true) {
   const prior = currentApaView(bundle, record).artifact;
   const candidate = { confirmation: clone(prior.confirmation), report: clone(prior.report) };
+  reviewedCorrectionNarratives(candidate, prior, confirmedChange);
   if (material) {
     const domain = candidate.report.domains.find(item => item.id === 'training');
     domain.gap = 'The athlete confirmed a changed practice constraint for the current week.';
@@ -58,7 +67,7 @@ function fixture(apaComposer = input => candidateFor(input), redis = new FakeRed
   const scopeId = `apa-store-integration:${randomUUID()}`;
   const store = createStore({ redis, bundles, scopeId,
     coach: async () => clone(coachOutput), apaComposer });
-  return { store, redis,
+  return { store, redis, scopeId,
     keys: slug => athleteConsultingV2Keys({ scopeId, slug, bundle: bundles[slug] }) };
 }
 
@@ -85,6 +94,77 @@ async function publishDraft(store, slug, prepared) {
   return store.act(slug, { action: 'publish_apa', id: prepared.apaDraft.id,
     hash: prepared.apaDraft.hash, revision: prepared.revision, requestId: randomUUID() });
 }
+
+test('whole-picture companion remains a private hash-bound draft across cold read until exact publication', async () => {
+  let calls = 0;
+  const { store, redis, scopeId, keys } = fixture(input => {
+    calls++;
+    const prior = currentApaView(input.bundle, input.record).artifact;
+    const candidate = { confirmation: clone(prior.confirmation), report: clone(prior.report) };
+    candidate.report.opening = 'The synthetic draft is submitted; Friday practice now fits the rehearsal week.';
+    candidate.report.what_we_dont_know = ['Whether the Friday cue helps.', 'Whether rehearsals keep the same timing.'];
+    candidate.narrative_updates = ['opening', 'what_we_dont_know'].map(field => ({
+      field, value: clone(candidate.report[field]), refs: [sourceId(input.confirmedChange)],
+    }));
+    return { candidate, changed: true };
+  });
+  const sourceMessageId = await savedMessage(store);
+  const before = await store.read('nia');
+  const body = updateBody(before, sourceMessageId);
+  const prepared = await store.act('nia', body);
+  assert.equal(calls, 1);
+  assert.equal(prepared.currentApa, null);
+  assert.equal(prepared.plan, before.plan);
+  const opening = prepared.apaDraft.previewRecord.receipts[0].narrative_changes
+    .find(change => change.field === 'opening');
+  assert.equal(opening.before, bundles.nia.apa.report.opening);
+  assert.equal(opening.after, 'The synthetic draft is submitted; Friday practice now fits the rehearsal week.');
+  assert.equal(opening.before_refs, null);
+  const stored = JSON.parse(redis.values.get(keys('nia').state)).state.apaDraft;
+  assert.equal(stored.candidate.narrative_updates[0].value, opening.after);
+  const cold = createStore({ redis, bundles, scopeId,
+    coach: async () => clone(coachOutput), apaComposer: () => { throw new Error('OFFLINE_COMPOSER_MUST_NOT_RUN'); } });
+  const restored = await cold.read('nia');
+  assert.equal(restored.apaDraft.hash, prepared.apaDraft.hash);
+  assert.equal(restored.currentApa, null);
+  await assert.rejects(() => publishDraft(cold, 'nia', { ...restored,
+    apaDraft: { ...restored.apaDraft, hash: '0'.repeat(64) } }), /CURRENT_APA_DRAFT_CHANGED/u);
+  assert.equal((await cold.read('nia')).currentApa, null);
+  const published = await publishDraft(cold, 'nia', await cold.read('nia'));
+  assert.equal(published.currentApa.artifact.report.opening, opening.after);
+  assert.deepEqual(published.currentApa.artifact.report.what_we_dont_know,
+    ['Whether the Friday cue helps.', 'Whether rehearsals keep the same timing.']);
+  assert.equal(published.currentApa.artifact.narrative_provenance.fields
+    .find(item => item.field === 'opening').status, 'SOURCE_BOUND');
+  assert.equal(published.plan, before.plan);
+  assert.equal(published.apaDraft, null);
+  assert.equal(currentApaView(bundles.nia, published.currentApa).version, 1);
+  assert.equal((await cold.read('sofia')).currentApa, null);
+  assert.equal(calls, 1);
+  assert.equal(bundles.nia.apa.report.opening, opening.before);
+});
+
+test('uncited whole-picture output fails once without staging or changing any saved APA', async () => {
+  let calls = 0;
+  const { store } = fixture(input => {
+    calls++;
+    const result = candidateFor(input);
+    result.candidate.report.opening = 'An unsupported new whole-picture explanation.';
+    // No typed narrative source companion: domain citation cannot authorize it.
+    return result;
+  });
+  const sourceMessageId = await savedMessage(store), before = await store.read('nia');
+  const body = updateBody(before, sourceMessageId);
+  const failed = await store.act('nia', body);
+  assert.equal(failed.currentApa, null);
+  assert.equal(failed.apaDraft, null);
+  assert.equal(failed.plan, before.plan);
+  assert.ok(failed.lastError);
+  assert.equal(calls, 1);
+  await store.act('nia', body);
+  assert.equal(calls, 1);
+  assert.equal((await store.read('nia')).currentApa, null);
+});
 
 test('pinned Nia material update prepares only, then exact athlete approval publishes a version', async () => {
   let composerCalls = 0;
@@ -244,6 +324,7 @@ test('an RSL correction cannot be cleared by an old or unrelated APA source', as
       : 'The athlete first reported Tuesday as the short practice.';
     domain.refs = domain.refs.filter(id => !confirmedChange.supersedes.includes(id));
     domain.refs.push(sourceId(confirmedChange));
+    reviewedCorrectionNarratives(candidate, prior, confirmedChange);
     return { candidate, changed: true };
   });
   const firstMessage = await savedMessage(store);

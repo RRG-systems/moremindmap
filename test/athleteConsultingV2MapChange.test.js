@@ -30,6 +30,14 @@ function publish(bundle, state, { messageId = firstMessage, changeId = firstChan
   domain.gap = gap;
   domain.refs = domain.refs.filter(id => !supersedes.includes(id));
   domain.refs.push(sourceId(changeId));
+  if (kind === 'correction') {
+    // The fixture explicitly reviews baseline summaries with unknown original
+    // field citations; production now refuses silently carrying them forward.
+    candidate.narrative_updates = ['headline', 'opening', 'connection', 'main_obstacle', 'what_we_dont_know']
+      .map(field => ({ field, value: clone(candidate.report[field]),
+        refs: [...(prior.artifact.narrative_provenance?.fields.find(item => item.field === field)?.refs || [])
+          .filter(id => !supersedes.includes(id)), sourceId(changeId)] }));
+  }
   decorateCandidate?.(candidate, sourceId(changeId));
   const result = publishCurrentApa({ bundle, record: state.currentApa, state,
     confirmedChange: { id: changeId, source_message_id: messageId,

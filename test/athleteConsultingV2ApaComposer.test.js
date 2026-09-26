@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { Buffer } from 'node:buffer';
 import { setImmediate } from 'node:timers';
 import test from 'node:test';
 import nia from '../server/athleteConsultingV2/fixtures/nia.json' with { type: 'json' };
@@ -6,8 +7,11 @@ import sofia from '../server/athleteConsultingV2/fixtures/sofia.json' with { typ
 import { REPORT_SCHEMA } from '../server/athleteAcademyV1/apa/schema.js';
 import {
   APA_COMPOSITION_POLICY, APA_COMPOSITION_SCHEMA, createApaComposer,
+  validateApaPublicationDryRun,
 } from '../server/athleteConsultingV2/apaComposer.js';
-import { currentApaView, publishCurrentApa } from '../server/athleteConsultingV2/currentApa.js';
+import { currentApaHash, currentApaView, publishCurrentApa } from '../server/athleteConsultingV2/currentApa.js';
+import { APA_DELTA_SCHEMA, apaDeltaBinding } from '../server/athleteConsultingV2/apaDelta.js';
+import { APA_NARRATIVE_FIELDS, NARRATIVE_UPDATE_SCHEMA } from '../server/athleteConsultingV2/apaNarrative.js';
 
 const clone = value => structuredClone(value);
 const messageId = '11111111-1111-4111-8111-111111111111';
@@ -31,7 +35,7 @@ function input(bundle = nia) {
       reason: 'The athlete confirmed a material change in current training reality.' } };
 }
 function candidate(bundle = nia) {
-  const value = { confirmation: clone(bundle.apa.confirmation), report: clone(bundle.apa.report) };
+  const value = { confirmation: clone(bundle.apa.confirmation), report: clone(bundle.apa.report), narrative_updates: [] };
   for (const item of value.report.candidates) item.review_schedule = null;
   value.report.domains[1].gap = 'Tuesday practice now leaves less time to rehearse calm passing choices.';
   value.report.domains[1].refs.push(sourceId);
@@ -54,13 +58,31 @@ function replaceRef(value, source, replacement) {
     else replaceRef(child, source, replacement);
   }
 }
-const response = (body = candidate(), changes = {}) => ({ model: 'gpt-5.6-sol', status: 'completed',
-  output_text: JSON.stringify(body), usage: { input_tokens: 10, output_tokens: 20 }, ...changes });
+function deltaFor(body = candidate(), submitted = input()) {
+  const prior = currentApaView(submitted.bundle, submitted.record);
+  const typed = (entity, kind) => {
+    const copy = clone(entity);
+    delete copy.bos_refs;
+    if (kind === 'candidates' && !Object.hasOwn(copy, 'review_schedule')) copy.review_schedule = null;
+    return copy;
+  };
+  const affected = kind => body.report[kind].filter((entity, index) =>
+    JSON.stringify(typed(entity, kind)) !== JSON.stringify(typed(prior.artifact.report[kind][index], kind)))
+    .map(entity => typed(entity, kind));
+  return { contract: 'athlete_current_apa_delta_v1',
+    binding: clone(apaDeltaBinding({ bundle: submitted.bundle, prior, confirmedChange: submitted.confirmedChange })),
+    domains: affected('domains'), futures: affected('futures'), candidates: affected('candidates'),
+    narratives: clone(body.narrative_updates || []) };
+}
+const response = (body = candidate(), changes = {}, submitted = input()) => ({ model: 'gpt-5.6-sol', status: 'completed',
+  output_text: JSON.stringify(body.contract ? body : deltaFor(body, submitted)),
+  usage: { input_tokens: 10, output_tokens: 20 }, ...changes });
 
 test('composer uses exact Youth APA report schema and stays private with no automatic publication', () => {
   assert.deepEqual(APA_COMPOSITION_SCHEMA.properties.report, REPORT_SCHEMA);
   assert.equal(APA_COMPOSITION_SCHEMA.additionalProperties, false);
-  assert.deepEqual(APA_COMPOSITION_SCHEMA.required, ['confirmation', 'report']);
+  assert.deepEqual(APA_COMPOSITION_SCHEMA.required, ['confirmation', 'report', 'narrative_updates']);
+  assert.deepEqual(APA_COMPOSITION_SCHEMA.properties.narrative_updates.items, NARRATIVE_UPDATE_SCHEMA);
   assert.equal(APA_COMPOSITION_POLICY.store, false);
   assert.equal(APA_COMPOSITION_POLICY.max_retries, 0);
   assert.equal(APA_COMPOSITION_POLICY.timeout_ms, 600000);
@@ -81,7 +103,8 @@ test('one synthetic confirmed message composes a source-bound private candidate,
       assert.equal(request.store, false);
       assert.equal(request.max_output_tokens, 30000);
       assert.equal(request.text.format.strict, true);
-      assert.deepEqual(request.text.format.schema, APA_COMPOSITION_SCHEMA);
+      assert.deepEqual(request.text.format.schema, APA_DELTA_SCHEMA);
+      assert.equal(request.text.format.name, 'athlete_current_apa_delta');
       assert.equal(options.maxRetries, 0);
       assert.equal(options.timeout, 600000);
       const packet = JSON.parse(request.input);
@@ -95,6 +118,7 @@ test('one synthetic confirmed message composes a source-bound private candidate,
       assert.deepEqual(packet.original_apa.sources, nia.apa.sources);
       assert.deepEqual(packet.accepted_bos, { reading: nia.bos.reading, evidence: nia.bos.evidence });
       assert.equal(packet.saved_athlete_confirmation.id, sourceId);
+      assert.deepEqual(packet.delta_binding, deltaFor(candidate(), submitted).binding);
       assert.match(packet.saved_athlete_confirmation.text, /Training now happens on Tuesdays/u);
       assert.equal(request.input.includes('Private coach observation'), false);
       assert.equal(request.input.includes('Another unrelated conversation turn'), false);
@@ -112,7 +136,24 @@ test('one synthetic confirmed message composes a source-bound private candidate,
   assert.ok(result.receipt.material_paths.includes('report.futures.current_course.conditions'));
   assert.deepEqual(result.candidate.report.coach_view, nia.apa.report.coach_view);
   assert.equal(result.candidate.report.candidates.every(item => !Object.hasOwn(item, 'review_schedule')), true);
-  assert.equal(events[1].response.output_text.includes('review_schedule'), true);
+  assert.equal(Object.hasOwn(JSON.parse(events[1].response.output_text), 'report'), false);
+  assert.deepEqual(result.receipt.delta_receipt.targeted_entities.domains, ['training']);
+  assert.deepEqual(result.receipt.delta_receipt.targeted_entities.futures, ['current_course']);
+  assert.deepEqual(result.receipt.delta_receipt.targeted_entities.candidates, []);
+  assert.equal(result.receipt.input_chars, events[0].request.input.length);
+  assert.equal(result.receipt.input_bytes, Buffer.byteLength(events[0].request.input));
+  assert.equal(result.receipt.output_chars, events[1].response.output_text.length);
+  assert.equal(result.receipt.output_bytes, Buffer.byteLength(events[1].response.output_text));
+  assert.equal(result.receipt.delta_sha256, currentApaHash(JSON.parse(events[1].response.output_text)));
+  assert.equal(result.receipt.reconstruction_receipt_sha256, currentApaHash(result.receipt.delta_receipt));
+  for (const field of ['before_sha256','after_sha256','reconstructed_candidate_sha256','candidate_sha256'])
+    assert.match(result.receipt[field], /^[a-f0-9]{64}$/u);
+  assert.deepEqual(result.candidate.confirmation, nia.apa.confirmation);
+  assert.deepEqual(result.candidate.report.domains[0], nia.apa.report.domains[0]);
+  assert.deepEqual(result.candidate.report.candidates, nia.apa.report.candidates);
+  const expected = candidate();
+  for (const item of expected.report.candidates) delete item.review_schedule;
+  assert.deepEqual(result.candidate, expected);
   assert.deepEqual(submitted.state, beforeState);
   assert.deepEqual(nia.apa, beforeApa);
   assert.equal(currentApaView(nia).version, 0);
@@ -144,9 +185,10 @@ test('a published current APA remains complete and distinct from the retained or
       assert.equal(Object.hasOwn(packet.current_apa, 'same_as_original_apa'), false);
       assert.deepEqual(packet.current_apa.report, published.record.artifact.report);
       assert.deepEqual(packet.current_apa.sources, published.record.artifact.sources);
+      assert.deepEqual(packet.current_apa.narrative_provenance, published.record.artifact.narrative_provenance);
       assert.deepEqual(packet.original_apa.report, nia.apa.report);
       assert.deepEqual(packet.accepted_bos, { reading: nia.bos.reading, evidence: nia.bos.evidence });
-      return response(body);
+      return response(body, {}, submitted);
     } });
   const result = await composer(submitted);
   assert.equal(calls, 1);
@@ -171,18 +213,19 @@ test('invalid real/cross-athlete/unconfirmed/coach source fails before any provi
   assert.equal(calls, 0);
 });
 
-test('invalid coach-view rewrite and missing source citation fail after preserving raw response', async (context) => {
+test('full-report coach-view rewrite and missing source citation fail after preserving raw response', async (context) => {
   const changedCoach = candidate();
   changedCoach.report.coach_view.summary = 'Coach now agrees to the plan.';
   const missingRef = candidate();
   missingRef.report.domains[1].refs = missingRef.report.domains[1].refs.filter(id => id !== sourceId);
   for (const [name, body, code] of [
-    ['coach view', changedCoach, 'APA_COMPOSITION_COACH_VIEW_CHANGED'],
+    ['coach view', changedCoach, 'APA_COMPOSITION_RESPONSE_INVALID'],
     ['missing citation', missingRef, 'APA_COMPOSITION_CANDIDATE_INVALID'],
   ]) await context.test(name, async () => {
     const events = []; let calls = 0;
     const composer = createApaComposer({ env: {}, evidenceSink: async event => { events.push(event); },
-      transport: async () => { calls++; return response(body); } });
+      transport: async () => { calls++; return name === 'coach view'
+        ? response(body, { output_text: JSON.stringify(body) }) : response(body); } });
     await assert.rejects(composer(input()), { message: code });
     assert.equal(calls, 1);
     assert.deepEqual(events.map(event => event.kind), ['request', 'response', 'failure']);
@@ -205,6 +248,8 @@ test('honest no-material-change result is a validated receipt, not a failure or 
   assert.equal(result.receipt.changed, false);
   assert.deepEqual(result.receipt.material_paths, []);
   assert.equal(result.receipt.preview_content_hash, nia.apa.artifact_sha256);
+  const emitted = JSON.parse(events[1].response.output_text);
+  assert.deepEqual([emitted.domains, emitted.futures, emitted.candidates], [[], [], []]);
   assert.equal(result.candidate.report.candidates.every(item => !Object.hasOwn(item, 'review_schedule')), true);
   assert.equal(currentApaView(nia).version, 0);
 });
@@ -220,9 +265,11 @@ test('correction of a currently cited athlete source composes only after replaci
   }
   revised.report.domains[1].gap = 'Thursday is the short practice; Tuesday is now a rest day.';
   revised.report.futures[0].conditions = 'If Thursday practice stays short, Nia may need a concise passing-choice cue.';
+  revised.narrative_updates = APA_NARRATIVE_FIELDS.map(field => ({ field,
+    value: clone(revised.report[field]), refs: [sourceId] }));
   const events = []; let calls = 0;
   const composer = createApaComposer({ env: {}, evidenceSink: async event => { events.push(event); },
-    transport: async () => { calls++; return response(revised); } });
+    transport: async () => { calls++; return response(revised, {}, confirmed); } });
   const result = await composer(confirmed);
   assert.equal(calls, 1);
   assert.equal(result.changed, true);
@@ -282,14 +329,69 @@ test('provider failure is sanitized, recorded and never retried', async () => {
   assert.doesNotMatch(JSON.stringify(events), /private provider detail/u);
 });
 
-test('strict raw output is required even though legacy null review schedules normalize afterward', async () => {
-  const missingStrictField = candidate();
-  delete missingStrictField.report.candidates[0].review_schedule;
+test('changed entities require every strict field even though legacy null schedules normalize afterward', async () => {
+  const missingStrictField = deltaFor(candidate());
+  const item = clone(nia.apa.report.candidates[0]);
+  delete item.bos_refs;
+  item.action = 'Use one short cue before the Thursday passing drill.';
+  item.refs.push(sourceId);
+  missingStrictField.candidates.push(item);
   const events = [];
   const composer = createApaComposer({ env: {}, evidenceSink: async event => { events.push(event); },
     transport: async () => response(missingStrictField) });
   await assert.rejects(composer(input()), { message: 'APA_COMPOSITION_RESPONSE_INVALID' });
   assert.deepEqual(events.map(event => event.kind), ['request', 'response', 'failure']);
+});
+
+test('typed delta rejects binding drift and generic patches without retry or public diagnostic leakage', async (context) => {
+  for (const [name, change, stage] of [
+    ['other athlete', delta => { delta.binding.athlete_slug = 'sofia'; }, 'reconstruction'],
+    ['stale version', delta => { delta.binding.current_apa_version = 1; }, 'reconstruction'],
+    ['generic patch', delta => { delta.patches = [{ path: 'report.opening', value: 'Invented' }]; }, 'delta_schema'],
+    ['model winner', delta => { delta.move = { selection: 'M1' }; }, 'delta_schema'],
+  ]) await context.test(name, async () => {
+    const events = []; let calls = 0;
+    const delta = deltaFor(); change(delta);
+    const composer = createApaComposer({ env: {}, evidenceSink: async event => { events.push(event); },
+      transport: async () => { calls++; return response(delta); } });
+    await assert.rejects(composer(input()), { message: stage === 'delta_schema'
+      ? 'APA_COMPOSITION_RESPONSE_INVALID' : 'APA_COMPOSITION_CANDIDATE_INVALID' });
+    assert.equal(calls, 1);
+    assert.deepEqual(events.map(event => event.kind), ['request', 'response', 'failure']);
+    assert.equal(events.at(-1).stage, stage);
+    assert.ok(Object.hasOwn(events.at(-1), 'validator_code'));
+    assert.ok(Object.hasOwn(events.at(-1), 'validator_path'));
+  });
+});
+
+test('reconstruction rejection retains content-free validator cause while public failure stays generic', async () => {
+  const body = candidate();
+  body.report.domains[1].help = Array.from({ length: 150 }, () => 'practice').join(' ');
+  const events = []; let calls = 0;
+  const composer = createApaComposer({ env: {}, evidenceSink: async event => { events.push(event); },
+    transport: async () => { calls++; return response(body); } });
+  await assert.rejects(composer(input()), { message: 'APA_COMPOSITION_CANDIDATE_INVALID' });
+  assert.equal(calls, 1);
+  assert.deepEqual(events.map(event => event.kind), ['request', 'response', 'failure']);
+  const failure = events.at(-1);
+  assert.equal(failure.code, 'APA_COMPOSITION_CANDIDATE_INVALID');
+  assert.equal(failure.validator_code, 'FIRST_LAYER_TOO_LONG');
+  assert.equal(failure.validator_path, 'report');
+  assert.equal(failure.stage, 'reconstruction');
+  assert.equal(failure.output_chars, events[1].response.output_text.length);
+});
+
+test('full publication dry-run wrapper captures exact safe cause without changing generic thrown failure', () => {
+  const body = candidate();
+  for (const item of body.report.candidates) delete item.review_schedule;
+  body.report.domains[1].help = Array.from({ length: 150 }, () => 'practice').join(' ');
+  assert.throws(() => validateApaPublicationDryRun({ ...input(), candidate: body }), error => {
+    assert.equal(error.message, 'APA_COMPOSITION_CANDIDATE_INVALID');
+    assert.deepEqual(error.diagnostic, { validator_code: 'FIRST_LAYER_TOO_LONG',
+      validator_path: 'report', stage: 'publication_dry_run' });
+    return true;
+  });
+  assert.equal(currentApaView(nia).version, 0);
 });
 
 test('a private evidence failure blocks provider or candidate delivery at each boundary', async (context) => {
@@ -304,4 +406,64 @@ test('a private evidence failure blocks provider or candidate delivery at each b
     assert.equal(calls, failedKind === 'request' ? 0 : 1);
     assert.equal(events.at(-1), 'failure');
   });
+});
+
+test('summary-only typed composition is private, source-bound and does not manufacture domain changes', async () => {
+  const submitted = input(), prior = currentApaView(nia);
+  const delta = { contract: 'athlete_current_apa_delta_v1',
+    binding: clone(apaDeltaBinding({ bundle: nia, prior, confirmedChange: submitted.confirmedChange })),
+    domains: [], futures: [], candidates: [],
+    narratives: [{ field: 'headline', value: 'One calm cue within a shorter Thursday practice', refs: [sourceId] },
+      { field: 'what_we_dont_know', value: ['Whether the shorter practice leaves room for the cue.'], refs: [sourceId] }] };
+  const events = []; let calls = 0;
+  const compose = createApaComposer({ env: {}, evidenceSink: async event => events.push(event),
+    transport: async () => { calls++; return response(delta); } });
+  const result = await compose(submitted);
+  assert.equal(calls, 1); assert.equal(result.changed, true); assert.equal(result.publication_performed, false);
+  assert.deepEqual(result.candidate.narrative_updates, delta.narratives);
+  assert.deepEqual(result.candidate.report.domains, nia.apa.report.domains);
+  assert.deepEqual(result.receipt.delta_receipt.targeted_entities.narratives, ['headline', 'what_we_dont_know']);
+  assert.deepEqual(result.receipt.material_paths, ['report.headline', 'narrative_provenance.headline',
+    'report.what_we_dont_know', 'narrative_provenance.what_we_dont_know']);
+  assert.equal(JSON.stringify(result.receipt.delta_receipt).includes(delta.narratives[0].value), false);
+  const published = publishCurrentApa({ ...submitted, candidate: result.candidate });
+  assert.equal(published.record.artifact.artifact_sha256, result.receipt.preview_content_hash);
+  assert.equal(currentApaView(nia).version, 0);
+});
+
+test('latest narrative provenance remains in complete next-composition input without invented baseline refs', async () => {
+  const first = input(), firstCandidate = candidate();
+  for (const item of firstCandidate.report.candidates) delete item.review_schedule;
+  firstCandidate.narrative_updates = [{ field: 'opening', value: nia.apa.report.opening, refs: [sourceId] }];
+  const published = publishCurrentApa({ ...first, candidate: firstCandidate });
+  const submitted = input(); submitted.record = published.record; submitted.expectedVersion = 1;
+  submitted.state.messages[1].id = '33333333-3333-4333-8333-333333333333';
+  submitted.confirmedChange.id = '44444444-4444-4444-8444-444444444444';
+  submitted.confirmedChange.source_message_id = submitted.state.messages[1].id;
+  const unchanged = { confirmation: clone(published.record.artifact.confirmation),
+    report: clone(published.record.artifact.report), narrative_updates: [] };
+  const compose = createApaComposer({ env: {}, evidenceSink: async () => {}, transport: async request => {
+    const packet = JSON.parse(request.input);
+    assert.deepEqual(packet.current_apa.narrative_provenance, published.record.artifact.narrative_provenance);
+    assert.equal(packet.current_apa.narrative_provenance.fields[1].source_id, sourceId);
+    assert.equal(Object.hasOwn(packet.original_apa, 'narrative_provenance'), false);
+    assert.deepEqual(packet.original_apa.sources, nia.apa.sources);
+    return response(unchanged, {}, submitted);
+  } });
+  assert.equal((await compose(submitted)).changed, false);
+});
+
+test('legacy-unknown correction without explicit whole-summary review fails once with safe diagnostic only', async () => {
+  const submitted = correctionInput(), revised = candidate();
+  replaceRef(revised.report, 'A06', sourceId);
+  for (const item of revised.report.candidates)
+    if (item.gates.some(gate => gate.refs.includes(sourceId))) item.refs = [...new Set([...item.refs, sourceId])];
+  const events = []; let calls = 0;
+  const compose = createApaComposer({ env: {}, evidenceSink: async event => events.push(event),
+    transport: async () => { calls++; return response(revised, {}, submitted); } });
+  await assert.rejects(compose(submitted), { message: 'APA_COMPOSITION_CANDIDATE_INVALID' });
+  assert.equal(calls, 1); assert.deepEqual(events.map(event => event.kind), ['request', 'response', 'failure']);
+  assert.equal(events.at(-1).validator_code, 'APA_NARRATIVE_CORRECTION_REVIEW_REQUIRED');
+  assert.equal(events.at(-1).validator_path, 'report.headline');
+  assert.equal(events.at(-1).stage, 'reconstruction');
 });

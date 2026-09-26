@@ -7,6 +7,7 @@ import './base.css';
 import './athlete.css';
 import './youth.css';
 import {api} from '../transport.js';
+import ApaNarrativeChanges from '../ApaNarrativeChanges.jsx';
 
 // The protected report keeps its five-box styling. The bundle supplies the
 // immutable original; authenticated same-athlete state supplies the current APA.
@@ -85,12 +86,15 @@ export default function ApprovedApa(){
   {(reading.availableCurrentVersion>0||reading.preview||reading.needsReview)&&<section className="panel apa-connection" aria-label="APA reading version">
    <p className="eyebrow green">{reading.showPreview?`PROPOSED UPDATE · VERSION ${reading.version} · NOT CURRENT`:reading.showOriginal?'ORIGINAL SAVED APA':reading.needsReview?'PREVIOUS APA · REVIEW NEEDED':reading.availableCurrentVersion>0?`CURRENT APA · VERSION ${reading.availableCurrentVersion}`:'CURRENT APA · ORIGINAL READING'}</p>
    <p>{reading.showPreview?'This is a proposed update for your review. It is not your current APA and has not been published. Your accepted plan is separate.':reading.showOriginal?'This is the preserved original assessment. The saved reading remains available beside it.':reading.needsReview?'A correction or retraction has changed the evidence. This earlier APA is historical until the athlete reviews and publishes an updated reading.':reading.availableCurrentVersion>0?`Updated from an athlete-confirmed change. ${reading.receipt.reason} The original assessment remains saved.`:'Your original assessment is still the current APA. A proposed update is available for review but has not been published.'}</p>
+   {!reading.showOriginal&&<p>Original assessment dates are preserved, not newly agreed deadlines. Your chosen plan has its own review timing.</p>}
    <div className="actions" role="group" aria-label="Choose APA reading">
     <button type="button" aria-pressed={!reading.showOriginal&&!reading.showPreview} onClick={()=>setReadingChoice('current')}>{reading.needsReview?'Previous reading · review needed':'Current reading'}</button>
     <button type="button" aria-pressed={reading.showOriginal} onClick={()=>setReadingChoice('original')}>Original saved APA</button>
     {reading.preview&&<button type="button" aria-pressed={reading.showPreview} onClick={()=>setReadingChoice('preview')}>Proposed update · not current</button>}
    </div>
   </section>}
+  {!reading.showOriginal&&<ApaNarrativeChanges receipt={reading.receipt}
+   proposed={reading.showPreview} historical={reading.needsReview&&!reading.showPreview}/>}
   <BusinessTwinApp key={slug} onContextChange={shareBox} viewModel={project(a,{version:reading.version,receipt:reading.receipt,
    acceptedPlan:reading.acceptedPlan,showOriginal:reading.showOriginal,showPreview:reading.showPreview,
    needsReview:reading.needsReview})} pageComponent={ReportPage}

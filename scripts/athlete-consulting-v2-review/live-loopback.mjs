@@ -14,7 +14,7 @@ import OpenAI from 'openai';
 import { createCoach } from '../../server/athleteConsultingV2/coach.js';
 import { createAthleteVisualComposer } from '../../server/athleteConsultingV2/visual.js';
 import { createApaComposer } from '../../server/athleteConsultingV2/apaComposer.js';
-import { safeDiagnostics } from './safe-diagnostics.mjs';
+import { safeDiagnostics, safeApaMetadata } from './safe-diagnostics.mjs';
 import { forkSyntheticRun } from './fork-synthetic-run.mjs';
 
 const root = resolve(import.meta.dirname, '../..');
@@ -182,7 +182,8 @@ function evidenceSinkFor(runId) {
       model: typeof event.model === 'string' ? event.model
         : typeof event.response?.model === 'string' ? event.response.model
           : typeof event.request?.model === 'string' ? event.request.model : null,
-      usage: safeUsage(event.usage || event.response?.usage), ...safeDiagnostics(event) };
+      usage: safeUsage(event.usage || event.response?.usage), ...safeDiagnostics(event),
+      ...safeApaMetadata(event) };
     const key = `qa:athlete-flagship:${runId}:evidence:${event.id}:${event.kind}`;
     if (await redis.set(key, JSON.stringify(record), 'NX') !== 'OK') {
       throw new Error('ATHLETE_QA_EVIDENCE_DUPLICATE');

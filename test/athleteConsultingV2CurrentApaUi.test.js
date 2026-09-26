@@ -193,6 +193,8 @@ test('evidence drawer distinguishes a confirmed correction from its superseded s
   candidate.report.futures[0].headline = 'Thursday offers the shorter cue';
   candidate.report.futures[0].refs = candidate.report.futures[0].refs.filter(id => id !== firstSource);
   candidate.report.futures[0].refs.push(nextSource);
+  candidate.narrative_updates = ['headline', 'opening', 'connection', 'main_obstacle', 'what_we_dont_know']
+    .map(field => ({ field, value: clone(candidate.report[field]), refs: [nextSource] }));
   const second = publishCurrentApa({ bundle: nia, state, record: state.currentApa,
     confirmedChange: { id: nextChangeId, source_message_id: nextMessageId,
       athlete_slug: 'nia', mm: nia.person.mm, kind: 'correction', supersedes: [firstSource],

@@ -10,7 +10,10 @@ const DOMAIN_FIELDS = ['goal', 'strength', 'gap', 'help', 'detail', 'bos_connect
 const FUTURE_FIELDS = ['headline', 'what', 'conditions', 'first_sign', 'details', 'sufficient_evidence'];
 const CANDIDATE_FIELDS = ['domain', 'action', 'why', 'when', 'who', 'action_signal',
   'progress_signal', 'review', 'review_schedule', 'stop_or_change', 'bos_fit', 'selection_signals'];
-const REPORT_FIELDS = ['connection', 'main_obstacle', 'what_we_dont_know'];
+const REPORT_FIELDS = ['headline', 'opening', 'connection', 'main_obstacle', 'what_we_dont_know'];
+const NEW_SUMMARY_FIELDS = ['headline', 'opening'];
+const summaryLabel = { headline: 'APA heading', opening: 'Your whole picture',
+  connection: 'How it connects', main_obstacle: 'Main obstacle', what_we_dont_know: 'What is still unknown' };
 const UUID = /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/iu;
 const ensure = (condition, code) => { if (!condition) throw new Error(code); };
 const clone = value => structuredClone(value);
@@ -64,6 +67,14 @@ function materialFields(artifact) {
         fields[`report.candidates.${candidate.candidate_id}.gates.${gate.id}.${field}`] = clone(gate[field]);
   for (const field of REPORT_FIELDS)
     fields[`report.${field}`] = clone(artifact.report[field]);
+  for (const field of REPORT_FIELDS) {
+    const provenance = artifact.narrative_provenance?.fields?.find(item => item.field === field);
+    fields[`narrative_provenance.${field}`] = provenance ? clone(provenance) : {
+      field, status: 'BASELINE_UNCITED_AT_FIELD_LEVEL',
+      value_sha256: currentApaHash(artifact.report[field]), refs: [],
+      source_id: null, source_message_id: null, version: null,
+    };
+  }
   return { fields, candidate_ids: artifact.report.candidates.map(item => item.candidate_id) };
 }
 
@@ -143,6 +154,8 @@ function display(value, present) {
 function label(path) {
   if (path === 'move.selection') return 'Your One Move';
   const parts = path.split('.');
+  if (parts[0] === 'narrative_provenance') return `${summaryLabel[parts[1]]} · evidence`;
+  if (parts[0] === 'report' && Object.hasOwn(summaryLabel, parts[1])) return summaryLabel[parts[1]];
   if (parts[0] === 'confirmation' && parts[1] === 'goals')
     return `${parts[2]} goal`;
   if (parts[0] === 'confirmation') return `APA ${parts[1].replaceAll('_', ' ')}`;
@@ -150,6 +163,42 @@ function label(path) {
   if (parts[1] === 'futures') return `${parts[2].replaceAll('_', ' ')} future · ${parts[3].replaceAll('_', ' ')}`;
   if (parts[1] === 'candidates') return `${parts[2]} option · ${parts[3].replaceAll('_', ' ')}`;
   return `APA ${parts.slice(1).join(' ').replaceAll('_', ' ')}`;
+}
+
+function provenanceDisplay(value, present) {
+  if (!present) return 'Field-level evidence was not captured';
+  return value?.status === 'SOURCE_BOUND'
+    ? `Athlete-reviewed evidence · version ${value.version}`
+    : 'Original baseline · no field-level citation';
+}
+
+// Old session snapshots did not capture heading/opening or narrative evidence.
+// Recover only what exact immutable custody or a verified first change receipt
+// proves; otherwise explicitly omit the comparison, never invent a prior value.
+export function compareSessionMapSummaries(bundle, start, now, receipts) {
+  const before = clone(start), current = clone(now), limits = [];
+  const baseline = start.version === 0 && start.artifact_hash === bundle.apa.artifact_sha256;
+  for (const field of REPORT_FIELDS) {
+    const valuePath = `report.${field}`, evidencePath = `narrative_provenance.${field}`;
+    const linkedReceipt = receipts.find(receipt => receipt.prior_version === start.version
+      && receipt.version === start.version + 1
+      && receipt.prior_artifact_sha256 === start.artifact_hash);
+    const firstChange = linkedReceipt?.narrative_changes?.find(change => change.field === field);
+    if (!Object.hasOwn(before.fields, valuePath) && NEW_SUMMARY_FIELDS.includes(field)) {
+      if (baseline) before.fields[valuePath] = clone(bundle.apa.report[field]);
+      else if (firstChange) before.fields[valuePath] = clone(firstChange.before);
+      else { delete current.fields[valuePath]; limits.push(valuePath); }
+    }
+    if (!Object.hasOwn(before.fields, evidencePath)) {
+      if (baseline || firstChange?.prior_provenance === 'BASELINE_FIELD_UNCITED') {
+        before.fields[evidencePath] = { field, status: 'BASELINE_UNCITED_AT_FIELD_LEVEL',
+          value_sha256: currentApaHash(before.fields[valuePath] ?? bundle.apa.report[field]),
+          refs: [], source_id: null, source_message_id: null, version: null };
+      } else if (firstChange?.before_provenance) before.fields[evidencePath] = clone(firstChange.before_provenance);
+      else { delete current.fields[evidencePath]; limits.push(evidencePath); }
+    }
+  }
+  return { before, now: current, limits };
 }
 
 function changedFields(before, now, receipts) {
@@ -169,11 +218,27 @@ function changedFields(before, now, receipts) {
     if (beforePresent === nowPresent && same(oldValue, newValue)) continue;
     const lineage = supported.get(path);
     ensure(lineage?.length, 'MAP_CHANGE_UNRECEIPTED_FIELD');
+    const narrativeField = path.startsWith('narrative_provenance.') ? path.split('.')[1]
+      : path.startsWith('report.') && Object.hasOwn(summaryLabel, path.split('.')[1]) ? path.split('.')[1] : null;
+    const beforeEvidence = narrativeField ? before.fields[`narrative_provenance.${narrativeField}`] : null;
+    const afterEvidence = narrativeField ? now.fields[`narrative_provenance.${narrativeField}`] : null;
     entries.push({ path, label: label(path),
       before: path === 'move.selection' ? before.move_copy?.action || 'No One Move suggestion'
+        : path.startsWith('narrative_provenance.') ? provenanceDisplay(oldValue, beforePresent)
         : display(oldValue, beforePresent),
       now: path === 'move.selection' ? now.move_copy?.action || 'No One Move suggestion'
+        : path.startsWith('narrative_provenance.') ? provenanceDisplay(newValue, nowPresent)
         : display(newValue, nowPresent),
+      ...(narrativeField && afterEvidence ? { narrative_evidence: {
+        before_refs: beforeEvidence?.status === 'SOURCE_BOUND' ? clone(beforeEvidence.refs) : null,
+        after_refs: clone(afterEvidence.refs),
+        prior_provenance: beforeEvidence?.status === 'SOURCE_BOUND' ? 'SOURCE_BOUND'
+          : beforeEvidence ? 'BASELINE_FIELD_UNCITED' : 'START_FIELD_EVIDENCE_UNAVAILABLE',
+        value_changed: !same(before.fields[`report.${narrativeField}`], now.fields[`report.${narrativeField}`]),
+        reference_changed: !beforeEvidence || beforeEvidence.status !== afterEvidence.status
+          || !same(beforeEvidence.refs, afterEvidence.refs),
+        source_id: afterEvidence.source_id, source_message_id: afterEvidence.source_message_id,
+      } } : {}),
       ...(path === 'move.selection' ? { before_rationale: before.move_copy?.why || null,
         now_rationale: now.move_copy?.why || null,
         selection: { before: clone(oldValue), now: clone(newValue) } } : {}),
@@ -221,7 +286,7 @@ function representativeEntries(entries, limit = 6) {
     if (entry) selected.push(entry);
   };
   pick(path => path.startsWith('confirmation.') || path.startsWith('report.domains.')
-    || ['report.connection', 'report.main_obstacle', 'report.what_we_dont_know'].includes(path));
+    || REPORT_FIELDS.some(field => path === `report.${field}`));
   pick(path => path.startsWith('report.futures.'));
   pick(path => path === 'move.selection');
   pick(path => path.startsWith('report.candidates.'));
@@ -244,7 +309,8 @@ function pendingApa(bundle, state, current) {
     proposed_version: preview.version, artifact_hash: preview.artifact.artifact_sha256,
     receipt_hash: preview.receipt.receipt_hash, source_id: preview.receipt.source_id,
     source_message_id: preview.receipt.source_message_id,
-    material_paths: clone(preview.receipt.material_paths), reason: preview.receipt.reason };
+    material_paths: clone(preview.receipt.material_paths), reason: preview.receipt.reason,
+    narrative_changes: clone(preview.receipt.narrative_changes || []) };
 }
 
 export function buildSessionMapChange({ bundle, state, startMap }) {
@@ -264,7 +330,8 @@ export function buildSessionMapChange({ bundle, state, startMap }) {
   } else ensure(startMap.apa.artifact_hash === bundle.apa.artifact_sha256,
     'MAP_CHANGE_LINEAGE_CHANGED');
   const newReceipts = (state.currentApa?.receipts || []).slice(startMap.apa.version);
-  const entries = changedFields(startMap.apa, nowApa, newReceipts);
+  const comparison = compareSessionMapSummaries(bundle, startMap.apa, nowApa, newReceipts);
+  const entries = changedFields(comparison.before, comparison.now, newReceipts);
   const versionAdvanced = current.version > startMap.apa.version;
   const apaChanged = entries.length > 0;
   const planChanged = !same(startMap.plan, nowPlan);
@@ -318,6 +385,9 @@ export function buildSessionMapChange({ bundle, state, startMap }) {
     ...(entries.length > representatives.length ? [{ label: 'More map details',
       value: `${entries.length - representatives.length} other saved details changed`,
       note: 'These are highlights. See Your Sport for the full current report.' }] : []),
+    ...(comparison.limits.length ? [{ label: 'Earlier comparison limit',
+      value: 'Some summary evidence was not captured at session start',
+      note: 'No earlier summary value or field citation has been invented.' }] : []),
   ];
   const result = { contract: SESSION_MAP_CHANGE_CONTRACT,
     binding: { ...clone(startMap.binding), session_id: startMap.session_id },
@@ -328,11 +398,12 @@ export function buildSessionMapChange({ bundle, state, startMap }) {
       needs_review: startMap.apa_needs_review },
     now: { version: nowApa.version, artifact_hash: nowApa.artifact_hash,
       needs_review: needsReview },
-    entries, receipts: newReceipts.map(receipt => ({ version: receipt.version,
+    entries, comparison_limits: comparison.limits, receipts: newReceipts.map(receipt => ({ version: receipt.version,
       receipt_hash: receipt.receipt_hash, prior_hash: receipt.prior_hash,
       content_hash: receipt.content_hash, source_id: receipt.source_id,
       source_message_id: receipt.source_message_id, reason: receipt.reason,
-      material_paths: clone(receipt.material_paths), at: receipt.at })) },
+      material_paths: clone(receipt.material_paths),
+      narrative_changes: clone(receipt.narrative_changes || []), at: receipt.at })) },
     plan: { status: planChanged ? nowPlan ? 'ACCEPTED_CHANGE' : 'REMOVED' : 'UNCHANGED',
       before: clone(startMap.plan), now: clone(nowPlan),
       binding: { before: startMap.plan ? { id: startMap.plan.id, hash: startMap.plan.hash } : null,
