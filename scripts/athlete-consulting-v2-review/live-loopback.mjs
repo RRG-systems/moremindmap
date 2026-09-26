@@ -14,19 +14,25 @@ import OpenAI from 'openai';
 import { createCoach } from '../../server/athleteConsultingV2/coach.js';
 import { createAthleteVisualComposer } from '../../server/athleteConsultingV2/visual.js';
 import { createApaComposer } from '../../server/athleteConsultingV2/apaComposer.js';
+import { safeDiagnostics } from './safe-diagnostics.mjs';
+import { forkSyntheticRun } from './fork-synthetic-run.mjs';
 
 const root = resolve(import.meta.dirname, '../..');
 const dist = resolve(root, 'dist');
 const port = 5286;
 const runPrefix = '/private/tmp/moremindmap-athlete-flagship-qa-';
-const modelCallLimit = 16;
+const modelCallLimit = 8;
+const priorModelAttempts = 15;
+const cumulativeModelCallLimit = 23;
+const precedingRunDir = '/private/tmp/moremindmap-athlete-flagship-qa-llbFb8';
+const run2ClaimPath = '/private/tmp/moremindmap-athlete-flagship-run2-llbFb8.json';
 const allowedModel = 'gpt-5.6-sol';
 const localAccessCode = 'synthetic-test-entry-only';
 const startupCodes = new Set(['ATHLETE_QA_SOURCE_NOT_SEALED', 'ATHLETE_QA_BUILD_STALE',
   'ATHLETE_QA_BUILD_MISMATCH', 'ATHLETE_QA_RESUME_DIR_DENIED',
   'ATHLETE_QA_ARGUMENTS_DENIED', 'ATHLETE_QA_RESUME_CUSTODY_CHANGED',
   'ATHLETE_QA_LOCAL_REDIS_UNAVAILABLE', 'ATHLETE_QA_PROVIDER_BINDING_REQUIRED',
-  'ATHLETE_QA_LOCAL_REDIS_EXITED']);
+  'ATHLETE_QA_LOCAL_REDIS_EXITED', 'ATHLETE_QA_FORK_INVALID']);
 const pages = ['index.html', 'athlete-consulting-tool/demo/workspace.html',
   'athlete-consulting-tool/demo/apa-reading.html'];
 const sha = value => createHash('sha256').update(value).digest('hex');
@@ -65,9 +71,15 @@ function checkBuild() {
 
 function privateRunDirectory(custody) {
   let fresh = false;
-  if (process.argv.length === 2) {
+  let lineage = null;
+  if (process.argv.length === 4 && process.argv[2] === '--fork-dir'
+    && process.argv[3] === precedingRunDir) {
+    try { lstatSync(run2ClaimPath); throw new Error('ATHLETE_QA_ARGUMENTS_DENIED'); }
+    catch (error) { if (error.code !== 'ENOENT') throw error; }
     runDir = mkdtempSync(runPrefix);
     chmodSync(runDir, 0o700);
+    try { lineage = forkSyntheticRun({ sourceDir: precedingRunDir, targetDir: runDir }); }
+    catch { throw new Error('ATHLETE_QA_FORK_INVALID'); }
     fresh = true;
   } else if (process.argv.length === 4 && process.argv[2] === '--resume-dir') {
     const candidate = process.argv[3];
@@ -78,15 +90,29 @@ function privateRunDirectory(custody) {
     runDir = candidate;
   } else throw new Error('ATHLETE_QA_ARGUMENTS_DENIED');
   const receiptPath = resolve(runDir, 'run.json');
-  if (fresh) writeFileSync(receiptPath, JSON.stringify({ schema: 'more.athlete.flagship.loopback-run/v1',
-    ...custody, created_at: new Date().toISOString(), model_call_limit: modelCallLimit,
-    synthetic_only: true, local_redis_only: true }) + '\n', { flag: 'wx', mode: 0o600 });
+  if (fresh) {
+    writeFileSync(receiptPath, JSON.stringify({ schema: 'more.athlete.flagship.loopback-run/v2',
+      ...custody, created_at: new Date().toISOString(), model_call_limit: modelCallLimit,
+      prior_model_attempts: priorModelAttempts, cumulative_model_call_limit: cumulativeModelCallLimit,
+      lineage, synthetic_only: true, local_redis_only: true }) + '\n', { flag: 'wx', mode: 0o600 });
+    // One create-only phase claim prevents a new fork from silently renewing
+    // the eight-attempt allowance. Restarts must use this same run directory.
+    writeFileSync(run2ClaimPath, JSON.stringify({ run_dir: runDir, ...custody,
+      model_call_limit: modelCallLimit }) + '\n', { flag: 'wx', mode: 0o600 });
+  }
   else {
     const prior = JSON.parse(readFileSync(receiptPath, 'utf8'));
-    if (prior.schema !== 'more.athlete.flagship.loopback-run/v1'
+    const phaseClaim = JSON.parse(readFileSync(run2ClaimPath, 'utf8'));
+    if (prior.schema !== 'more.athlete.flagship.loopback-run/v2'
       || prior.head !== custody.head || prior.tree !== custody.tree
       || prior.build_sha256 !== custody.build_sha256
-      || prior.model_call_limit !== modelCallLimit) throw new Error('ATHLETE_QA_RESUME_CUSTODY_CHANGED');
+      || prior.model_call_limit !== modelCallLimit
+      || prior.prior_model_attempts !== priorModelAttempts
+      || prior.cumulative_model_call_limit !== cumulativeModelCallLimit
+      || prior.lineage?.source_dir !== precedingRunDir
+      || phaseClaim.run_dir !== runDir || phaseClaim.head !== custody.head
+      || phaseClaim.tree !== custody.tree || phaseClaim.build_sha256 !== custody.build_sha256
+      || phaseClaim.model_call_limit !== modelCallLimit) throw new Error('ATHLETE_QA_RESUME_CUSTODY_CHANGED');
   }
 }
 
@@ -156,7 +182,7 @@ function evidenceSinkFor(runId) {
       model: typeof event.model === 'string' ? event.model
         : typeof event.response?.model === 'string' ? event.response.model
           : typeof event.request?.model === 'string' ? event.request.model : null,
-      usage: safeUsage(event.usage || event.response?.usage) };
+      usage: safeUsage(event.usage || event.response?.usage), ...safeDiagnostics(event) };
     const key = `qa:athlete-flagship:${runId}:evidence:${event.id}:${event.kind}`;
     if (await redis.set(key, JSON.stringify(record), 'NX') !== 'OK') {
       throw new Error('ATHLETE_QA_EVIDENCE_DUPLICATE');
@@ -168,6 +194,7 @@ function evidenceSinkFor(runId) {
 function transportFor(client) {
   return async (request, options = {}) => {
     if (request?.model !== allowedModel) throw new Error('ATHLETE_QA_MODEL_DENIED');
+    const timeout = options.timeout === 600000 ? 600000 : 180000;
     // INCR is durable before network invocation; every composer shares this key.
     const ordinal = await redis.incr(budgetKey);
     if (ordinal > modelCallLimit) throw new Error('ATHLETE_QA_MODEL_BUDGET_EXHAUSTED');
@@ -176,8 +203,8 @@ function transportFor(client) {
     appendReceipt({ ...basis, status: 'attempted' });
     try {
       const response = await client.responses.create(request, {
-        signal: options.signal || AbortSignal.timeout(180000), maxRetries: 0,
-        timeout: 180000,
+        signal: options.signal || AbortSignal.timeout(timeout), maxRetries: 0,
+        timeout,
       });
       appendReceipt({ ...basis, at: new Date().toISOString(), status: response?.status || 'unknown',
         response_model: response?.model || null, usage: safeUsage(response?.usage) });

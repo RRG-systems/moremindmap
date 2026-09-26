@@ -202,6 +202,37 @@ test('unapproved or incomplete plan cannot enter the visual world as an accepted
   assert.throws(() => worldFor('SESSION_OPENING', state), /ATHLETE_VISUAL_PLAN_AUTHORITY_INVALID/u);
 });
 
+test('Sofia no-plan closing exposes exact block eligibility and retains the same fail-closed rule', async () => {
+  const state = baseState('sofia');
+  state.closing = { summary: 'Discussed the current week without agreeing a plan.',
+    continuity: 'No outcome or future commitment was confirmed.' };
+  const world = worldFor('SESSION_FINALIZATION', state, 'sofia');
+  assert.ok(world.eligibleObjectIdsByBlockType.COMMITMENTS.includes('athlete-map-change'));
+  assert.ok(world.eligibleObjectIdsByBlockType.PLAIN_LANGUAGE.includes('athlete-map-change'));
+  assert.equal(world.eligibleObjectIdsByBlockType.TIMELINE.includes('athlete-map-change'), false);
+  assert.equal(Object.values(world.eligibleObjectIdsByBlockType).flat().includes('athlete-plan'), false);
+  const mapEvidence = world.objects.find(item => item.id === 'athlete-map-change').sourceIds;
+  const closing = candidate(world, { objects: ['athlete-map-change', 'athlete-session-recap'],
+    evidence: [...mapEvidence, 'athlete-source-session-recap'] });
+  closing.blocks[0].type = 'COMMITMENTS';
+  Object.assign(closing.blocks[0], world.presentationCopy.blocksByType.COMMITMENTS);
+  assert.equal(validateAthleteVisualPlan({ candidate: closing, world }).ok, true);
+  const invalid = structuredClone(closing);
+  invalid.blocks[0].type = 'TIMELINE';
+  Object.assign(invalid.blocks[0], world.presentationCopy.blocksByType.TIMELINE);
+  const events = []; let calls = 0;
+  const compose = createAthleteVisualComposer({ env: {}, evidenceSink: async event => events.push(event),
+    transport: async request => {
+      calls++;
+      const supplied = JSON.parse(request.input[1].content);
+      assert.deepEqual(supplied.eligibleObjectIdsByBlockType, world.eligibleObjectIdsByBlockType);
+      return { model: 'gpt-5.6-sol', status: 'completed', output_text: JSON.stringify(invalid) };
+    } });
+  await assert.rejects(compose(world), /ATHLETE_VISUAL_PLAN_FAILED_CLOSED/u);
+  assert.equal(calls, 1);
+  assert.deepEqual(events.at(-1).validation_errors, ['ATHLETE_VISUAL_BLOCK_KIND_DENIED']);
+});
+
 test('current APA binding rejects a different athlete, tampered baseline or unverified artifact', () => {
   const state = baseState();
   const baselineView = { artifact: bundles.nia.apa, baseline_hash: bundles.nia.apa.artifact_sha256, version: 0 };

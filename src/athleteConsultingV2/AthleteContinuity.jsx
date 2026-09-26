@@ -19,7 +19,7 @@ function ContinuityModal({ title, children, onClose }) {
 }
 
 export default function AthleteContinuity({ bundle, state, onAction, onNavigate,
-  disabled = false, actionError = '', selectedMessageId = null, onSelectionHandled = () => {} }) {
+  disabled = false, apaUpdating = false, actionError = '', selectedMessageId = null, onSelectionHandled = () => {} }) {
   const [mode, setMode] = useState(null);
   const [sourceMessageId, setSourceMessageId] = useState('');
   const [targetEventId, setTargetEventId] = useState('');
@@ -112,6 +112,7 @@ export default function AthleteContinuity({ bundle, state, onAction, onNavigate,
     {activeMode === 'apa' && <ContinuityModal title="Prepare an APA update" onClose={close}>
       <form onSubmit={prepareApa}>
         {actionError && <p role="alert">{actionError}</p>}
+        {apaUpdating && <p className="athlete-apa-progress" role="status">MORE is preparing your APA review. This can take several minutes. Your saved reading and agreed plan stay unchanged while it runs; keep this page open.</p>}
         <p>{state.apaNeedsReview
           ? 'The previous APA is historical. Choose the exact saved athlete message that corrects the earlier source; an unrelated new reality cannot make the old reading current. Your original APA and agreed plan stay unchanged.'
           : 'This prepares a private five-box proposal from one of your saved messages. Your original APA and agreed plan stay unchanged. You will review a proposal before anything becomes current.'}</p>

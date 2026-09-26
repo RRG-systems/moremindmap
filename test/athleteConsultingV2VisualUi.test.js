@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { bundles } from '../server/athleteConsultingV2/bundles.js';
-import { selectAthleteVisuals, selectClosingAthleteVisual } from '../src/athleteConsultingV2/visualUi.js';
+import { selectAthleteVisuals, selectClosingAthleteVisual,
+  presentClosingAthleteReview } from '../src/athleteConsultingV2/visualUi.js';
 
 function receipt(bundle, event, changes = {}) {
   const sessionId = 'session-one';
@@ -60,4 +61,25 @@ test('stale APA visuals are withheld after correction or current APA publication
   state.apaNeedsReview = false;
   state.currentApa = { artifact: { artifact_sha256: 'f'.repeat(64) } };
   assert.equal(selectAthleteVisuals(bundles.nia, state).some((visual) => visual.id === 'prior-apa'), false);
+});
+
+test('closing presentation focuses the review and shows map reveal instead of the chat bottom', () => {
+  const calls = [];
+  const reveal = { scrollIntoView: (options) => calls.push(['reveal', options]) };
+  const review = { focus: (options) => calls.push(['focus', options]),
+    querySelector: (selector) => { assert.equal(selector, '.athlete-visual-map-reveal'); return reveal; },
+    scrollIntoView: () => assert.fail('Long recap must not be the scroll target when a map reveal exists') };
+  assert.equal(presentClosingAthleteReview(review), true);
+  assert.deepEqual(calls, [['focus', { preventScroll: true }],
+    ['reveal', { block: 'start', inline: 'nearest' }]]);
+});
+
+test('legacy closing refresh remains visible without a materialized reveal', () => {
+  const calls = [];
+  const review = { focus: (options) => calls.push(['focus', options]), querySelector: () => null,
+    scrollIntoView: (options) => calls.push(['review', options]) };
+  assert.equal(presentClosingAthleteReview(null), false);
+  assert.equal(presentClosingAthleteReview(review), true);
+  assert.deepEqual(calls, [['focus', { preventScroll: true }],
+    ['review', { block: 'start', inline: 'nearest' }]]);
 });

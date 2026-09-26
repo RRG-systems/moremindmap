@@ -35,3 +35,14 @@ export function selectClosingAthleteVisual(visuals, closing) {
     ? visuals.find((visual) => visual.event === 'SESSION_FINALIZATION' && visual.id === closing.visual_id) || null
     : null;
 }
+
+// A required closing reveal must not be hidden by the ordinary chat-bottom
+// scroll. Keep the owning review focused, and show the map-change heading
+// directly even when a long recap appears before it.
+export function presentClosingAthleteReview(review) {
+  if (!review) return false;
+  review.focus({ preventScroll: true });
+  const reveal = review.querySelector('.athlete-visual-map-reveal') || review;
+  reveal.scrollIntoView({ block: 'start', inline: 'nearest' });
+  return true;
+}

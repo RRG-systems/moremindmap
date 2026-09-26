@@ -251,6 +251,8 @@ export function buildAthleteVisualWorld({ event, bundle, state, scopeId, session
     objects, evidence: sources,
     presentationCopy: { guidance: PRESENTATION_COPY[event], renderReason: RENDER_REASON,
       noRenderReason: NO_RENDER_REASON, blockReason: BLOCK_REASON, blocksByType: BLOCK_COPY },
+    eligibleObjectIdsByBlockType: Object.fromEntries(BLOCK_TYPES.map(type => [type,
+      objects.filter(item => KIND_BY_BLOCK[type].includes(item.kind)).map(item => item.id)])),
     ...(exchange ? { currentExchange: { ...exchange,
       use: 'Use only to decide whether a visual helps now; it grants no fact, evidence, commitment or mutation authority.' } } : {}),
     truthBoundaries: {
@@ -374,7 +376,7 @@ export function materializeAthleteVisualPlan({ candidate, world, receipt = null 
   })), providerReceipt: receipt ? clone(receipt) : null });
 }
 
-const SYSTEM = `You are MORE's governed visual composer for one selected fictional Athlete Consulting relationship. The server chose the event and supplied exact eligible objects. The coach owns the conversation; you choose only the smallest useful visual composition. Return the strict JSON schema. OPENING: one orientation block. COACHING_MOMENT: usually no visual; render only if it materially improves this exact exchange. FINALIZATION: one or two blocks including athlete-map-change and the current unconfirmed recap AND each present athlete-plan (accepted) or athlete-draft (proposed) object, with their distinct saved statuses. Put athlete-map-change first so the exact server-derived before/now reveal is prominent. It may truthfully report no saved map change. Use only supplied object and evidence IDs. Do not invent a fact, number, result, cause, commitment, source, map update, or plan approval. An APA recommendation and a plan draft are not agreements. A coach observation is not athlete fact. Preserve uncertainty. No interactions or mutation authority. Every rendered free-text field must copy the exact server-approved strings from presentationCopy: guidance is presentationCopy.guidance; renderDecision.reason is renderReason or noRenderReason; each block title/subtitle comes from blocksByType for its type and each block reason is blockReason. Do not paraphrase or add text in these fields. The selected saved objects supply the personalized facts.`;
+const SYSTEM = `You are MORE's governed visual composer for one selected fictional Athlete Consulting relationship. The server chose the event and supplied exact eligible objects. The coach owns the conversation; you choose only the smallest useful visual composition. Return the strict JSON schema. OPENING: one orientation block. COACHING_MOMENT: usually no visual; render only if it materially improves this exact exchange. FINALIZATION: one or two blocks including athlete-map-change and the current unconfirmed recap AND each present athlete-plan (accepted) or athlete-draft (proposed) object, with their distinct saved statuses. Put athlete-map-change first so the exact server-derived before/now reveal is prominent. It may truthfully report no saved map change. Every block's objectIds must come from eligibleObjectIdsByBlockType for that exact block type; for example the map-change object is not eligible for TIMELINE. Use only supplied object and evidence IDs. Do not invent a fact, number, result, cause, commitment, source, map update, or plan approval. An APA recommendation and a plan draft are not agreements. A coach observation is not athlete fact. Preserve uncertainty. No interactions or mutation authority. Every rendered free-text field must copy the exact server-approved strings from presentationCopy: guidance is presentationCopy.guidance; renderDecision.reason is renderReason or noRenderReason; each block title/subtitle comes from blocksByType for its type and each block reason is blockReason. Do not paraphrase or add text in these fields. The selected saved objects supply the personalized facts.`;
 
 export function createAthleteVisualComposer({ env = globalThis.process?.env || {}, transport = null, evidenceSink } = {}) {
   if (typeof evidenceSink !== 'function') throw new TypeError('ATHLETE_VISUAL_PRIVATE_EVIDENCE_SINK_REQUIRED');
@@ -402,6 +404,7 @@ export function createAthleteVisualComposer({ env = globalThis.process?.env || {
     const record = { id, event: world.event, mm: world.stateBinding.mm, started: new Date().toISOString(),
       source_bos: world.stateBinding.bosHash, source_apa: world.stateBinding.currentApaHash,
       request_sha256: hashCanonicalJson(request) };
+    let validationErrors = [];
     try {
       await save({ kind: 'request', id, record, request });
       const response = await callProvider(request, { signal: AbortSignal.timeout(180000), maxRetries: 0, timeout: 180000 });
@@ -411,6 +414,7 @@ export function createAthleteVisualComposer({ env = globalThis.process?.env || {
       let candidate;
       try { candidate = JSON.parse(response.output_text); } catch { throw new Error('ATHLETE_VISUAL_RESPONSE_INVALID'); }
       const validation = validateAthleteVisualPlan({ candidate, world });
+      validationErrors = validation.errors;
       if (!validation.ok) throw new Error('ATHLETE_VISUAL_PLAN_FAILED_CLOSED');
       const receipt = { ...record, status: 'completed', model: response.model,
         usage: response.usage || null, completed: new Date().toISOString() };
@@ -419,6 +423,7 @@ export function createAthleteVisualComposer({ env = globalThis.process?.env || {
     } catch (error) {
       const code = /^ATHLETE_VISUAL_[A-Z_]+$/u.test(error?.message || '') ? error.message : 'ATHLETE_VISUAL_REQUEST_FAILED';
       await save({ kind: 'failure', id, ...record, status: 'failed', code,
+        validation_errors: validationErrors,
         http_status: Number.isInteger(error?.status) ? error.status : null });
       throw new Error(code);
     }

@@ -7,7 +7,7 @@ import { REPORT_SCHEMA } from '../server/athleteAcademyV1/apa/schema.js';
 import {
   APA_COMPOSITION_POLICY, APA_COMPOSITION_SCHEMA, createApaComposer,
 } from '../server/athleteConsultingV2/apaComposer.js';
-import { currentApaView } from '../server/athleteConsultingV2/currentApa.js';
+import { currentApaView, publishCurrentApa } from '../server/athleteConsultingV2/currentApa.js';
 
 const clone = value => structuredClone(value);
 const messageId = '11111111-1111-4111-8111-111111111111';
@@ -63,6 +63,7 @@ test('composer uses exact Youth APA report schema and stays private with no auto
   assert.deepEqual(APA_COMPOSITION_SCHEMA.required, ['confirmation', 'report']);
   assert.equal(APA_COMPOSITION_POLICY.store, false);
   assert.equal(APA_COMPOSITION_POLICY.max_retries, 0);
+  assert.equal(APA_COMPOSITION_POLICY.timeout_ms, 600000);
   assert.equal(APA_COMPOSITION_POLICY.automatic_publication, false);
 });
 
@@ -82,11 +83,17 @@ test('one synthetic confirmed message composes a source-bound private candidate,
       assert.equal(request.text.format.strict, true);
       assert.deepEqual(request.text.format.schema, APA_COMPOSITION_SCHEMA);
       assert.equal(options.maxRetries, 0);
-      assert.equal(options.timeout, 180000);
+      assert.equal(options.timeout, 600000);
       const packet = JSON.parse(request.input);
       assert.equal(packet.selected_athlete.slug, 'nia');
       assert.equal(packet.original_apa.artifact_sha256, nia.apa.artifact_sha256);
       assert.equal(packet.current_apa.artifact_sha256, nia.apa.artifact_sha256);
+      assert.equal(packet.current_apa.same_as_original_apa, true);
+      assert.equal(packet.current_apa.original_apa_sha256, nia.apa.artifact_sha256);
+      assert.equal(Object.hasOwn(packet.current_apa, 'report'), false);
+      assert.deepEqual(packet.original_apa.report, nia.apa.report);
+      assert.deepEqual(packet.original_apa.sources, nia.apa.sources);
+      assert.deepEqual(packet.accepted_bos, { reading: nia.bos.reading, evidence: nia.bos.evidence });
       assert.equal(packet.saved_athlete_confirmation.id, sourceId);
       assert.match(packet.saved_athlete_confirmation.text, /Training now happens on Tuesdays/u);
       assert.equal(request.input.includes('Private coach observation'), false);
@@ -109,6 +116,43 @@ test('one synthetic confirmed message composes a source-bound private candidate,
   assert.deepEqual(submitted.state, beforeState);
   assert.deepEqual(nia.apa, beforeApa);
   assert.equal(currentApaView(nia).version, 0);
+});
+
+test('a published current APA remains complete and distinct from the retained original baseline', async () => {
+  const first = input();
+  const firstCandidate = candidate();
+  for (const item of firstCandidate.report.candidates) delete item.review_schedule;
+  const published = publishCurrentApa({ ...first, candidate: firstCandidate });
+  const submitted = input();
+  submitted.record = published.record;
+  submitted.expectedVersion = 1;
+  submitted.state.messages[1].id = '33333333-3333-4333-8333-333333333333';
+  submitted.confirmedChange.id = '44444444-4444-4444-8444-444444444444';
+  submitted.confirmedChange.source_message_id = submitted.state.messages[1].id;
+  const body = { confirmation: clone(published.record.artifact.confirmation),
+    report: clone(published.record.artifact.report) };
+  for (const item of body.report.candidates) item.review_schedule = null;
+  let calls = 0;
+  const composer = createApaComposer({ env: {}, evidenceSink: async () => {},
+    transport: async request => {
+      calls++;
+      const packet = JSON.parse(request.input);
+      assert.equal(packet.expected_version, 1);
+      assert.equal(packet.original_apa.artifact_sha256, nia.apa.artifact_sha256);
+      assert.equal(packet.current_apa.artifact_sha256, published.record.artifact.artifact_sha256);
+      assert.notEqual(packet.current_apa.artifact_sha256, packet.original_apa.artifact_sha256);
+      assert.equal(Object.hasOwn(packet.current_apa, 'same_as_original_apa'), false);
+      assert.deepEqual(packet.current_apa.report, published.record.artifact.report);
+      assert.deepEqual(packet.current_apa.sources, published.record.artifact.sources);
+      assert.deepEqual(packet.original_apa.report, nia.apa.report);
+      assert.deepEqual(packet.accepted_bos, { reading: nia.bos.reading, evidence: nia.bos.evidence });
+      return response(body);
+    } });
+  const result = await composer(submitted);
+  assert.equal(calls, 1);
+  assert.equal(result.changed, false);
+  assert.equal(result.publication_performed, false);
+  assert.equal(currentApaView(nia, published.record).version, 1);
 });
 
 test('invalid real/cross-athlete/unconfirmed/coach source fails before any provider call', async () => {

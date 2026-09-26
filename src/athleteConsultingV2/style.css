@@ -8,4 +8,9 @@
 .fit-feedback{padding:18px 0 25px;border-bottom:1px solid #bac9ba;margin-bottom:15px}.fit-feedback .actions{margin-top:10px}.fit-feedback button:not(.primary){color:#25675b;border-color:#afc0b1}.fit-feedback button[aria-pressed=true]{background:#205e51;color:white}.fit-feedback label{display:block;font-size:14px;color:#345148;margin:22px 0}.fit-feedback textarea{background:#fff6;color:#203c31;border-color:#acbdac;margin:12px 0}.fit-feedback [role=status]{font-size:13px;color:#176349}.fit-feedback form>.text-button{margin-left:18px}.restart{font-size:12px;min-height:32px}
 
 /* Keep the approved APA document and its responsive layout intact. */
+.closing-card:focus-visible{outline:3px solid #81e4c9;outline-offset:3px}
+.closing-review-pane .athlete-visual-map-reveal{scroll-margin-block-start:18px}
+@media(min-width:1001px){.conversation.closing-review-pane{width:min(640px,48vw);max-width:none;flex-basis:min(640px,48vw)}}
+@media(max-width:1000px){.conversation.closing-review-pane.mobile-open{width:min(560px,100%)} }
+@media(max-width:600px){.conversation.closing-review-pane.mobile-open{width:100%;min-width:0}.closing-review-pane .closing-card{padding:16px}.closing-review-pane .athlete-visual-closing{padding:16px}.closing-review-pane .athlete-visual-map-reveal{padding:16px}}
 .approved-apa-embed{height:100%;min-height:0;display:flex;flex-direction:column;background:#020913}.apa-embed-tools{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 24px;border-bottom:1px solid #263b45;font-size:11px;color:#aebfc3;flex-shrink:0}.apa-embed-tools>div{display:flex;gap:18px}.apa-embed-tools button{font-size:11px;min-height:32px}.approved-apa-embed iframe{display:block;border:0;flex:1;min-height:0;width:100%;background:#020913}@media(max-width:600px){.apa-embed-tools{padding:7px 16px;flex-wrap:wrap}.apa-embed-tools>div{width:100%;justify-content:space-between}.approved-apa-embed{padding-bottom:70px}}
