@@ -91,9 +91,11 @@ function inspectSource(sourceDir) {
   const manifestNames = [];
   let bases = 0, increments = 0;
   for (const line of files.get('appendonly.aof.manifest').bytes.toString('utf8').split('\n').filter(Boolean)) {
-    const match = /^file (appendonly\.aof\.([1-9]\d{0,8})\.(base\.(?:rdb|aof)|incr\.aof)) seq ([1-9]\d{0,8}) type ([bi])$/u.exec(line);
+    const match = /^file (appendonly\.aof\.([1-9]\d{0,8})\.(base\.(?:rdb|aof)|incr\.aof)) seq ([1-9]\d{0,8}) type ([bi])(?: startoffset (0|[1-9]\d{0,15}))?$/u.exec(line);
     if (!match || match[2] !== match[4]
-      || (match[3].startsWith('base.') ? match[5] !== 'b' : match[5] !== 'i'))
+      || (match[3].startsWith('base.') ? match[5] !== 'b' : match[5] !== 'i')
+      || (match[6] !== undefined && (match[5] !== 'i'
+        || !Number.isSafeInteger(Number(match[6])))))
       deny('AOF_MANIFEST_DENIED');
     manifestNames.push(match[1]);
     if (match[5] === 'b') bases++; else increments++;

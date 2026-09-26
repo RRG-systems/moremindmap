@@ -29,7 +29,7 @@ function fixture(t) {
     JSON.stringify({ kind: 'model_invocation', ordinal: index + 1, status: 'attempted' })).join('\n') + '\n');
   privateWrite(join(aof, base), Buffer.from('fictional-synthetic-state-do-not-output'));
   privateWrite(join(aof, incr), Buffer.from('fictional-synthetic-increment-do-not-output'));
-  privateWrite(join(aof, manifest), `file ${base} seq 1 type b\nfile ${incr} seq 1 type i\n`);
+  privateWrite(join(aof, manifest), `file ${base} seq 1 type b\nfile ${incr} seq 1 type i startoffset 0\n`);
   return { sourceDir, targetDir, aof };
 }
 
@@ -58,6 +58,16 @@ test('copy is create-only, content-free, exact-hash and leaves all source custod
   assert.equal(receipt.source_unchanged, true);
   assert.ok(!JSON.stringify(receipt).includes('do-not-output'));
   assert.throws(() => forkSyntheticRun(f), /ATHLETE_QA_FORK_TARGET_NOT_FRESH/u);
+});
+
+test('accepts Redis incremental startoffset metadata and legacy manifests without it', t => {
+  for (const suffix of [' startoffset 123', '']) {
+    const f = fixture(t);
+    writeFileSync(join(f.aof, manifest), `file ${base} seq 1 type b\nfile ${incr} seq 1 type i${suffix}\n`);
+    const before = snapshot(f.sourceDir);
+    assert.equal(forkSyntheticRun(f).source_unchanged, true);
+    assert.deepEqual(snapshot(f.sourceDir), before);
+  }
 });
 
 for (const [field, value] of [['synthetic_only', false], ['local_redis_only', false],
@@ -143,6 +153,9 @@ for (const malformed of [
   `file ${base} seq 1 type i\nfile ${incr} seq 1 type i\n`,
   `file ${base} seq 1 type b\n`,
   `file ${base} seq 1 type b\nfile ${incr} seq 1 type i\nfile ${incr} seq 1 type i\n`,
+  `file ${base} seq 1 type b\nfile ${incr} seq 1 type i startoffset private\n`,
+  `file ${base} seq 1 type b startoffset 0\nfile ${incr} seq 1 type i\n`,
+  `file ${base} seq 1 type b\nfile ${incr} seq 1 type i startoffset 0 startoffset 0\n`,
 ]) {
   test('rejects unsafe, mismatched, incomplete or duplicate AOF manifests', t => {
     const f = fixture(t); writeFileSync(join(f.aof, manifest), malformed);
