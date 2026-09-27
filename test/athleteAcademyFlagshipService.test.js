@@ -290,7 +290,7 @@ test('pending confirmed source overrides persisted false currency; exact note ad
  assert.equal((await f.box()).attempts.filter(a=>a.status==='delivered').length,1);assert.equal(s.currentApa,null);assert.equal(s.apaDraft,null);await reportsUnchanged(f);assert.equal(digest(s.plan),digest(f.original.plan));assert.equal(digest(s.learning),digest(f.original.learning));
 });
 test('valid separate publication overrides stale persisted true currency at next Start',async()=>{
- const f=await fixture({transportHook:(request,_options,packet)=>packet.contract==='athlete_academy_current_apa_composition_packet_v1'?deltaResponse(packet):defaultResponse(request,packet)});
+ const f=await fixture({transportHook:(request,_options,packet)=>packet.contract==='athlete_academy_current_apa_composition_packet_v2'?deltaResponse(packet):defaultResponse(request,packet)});
  const id=await sourceMessage(f),change=await confirm(f,id);await f.action({action:'update_apa',confirmation_id:change.id,expected_version:0});
  const d=(await f.raw()).apaDraft;assert.ok(d,(await f.raw()).pendingAttempt?.errorCode);assert.equal((await f.raw()).currentApa,null);
  await f.action({action:'publish_apa',id:d.id,hash:d.hash,expected_version:d.expectedVersion,artifact_hash:d.previewRecord.artifact.artifact_sha256,confirmation_id:d.confirmedChange.id,source_id:d.source_id});
@@ -362,7 +362,7 @@ async function refreshCanonicalPair(f,{applyRefresh=true}={}) {
 }
 test('legacy saved learning removal and removal after explicit source refresh retain honest history until later explicit publication',async t=>{
  for(const refresh of [false,true])await t.test(refresh?'source-refresh-removal':'unknown-legacy-removal',async()=>{
-  const f=await fixture({transportHook:(request,_options,packet)=>packet.contract==='athlete_academy_current_apa_composition_packet_v1'?deltaResponse(packet):defaultResponse(request,packet)});
+  const f=await fixture({transportHook:(request,_options,packet)=>packet.contract==='athlete_academy_current_apa_composition_packet_v2'?deltaResponse(packet):defaultResponse(request,packet)});
   if(refresh)await refreshCanonicalPair(f);
   const firstSource=await sourceMessage(f),first=await confirm(f,firstSource);
   await f.action({action:'update_apa',confirmation_id:first.id,expected_version:0});
@@ -444,7 +444,7 @@ async function currentPublished(f) {
 }
 const mutationKinds=['start','message','close','view','draft','approve','discard','remember','forget','finish','continue','reset','share_draft','revoke_share','confirm_memory','confirm_fact','update_apa','publish_apa','discard_apa','recover','abandon_response','refresh_sources','feedback'];
 test('upgrade to explicit operator write hold preserves evolved current APA, plan and RSL; all Consulting mutations deny without calls or writes',async()=>{
- const f=await fixture({transportHook:(request,_options,packet)=>packet.contract==='athlete_academy_current_apa_composition_packet_v1'?deltaResponse(packet):defaultResponse(request,packet)});
+ const f=await fixture({transportHook:(request,_options,packet)=>packet.contract==='athlete_academy_current_apa_composition_packet_v2'?deltaResponse(packet):defaultResponse(request,packet)});
  await currentPublished(f);await f.action({action:'start'});await f.action({action:'message',text:'A short reminder helps.'});
  const own=(await f.raw()).messages.findLast(m=>m.role==='user');await f.action({action:'confirm_memory',source_message_id:own.id});
  const snapshot=JSON.stringify(await f.raw()),calls=f.calls.length,held=configured(f,{...f.config,coachingWriteHold:true});
@@ -459,7 +459,7 @@ test('upgrade to explicit operator write hold preserves evolved current APA, pla
  await cold(f).action(f.owner,await f.command({action:'message',text:'The compatible upgraded build is restored.'}));assert.equal((await f.raw()).status,'active');assert.equal(f.calls.length,calls+1);await reportsUnchanged(f);
 });
 test('feature downgrade is compatible read-only, not legacy writable; restore retains source-bound current APA, plan, RSL and visuals',async()=>{
- const f=await fixture({transportHook:(request,_options,packet)=>packet.contract==='athlete_academy_current_apa_composition_packet_v1'?deltaResponse(packet):defaultResponse(request,packet)});
+ const f=await fixture({transportHook:(request,_options,packet)=>packet.contract==='athlete_academy_current_apa_composition_packet_v2'?deltaResponse(packet):defaultResponse(request,packet)});
  await currentPublished(f);await f.action({action:'start'});
  const snapshot=JSON.stringify(await f.raw()),calls=f.calls.length,held=configured(f,{...f.config,currentApaEnabled:false,flagshipEnabled:false});
  const read=(await held.state(f.owner,{mm:f.mm})).state;
@@ -505,7 +505,7 @@ test('compatible held source-stale read is historical and cannot refresh or muta
 test('actual operator hold, downgrade and source-stale GET redact private pending and visual metadata without touching stored evidence',async()=>{
  let failChat=false;
  const f=await fixture({transportHook:(request,_options,packet)=>{
-  if(packet.contract==='athlete_academy_current_apa_composition_packet_v1')return deltaResponse(packet);
+  if(packet.contract==='athlete_academy_current_apa_composition_packet_v2')return deltaResponse(packet);
   if(!Array.isArray(request.input)&&packet.task==='CHAT'&&failChat)throw Error('OFFLINE_CHAT_UNKNOWN');
   return defaultResponse(request,packet);
  }});
@@ -527,7 +527,7 @@ test('actual operator hold, downgrade and source-stale GET redact private pendin
 test('exact cached APA publication acknowledgment under downgraded flagship uses redacted held DTO without writes or dispatch',async()=>{
  let failChat=false;
  const f=await fixture({transportHook:(request,_options,packet)=>{
-  if(packet.contract==='athlete_academy_current_apa_composition_packet_v1')return deltaResponse(packet);
+  if(packet.contract==='athlete_academy_current_apa_composition_packet_v2')return deltaResponse(packet);
   if(!Array.isArray(request.input)&&packet.task==='CHAT'&&failChat)throw Error('OFFLINE_CHAT_UNKNOWN');
   return defaultResponse(request,packet);
  }});

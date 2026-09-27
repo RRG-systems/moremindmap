@@ -3,6 +3,7 @@ import { APA_DELTA_SCHEMA, APA_REFERENCE_CODEC_CONTRACT, apaDeltaBinding, recons
   apaReferenceCodecSchema, decodeApaReferenceCodec } from './apaDelta.js';
 import { createApaComposerCore, makeApaCompositionInstructions, makeApaReferenceCodecInstructions,
   DEMO_APA_COMPOSITION_POLICY } from '../athleteApa/apaComposerCore.js';
+import { athleteCurrentApprovalSnapshot } from './rsl.js';
 
 export { APA_COMPOSITION_SCHEMA } from '../athleteApa/apaComposerCore.js';
 export const APA_COMPOSITION_POLICY = DEMO_APA_COMPOSITION_POLICY;
@@ -22,6 +23,8 @@ const composer = createApaComposerCore(Object.freeze({
   legacyInstructions: APA_LEGACY_COMPOSITION_INSTRUCTIONS,
   legacySchemaName: 'athlete_current_apa_delta',
   packetContract: 'athlete_current_apa_composition_packet_v1',
+  approvalPacketContract: 'athlete_current_apa_composition_packet_v2',
+  currentApprovalSnapshot: athleteCurrentApprovalSnapshot,
   schemaName: 'athlete_current_apa_reference_codec_v2',
   selectedAthlete: bundle => ({ slug: bundle.person.slug, mm: bundle.person.mm,
     synthetic: true, bos_sha256: bundle.bos.artifact_sha256 }),

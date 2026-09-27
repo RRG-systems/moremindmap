@@ -112,6 +112,20 @@ export function createMainAthleteRslAdapter({ assertFencedAuthority } = {}) {
     return core.retrieveRslCorrectionTargets({ ...ctx, ...(input.maxItems === undefined ? {} : { maxItems: input.maxItems }),
       ...(input.maxChars === undefined ? {} : { maxChars: input.maxChars }) });
   }
+  function currentApprovalSnapshot(input) {
+    owner(input);
+    requireThat(input.state, 'MAIN_RSL_STATE_SOURCE_MISMATCH');
+    const scope = createRslScope(input), learning = input.state.learning ?? [];
+    requireThat(Array.isArray(learning) && learning.length <= 512, 'ATHLETE_RSL_INPUT_INVALID');
+    return deepFreeze({
+      approved_learning: learning.filter(item => item?.actorId === scope.actor_id
+        && item.speaker === 'athlete' && !item.capture && text(item.id, 160)
+        && text(item.text) && isCanonicalTimestamp(item.approved_at))
+        .map(({ id, text: approvedText, approved_at, actorId }) => ({ id, text: approvedText,
+          approved_at, actorId, authority: 'ATHLETE_LEARNING_CONFIRMATION' })),
+      accepted_plan: input.state.plan == null ? null : acceptedPlan(input.state.plan, scope),
+    });
+  }
   // Current approved snapshot only, not fabricated historic chat/coach events.
   // Unknown actor-less legacy learning is left preserved, never promoted here.
   function deriveRslEvents(input) {
@@ -130,5 +144,5 @@ export function createMainAthleteRslAdapter({ assertFencedAuthority } = {}) {
     return deepFreeze(events.sort((a, b) => a.recorded_at.localeCompare(b.recorded_at) || a.event_id.localeCompare(b.event_id)));
   }
   return Object.freeze({ createRslScope, createRslEvent, deriveRslEvents, replayRsl,
-    validateRslSources, retrieveRslContext, retrieveRslCorrectionTargets });
+    validateRslSources, retrieveRslContext, retrieveRslCorrectionTargets, currentApprovalSnapshot });
 }

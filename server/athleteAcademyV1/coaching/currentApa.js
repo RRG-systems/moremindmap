@@ -4,6 +4,7 @@ import { createCurrentApaCore, currentApaHash, MAX_CURRENT_APA_REVISIONS } from 
 import { createApaDeltaCore } from '../../athleteApa/apaDeltaCore.js';
 import { createApaComposerCore, makeApaCompositionInstructions, makeApaReferenceCodecInstructions,
   DEMO_APA_COMPOSITION_POLICY } from '../../athleteApa/apaComposerCore.js';
+import { createMainAthleteRslAdapter } from './rsl.js';
 
 export const MAIN_CURRENT_APA_CONTRACT = 'athlete_academy_current_apa_v1';
 export const MAIN_APA_DELTA_CONTRACT = 'athlete_academy_current_apa_delta_v1';
@@ -77,6 +78,7 @@ export const MAIN_APA_COMPOSITION_INSTRUCTIONS = makeApaReferenceCodecInstructio
 // substitution is accepted. These pure methods never persist anything themselves.
 export function createMainCurrentApaAdapter({ assertFencedAuthority } = {}) {
   requireThat(typeof assertFencedAuthority === 'function', 'MAIN_CURRENT_APA_FENCE_REQUIRED');
+  const approvalReader = createMainAthleteRslAdapter({ assertFencedAuthority: () => false });
   function owner(input) {
     canonicalBundle(input?.bundle);
     assertOwner(input.bundle, input.principal);
@@ -119,6 +121,7 @@ export function createMainCurrentApaAdapter({ assertFencedAuthority } = {}) {
     legacyInstructions: MAIN_APA_LEGACY_COMPOSITION_INSTRUCTIONS,
     legacySchemaName: 'athlete_academy_current_apa_delta',
     packetContract: 'athlete_academy_current_apa_composition_packet_v1',
+    approvalPacketContract: 'athlete_academy_current_apa_composition_packet_v2',
     schemaName: 'athlete_academy_current_apa_reference_codec_v2',
     selectedAthlete: bundle => ({ actorId: bundle.binding.actorId, mm: bundle.person.mm,
       ...(own(bundle.person, 'synthetic') ? { synthetic: bundle.person.synthetic } : {}),
@@ -127,6 +130,10 @@ export function createMainCurrentApaAdapter({ assertFencedAuthority } = {}) {
     confirmationIdentity: ownerIdentity,
   });
   const composer = createApaComposerCore(Object.freeze({ ...configuration,
+    currentApprovalSnapshot: input => {
+      fenced(input, 'composition');
+      return approvalReader.currentApprovalSnapshot(input);
+    },
     assertCurrentApaConfirmedSource: input => source(input, 'composition'),
     publishCurrentApa: input => publish(input, 'publication_dry_run'),
     apaDeltaBinding, reconstructApaDelta, apaReferenceCodecSchema, decodeApaReferenceCodec,
@@ -134,6 +141,10 @@ export function createMainCurrentApaAdapter({ assertFencedAuthority } = {}) {
   // Statically separate recovery authority: nested validation cannot switch
   // itself into a live operation or accept a request-selected bypass flag.
   const recovery = createApaComposerCore(Object.freeze({ ...configuration,
+    currentApprovalSnapshot: input => {
+      fenced(input, 'recovery');
+      return approvalReader.currentApprovalSnapshot(input);
+    },
     assertCurrentApaConfirmedSource: input => source(input, 'recovery'),
     publishCurrentApa: input => publish(input, 'recovery'),
     apaDeltaBinding: input => delta.apaDeltaBinding(deltaInput(input, 'recovery')),

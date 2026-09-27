@@ -5,7 +5,7 @@ import nia from '../server/athleteConsultingV2/fixtures/nia.json' with { type: '
 import { createRedisRepository, CAS_LUA, digest } from '../server/athleteAcademyV1/repository.js';
 import { createAcademyService } from '../server/athleteAcademyV1/service.js';
 import { createCoachingService } from '../server/athleteAcademyV1/coaching/service.js';
-import { initialCoachState } from '../server/athleteAcademyV1/coaching/state.js';
+import { initialCoachState, applyActorAction } from '../server/athleteAcademyV1/coaching/state.js';
 import { hash } from '../server/athleteAcademyV1/coaching/bundle.js';
 import { MAIN_APA_REFERENCE_CODEC_CONTRACT } from '../server/athleteAcademyV1/coaching/currentApa.js';
 import { continuityView, confirmApaCommand, prepareApaCommand, publishApaCommand, apaDraftKey, APA_BOXES } from '../src/athleteAcademyV1/coach/currentApaUi.js';
@@ -43,7 +43,7 @@ function memoryCas() {
 }
 function typedResponse(request) {
   const packet = JSON.parse(request.input);
-  assert.equal(packet.contract, 'athlete_academy_current_apa_composition_packet_v1');
+  assert.equal(packet.contract, 'athlete_academy_current_apa_composition_packet_v2');
   assert.equal(packet.selected_athlete.slug, undefined);
   assert.equal(packet.selected_athlete.synthetic, false);
   assert.equal(request.store, false);
@@ -100,13 +100,19 @@ async function fixture({ enabled = true, providerEnabled = true, transportHook =
   const auth = { event: (type, actor, extra = {}) => ({ type, actor, ...extra, at: new Date(clock).toISOString() }) };
   const academy = createAcademyService({ repo: memory.repo, config, auth, transport, now });
   const service = createCoachingService({ repo: memory.repo, config, academy, transport, now });
-  const bundle = await service.bundle(account, { mm }), state = initialCoachState(bundle);
+  const bundle = await service.bundle(account, { mm }); let state = initialCoachState(bundle);
   state.status = 'active';
   state.messages = [{ id: MESSAGE, role: 'user', speaker: 'athlete', actorId, mm, text: SOURCE_TEXT, at: '2026-09-27T18:00:00.000Z', sessionId: state.sessionId }];
-  state.plan = { id: OTHER_MESSAGE, title: 'Saved athlete-owned plan', why: 'Already accepted independently',
+  const principal = { authenticated: true, actorId, subjectActorId: actorId, mm, role: 'athlete',
+    grants: { reportsRead: true, coachingRead: true, participation: true } };
+  state = applyActorAction(state, { action: 'draft', visibility: 'private', plan: {
+    title: 'Saved athlete-owned plan', why: 'Already accepted independently',
     steps: [{ action: 'Notice one calm pass.', when: 'Next practice', notice: 'One observation', owner: 'athlete' }],
-    review: 'At my next chosen review', accepted_at: '2026-09-26T18:00:00.000Z' };
-  state.learning = [{ id: OTHER_MESSAGE, text: 'I prefer one short reminder.', confirmed_by: 'athlete' }];
+    review: 'At my next chosen review' } }, bundle, principal);
+  state = applyActorAction(state, { action: 'approve', visibility: 'private', id: state.draft.id,
+    hash: state.draft.hash }, bundle, principal);
+  state.suggestedLearning = ['I prefer one short reminder.'];
+  state = applyActorAction(state, { action: 'remember', items: [...state.suggestedLearning] }, bundle, principal);
   const key = `coach:${mm}`;
   await memory.repo.transact([key], () => ({ writes: { [key]: state }, result: true }));
   const original = { reports: await Promise.all(reportKeys.map(key => memory.repo.read(key))), dossier: clone(dossier), plan: clone(state.plan), learning: clone(state.learning), source: clone(state.messages) };

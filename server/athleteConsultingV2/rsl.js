@@ -2,6 +2,7 @@ import { hashCanonicalJson } from '../../src/lib/intelligenceFabric/hashing.js';
 import { deepFreeze, isCanonicalTimestamp } from '../../src/lib/intelligenceFabric/validation.js';
 
 import { createAthleteRslCore } from '../athleteApa/rslCore.js';
+import { hash as approvedPlanHash } from './state.js';
 
 // Exact legacy synthetic policy; shared extraction does not widen demo authority.
 const SCOPE_CONTRACT = 'athlete_consulting_v2_rsl_scope_v1';
@@ -69,6 +70,29 @@ export const replayAthleteRsl = core.replayRsl;
 export const validateAthleteRslSourceMessages = core.validateRslSources;
 export const athleteRslRetrievalContext = core.retrieveRslContext;
 export const athleteRslActiveCorrectionTargets = core.retrieveRslCorrectionTargets;
+
+// Read-only current approval context, not a fabricated historical RSL event.
+// The owning composer has already verified its exact saved athlete source.
+export function athleteCurrentApprovalSnapshot({ bundle, state }) {
+  requireThat(bundle?.person?.synthetic === true && ['nia', 'sofia'].includes(bundle.person.slug)
+    && state?.mm === bundle.person.mm && bundle.bos?.mm === state.mm && bundle.apa?.mm === state.mm,
+  'ATHLETE_RSL_SCOPE_DENIED');
+  const learning = state.learning ?? [];
+  requireThat(Array.isArray(learning) && learning.length <= 512, 'ATHLETE_RSL_INPUT_INVALID');
+  // Native demo draft hashes its complete body in its original field order,
+  // including supported legacy extra fields, before adding these metadata keys.
+  if (state.plan != null) requireThat(state.plan.hash === approvedPlanHash(Object.fromEntries(
+    Object.entries(state.plan).filter(([key]) => !['id', 'hash', 'approvals', 'source', 'accepted_at'].includes(key)),
+  )), 'ATHLETE_RSL_PLAN_NOT_ACCEPTED');
+  return deepFreeze({
+    approved_learning: learning.filter(item => item?.speaker === 'athlete' && !item.capture
+      && !Object.hasOwn(item, 'actorId')
+      && string(item.id, 160) && string(item.text) && isCanonicalTimestamp(item.approved_at))
+      .map(({ id, text: approvedText, approved_at }) => ({ id, text: approvedText,
+        approved_at, authority: 'ATHLETE_LEARNING_CONFIRMATION' })),
+    accepted_plan: state.plan == null ? null : planSnapshot(state.plan),
+  });
+}
 
 export function deriveAthleteRslEvents({ scope, bundle, state }) {
   requireThat(validScope(scope) && bundle?.person?.synthetic === true

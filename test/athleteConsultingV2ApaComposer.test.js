@@ -12,6 +12,8 @@ import {
 import { currentApaHash, currentApaView, publishCurrentApa } from '../server/athleteConsultingV2/currentApa.js';
 import { APA_REFERENCE_CODEC_CONTRACT, apaReferenceCodecSchema, apaDeltaBinding } from '../server/athleteConsultingV2/apaDelta.js';
 import { APA_NARRATIVE_FIELDS, getApaNarrativeValue, NARRATIVE_UPDATE_SCHEMA } from '../server/athleteConsultingV2/apaNarrative.js';
+import { applyLocalAction, initial, hash as planHash } from '../server/athleteConsultingV2/state.js';
+import { athleteCurrentApprovalSnapshot } from '../server/athleteConsultingV2/rsl.js';
 
 const clone = value => structuredClone(value);
 const messageId = '11111111-1111-4111-8111-111111111111';
@@ -83,6 +85,104 @@ function deltaFor(body = candidate(), submitted = input()) {
 const response = (body = candidate(), changes = {}, submitted = input()) => ({ model: 'gpt-5.6-sol', status: 'completed',
   output_text: JSON.stringify(body.contract ? body : deltaFor(body, submitted)),
   usage: { input_tokens: 10, output_tokens: 20 }, ...changes });
+
+function currentApprovals(submitted = input()) {
+  submitted.state = { ...initial(submitted.bundle), ...submitted.state, status: 'active', revision: 8 };
+  const plan = { title: 'One existing Friday cue', why: 'Keep the accepted test small.',
+    steps: [{ action: 'Notice one receiving cue.', when: 'Friday practice', notice: 'Whether it helps.', owner: 'athlete' }],
+    review: 'After Friday practice' };
+  applyLocalAction(submitted.state, { action: 'draft', plan }, submitted.bundle);
+  const draft = submitted.state.draft;
+  applyLocalAction(submitted.state, { action: 'approve', id: draft.id, hash: draft.hash, actor: 'athlete' }, submitted.bundle);
+  submitted.state.suggestedLearning = ['Start with a short written checklist.'];
+  applyLocalAction(submitted.state, { action: 'remember', items: [...submitted.state.suggestedLearning] }, submitted.bundle);
+  return submitted;
+}
+
+test('APA request supplies current approved preference and separate accepted plan with exact context custody', async () => {
+  const submitted = currentApprovals(), before = clone(submitted), events = [];
+  const composer = createApaComposer({ env: {}, evidenceSink: async event => events.push(event), transport: async request => {
+    const packet = JSON.parse(request.input), context = packet.current_approval_context;
+    assert.equal(packet.contract, 'athlete_current_apa_composition_packet_v2');
+    assert.equal(context.contract, 'athlete_apa_current_approval_context_v1');
+    assert.deepEqual(context.selected_athlete, packet.selected_athlete);
+    assert.equal(Object.hasOwn(context, 'state_revision'), false, 'mutable status revision is not provider context currency');
+    assert.equal(context.provenance, 'CURRENT_APPROVED_SNAPSHOT_NOT_HISTORICAL_EVENT');
+    assert.deepEqual(context.approved_learning.map(item => item.text), ['Start with a short written checklist.']);
+    assert.equal(context.approved_learning[0].id, submitted.state.learning[0].id);
+    assert.equal(context.approved_learning[0].approved_at, submitted.state.learning[0].approved_at);
+    assert.deepEqual(context.accepted_plan.steps, submitted.state.plan.steps);
+    assert.equal(context.accepted_plan.hash, submitted.state.plan.hash);
+    assert.deepEqual(context.accepted_plan.approvals, ['athlete']);
+    assert.deepEqual(packet.original_apa.existing_plan, submitted.bundle.apa.existing_plan);
+    assert.match(request.instructions, /already been explicitly approved/u);
+    assert.match(request.instructions, /never unrecorded coach agreement/u);
+    assert.match(request.instructions, /supplies no new APA source IDs/u);
+    assert.equal(JSON.stringify(context).includes('Private coach observation'), false);
+    assert.equal(Object.hasOwn(context, 'messages'), false);
+    const saved = events.find(event => event.kind === 'request');
+    assert.equal(saved.basis.approval_context_sha256, planHash(context));
+    return response(candidate(), {}, submitted);
+  } });
+  await composer(submitted);
+  assert.deepEqual(submitted, before);
+});
+
+test('current approval projection omits draft, suggested, forgotten, coach and wrong-lane learning', () => {
+  const submitted = currentApprovals(), removed = submitted.state.learning[0];
+  applyLocalAction(submitted.state, { action: 'forget', id: removed.id }, submitted.bundle);
+  submitted.state.suggestedLearning = ['Only a proposal.'];
+  submitted.state.learning.push({ id: 'coach-memory', text: 'Coach-only note.', speaker: 'coach', approved_at: removed.approved_at },
+    { id: 'foreign-account', text: 'Other account preference.', speaker: 'athlete', actorId: 'foreign', approved_at: removed.approved_at });
+  applyLocalAction(submitted.state, { action: 'draft', plan: { title: 'Still proposed', why: 'Not accepted.',
+    steps: [{ action: 'Try another thing.', when: 'Next week', notice: 'What happens.', owner: 'athlete' }], review: 'Later' } }, submitted.bundle);
+  const projected = athleteCurrentApprovalSnapshot(submitted);
+  assert.deepEqual(projected.approved_learning, []);
+  assert.equal(projected.accepted_plan.id, submitted.state.plan.id);
+  assert.notEqual(projected.accepted_plan.id, submitted.state.draft.id);
+  assert.equal(JSON.stringify(projected).includes('Still proposed'), false);
+  submitted.state.plan = null;
+  assert.equal(athleteCurrentApprovalSnapshot(submitted).accepted_plan, null);
+});
+
+test('accepted plan context rejects missing athlete approval, unapproved coach-owned action and hash tampering', () => {
+  for (const fault of ['no-athlete', 'coach-owned', 'changed-text']) {
+    const submitted = currentApprovals();
+    if (fault === 'no-athlete') submitted.state.plan.approvals = ['coach'];
+    if (fault === 'coach-owned') {
+      submitted.state.plan.steps[0].owner = 'coach';
+      submitted.state.plan.hash = planHash({ title: submitted.state.plan.title, why: submitted.state.plan.why,
+        steps: submitted.state.plan.steps, review: submitted.state.plan.review });
+    }
+    if (fault === 'changed-text') submitted.state.plan.steps[0].action = 'Different unapproved action.';
+    assert.throws(() => athleteCurrentApprovalSnapshot(submitted), /ATHLETE_RSL_PLAN_NOT_ACCEPTED/u);
+  }
+});
+
+test('corrected approved preference is exact current state and never resurrects forgotten wording', () => {
+  const submitted = currentApprovals(), old = submitted.state.learning[0];
+  applyLocalAction(submitted.state, { action: 'forget', id: old.id }, submitted.bundle);
+  submitted.state.suggestedLearning = ['Open with one question; checklist only if I ask.'];
+  applyLocalAction(submitted.state, { action: 'remember', items: [...submitted.state.suggestedLearning] }, submitted.bundle);
+  const projected = athleteCurrentApprovalSnapshot(submitted);
+  assert.equal(projected.approved_learning.length, 1);
+  assert.equal(projected.approved_learning[0].text, 'Open with one question; checklist only if I ask.');
+  assert.notEqual(projected.approved_learning[0].id, old.id);
+});
+
+test('demo approval projection respects native legacy plan body order and harmless extra fields', () => {
+  const submitted = currentApprovals();
+  const body = { review: 'After practice', steps: [{ when: 'Friday', action: 'One cue.', owner: 'athlete', notice: 'Whether it helps.' }],
+    why: 'Small existing test.', title: 'Already reviewed', legacy_detail: 'Preserved body metadata' };
+  applyLocalAction(submitted.state, { action: 'draft', plan: body }, submitted.bundle);
+  const draft = submitted.state.draft;
+  applyLocalAction(submitted.state, { action: 'approve', id: draft.id, hash: draft.hash, actor: 'athlete' }, submitted.bundle);
+  const snapshot = athleteCurrentApprovalSnapshot(submitted);
+  assert.equal(snapshot.accepted_plan.hash, planHash(body));
+  assert.equal(snapshot.accepted_plan.title, body.title);
+  assert.deepEqual(snapshot.accepted_plan.steps, [{ action: 'One cue.', when: 'Friday', notice: 'Whether it helps.', owner: 'athlete' }]);
+  assert.equal(Object.hasOwn(snapshot.accepted_plan, 'legacy_detail'), false);
+});
 
 test('composer uses exact Youth APA report schema and stays private with no automatic publication', () => {
   assert.deepEqual(APA_COMPOSITION_SCHEMA.properties.report, REPORT_SCHEMA);

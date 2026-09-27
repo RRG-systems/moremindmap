@@ -37,16 +37,22 @@ export default function ApaNarrativeChanges({ receipt, proposed = false, histori
   return <section className="panel apa-connection" aria-label="Whole-picture changes and evidence">
     <p className="eyebrow green">{proposed ? 'PROPOSED WHOLE-PICTURE UPDATE · NOT SAVED'
       : historical ? 'EARLIER WHOLE-PICTURE UPDATE · REVIEW NEEDED' : 'SAVED WHOLE-PICTURE UPDATE'}</p>
-    <p>{proposed ? 'Review the exact earlier and proposed wording before choosing whether to publish. Nothing below is saved yet.'
-      : historical ? 'This receipt records an earlier publication. The reading is historical until the changed evidence is reviewed.'
-        : 'These are the exact changes you reviewed and published. Your original assessment remains preserved.'}</p>
-    {changes.map(change => { const copy=apaNarrativeChangePresentation(change,{proposed});return <article key={change.field}>
+    <p>{proposed ? 'Proposed APA only. Your current reading and accepted plan are unchanged.'
+      : historical ? 'Earlier APA changes await review. Your accepted plan remains separate.'
+        : 'Reviewed APA changes. Your accepted plan remains separate.'}</p>
+    <details className="apa-narrative-review">
+      <summary>Review what changed <span>· {changes.length} {changes.length===1?'field':'fields'}</span></summary>
+      <p>{proposed ? 'Review the exact earlier and proposed wording before choosing whether to publish. Nothing below is saved yet.'
+        : historical ? 'This receipt records an earlier publication. The reading is historical until the changed evidence is reviewed.'
+          : 'These are the exact changes you reviewed and published. Your original assessment remains preserved.'}</p>
+      {changes.map(change => { const copy=apaNarrativeChangePresentation(change,{proposed});return <article key={change.field}>
       <h3>{copy.label}</h3>
       {change.value_changed ? <div className="two-col">
         <div><h4>Before</h4><Value value={change.before}/></div>
         <div><h4>{copy.afterHeading}</h4><Value value={change.after}/></div>
       </div> : <><p>{copy.unchangedText}</p><Value value={change.after}/></>}
       <p>{copy.beforeEvidence}</p><p>{copy.afterEvidence}</p>
-    </article>;})}
+      </article>;})}
+    </details>
   </section>;
 }

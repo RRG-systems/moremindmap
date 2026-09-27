@@ -1,17 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { Buffer } from 'node:buffer';
 import { createHash } from 'node:crypto';
 import nia from '../server/athleteConsultingV2/fixtures/nia.json' with { type: 'json' };
 import { buildCanonicalCoachBundle, hash } from '../server/athleteAcademyV1/coaching/bundle.js';
 import { createMainCurrentApaAdapter, MAIN_CURRENT_APA_CONTRACT, MAIN_APA_DELTA_CONTRACT,
   MAIN_APA_DELTA_SCHEMA, MAIN_APA_COMPOSITION_POLICY,
   MAIN_APA_REFERENCE_CODEC_CONTRACT,
-  MAIN_APA_LEGACY_COMPOSITION_INSTRUCTIONS } from '../server/athleteAcademyV1/coaching/currentApa.js';
+  MAIN_APA_LEGACY_COMPOSITION_INSTRUCTIONS, MAIN_APA_COMPOSITION_INSTRUCTIONS } from '../server/athleteAcademyV1/coaching/currentApa.js';
 import { currentApaHash } from '../server/athleteApa/currentApaCore.js';
 import { APA_NARRATIVE_FIELDS, APA_NARRATIVE_CONTRACT_V1, getApaNarrativeValue,
   verifyApaNarrativeProvenance } from '../server/athleteConsultingV2/apaNarrative.js';
 import { currentApaView as demoView, publishCurrentApa as demoPublish } from '../server/athleteConsultingV2/currentApa.js';
 import { selectMove } from '../server/athleteAcademyV1/apa/contract.js';
+import { createMainAthleteRslAdapter } from '../server/athleteAcademyV1/coaching/rsl.js';
 
 const clone = value => structuredClone(value);
 const firstMessage = '11111111-1111-4111-8111-111111111111';
@@ -376,7 +378,12 @@ test('main injected composer retains complete canonical input, exact provider po
   assert.equal(requests.length, 1);
   assert.equal(result.changed, true); assert.equal(result.publication_performed, false);
   assert.equal(input.record, null); assert.equal(JSON.stringify(input.bundle), baseline);
-  assert.equal(packet.contract, 'athlete_academy_current_apa_composition_packet_v1');
+  assert.equal(packet.contract, 'athlete_academy_current_apa_composition_packet_v2');
+  assert.deepEqual(packet.current_approval_context.approved_learning, []);
+  assert.equal(packet.current_approval_context.accepted_plan, null);
+  assert.deepEqual(packet.current_approval_context.selected_athlete, packet.selected_athlete);
+  assert.equal(evidence[0].basis.approval_context_sha256,
+    createHash('sha256').update(JSON.stringify(packet.current_approval_context)).digest('hex'));
   assert.deepEqual(packet.selected_athlete, { actorId: input.principal.actorId, mm: input.bundle.person.mm,
     synthetic: false, bos_sha256: input.bundle.bos.artifact_sha256 });
   assert.equal(packet.selected_athlete.slug, undefined);
@@ -399,6 +406,60 @@ test('main injected composer retains complete canonical input, exact provider po
   assert.equal(evidence[2].receipt.publication_performed, false);
   const published = input.adapter.publishCurrentApa({ ...input, candidate: result.candidate });
   assert.equal(published.record.artifact.artifact_sha256, evidence[2].receipt.preview_content_hash);
+});
+
+test('main read-only approval context supplies only the exact owner current memory and private accepted plan', async () => {
+  const input = setup(), when = '2026-09-27T18:00:00.000Z';
+  const body = { title: 'Existing athlete-only step', why: 'Already reviewed.',
+    steps: [{ action: 'Use one cue.', when: 'Friday', notice: 'Whether it helps.', owner: 'athlete' }], review: 'After Friday' };
+  input.state.plan = { ...body, id: 'accepted-main-plan', hash: hash(body), accepted_at: when,
+    approvals: [{ actorId: input.principal.actorId, hash: hash(body), at: when }], visibility: 'private' };
+  input.state.learning = [
+    { id: 'owner-preference', text: 'Question first.', approved_at: when, speaker: 'athlete', actorId: input.principal.actorId },
+    { id: 'foreign', text: 'Other person.', approved_at: when, speaker: 'athlete', actorId: 'another' },
+    { id: 'coach', text: 'Coach opinion.', approved_at: when, speaker: 'coach', actorId: input.principal.actorId },
+    { id: 'legacy-unknown', text: 'Unknown actor.', approved_at: when, speaker: 'athlete' },
+  ];
+  input.state.suggestedLearning = ['Not approved.'];
+  input.state.draft = { ...body, title: 'Proposed only' };
+  const before = clone(input.state), events = [];
+  const compose = input.adapter.createApaComposer({ env: {}, evidenceSink: event => events.push(event), transport: async request => {
+    const packet = JSON.parse(request.input), context = packet.current_approval_context;
+    assert.deepEqual(context.approved_learning.map(item => item.id), ['owner-preference']);
+    assert.equal(context.approved_learning[0].actorId, input.principal.actorId);
+    assert.deepEqual(context.accepted_plan.approvals, input.state.plan.approvals);
+    assert.equal(context.accepted_plan.hash, hash(body));
+    assert.equal(JSON.stringify(context).includes('Proposed only'), false);
+    return { status: 'completed', model: 'gpt-5.6-sol', output_text: JSON.stringify({
+      contract: MAIN_APA_REFERENCE_CODEC_CONTRACT, binding: packet.delta_binding,
+      domains: [], futures: [], candidates: [], narratives: [],
+    }) };
+  } });
+  const result = await compose(input);
+  assert.equal(result.changed, false); assert.equal(result.publication_performed, false);
+  assert.deepEqual(input.state, before);
+  const reader = createMainAthleteRslAdapter({ assertFencedAuthority: () => false });
+  input.state.learning = [];
+  assert.deepEqual(reader.currentApprovalSnapshot(input).approved_learning, []);
+  assert.throws(() => reader.currentApprovalSnapshot({ ...input,
+    principal: { ...input.principal, actorId: 'foreign' } }), /COACH_.*DENIED|COACH_.*MISMATCH/u);
+});
+
+test('main approval snapshot rejects foreign approvals, shared/coach-owned plans and changed accepted bytes', () => {
+  const input = setup(), reader = createMainAthleteRslAdapter({ assertFencedAuthority: () => false });
+  const when = '2026-09-27T18:00:00.000Z';
+  const body = { title: 'A current step', why: 'Approved.',
+    steps: [{ action: 'One cue.', when: 'Friday', notice: 'What happens.', owner: 'athlete' }], review: 'Later' };
+  const accepted = { ...body, id: 'plan', hash: hash(body), accepted_at: when,
+    approvals: [{ actorId: input.principal.actorId, hash: hash(body), at: when }], visibility: 'private' };
+  for (const fault of ['foreign', 'shared', 'coach', 'edited']) {
+    input.state.plan = clone(accepted);
+    if (fault === 'foreign') input.state.plan.approvals[0].actorId = 'foreign';
+    if (fault === 'shared') input.state.plan.visibility = 'shared';
+    if (fault === 'coach') input.state.plan.steps[0].owner = 'coach';
+    if (fault === 'edited') input.state.plan.steps[0].action = 'Unapproved replacement.';
+    assert.throws(() => reader.currentApprovalSnapshot(input), /ATHLETE_RSL_PLAN_NOT_ACCEPTED/u);
+  }
 });
 
 test('main composer rejects unverified account sources before injected dispatch and rechecks fence afterward', async () => {
@@ -560,6 +621,52 @@ test('recovery authority is explicit and synchronous, never a caller-selected li
   assert.throws(() => asynchronous.recoverApaComposition({ ...input, ...saved }), /MAIN_CURRENT_APA_FENCE_REQUIRED/u);
 });
 
+test('current approval request recovery ignores status revision only, not changed approved context', async () => {
+  const input = setup(), saved = await savedComposition(input), before = clone(saved.stats);
+  input.state.status = 'unknown'; input.state.revision++;
+  const reader = createMainCurrentApaAdapter({ assertFencedAuthority: context =>
+    context.operation === 'recovery' && context.authority === input.authority
+    && context.principal === input.principal && context.state === input.state });
+  const recovered = reader.recoverApaComposition({ ...input, ...saved });
+  assert.equal(recovered.receipt.no_provider_call, true); assert.deepEqual(saved.stats, before);
+  input.state.learning = [{ id: 'changed-after-request', text: 'Different approved preference.',
+    speaker: 'athlete', actorId: input.principal.actorId, approved_at: at }];
+  assert.throws(() => reader.recoverApaComposition({ ...input, ...saved }), /APA_COMPOSITION_RECOVERY_REQUEST_MISMATCH/u);
+});
+
+test('recovery rejects never-emitted new approval packet with old raw-reference schema/prompt hybrid', async () => {
+  const input = setup(), saved = await savedComposition(input), request = clone(saved.savedRequest);
+  const appendix = request.request.instructions.slice(MAIN_APA_COMPOSITION_INSTRUCTIONS.length);
+  assert.match(appendix, /CURRENT APPROVAL CONTEXT/u);
+  request.request.instructions = MAIN_APA_LEGACY_COMPOSITION_INSTRUCTIONS + appendix;
+  request.request.text.format.name = 'athlete_academy_current_apa_delta';
+  request.request.text.format.schema = MAIN_APA_DELTA_SCHEMA;
+  request.basis.request_sha256 = createHash('sha256').update(JSON.stringify(request.request)).digest('hex');
+  input.state.status = 'unknown';
+  assert.throws(() => input.adapter.recoverApaComposition({ ...input, ...saved,
+    savedRequest: request }), /APA_COMPOSITION_RECOVERY_REQUEST_MISMATCH/u);
+});
+
+test('exact old codec request recovery does not reinterpret unverified legacy approval state', async () => {
+  const input = setup(), saved = await savedComposition(input), old = clone(saved.savedRequest);
+  const packet = JSON.parse(old.request.input);
+  packet.contract = 'athlete_academy_current_apa_composition_packet_v1'; delete packet.current_approval_context;
+  old.request.input = JSON.stringify(packet); old.request.instructions = MAIN_APA_COMPOSITION_INSTRUCTIONS;
+  delete old.basis.approval_context_contract; delete old.basis.approval_context_sha256;
+  old.basis.input_chars = old.request.input.length; old.basis.input_bytes = Buffer.byteLength(old.request.input);
+  old.basis.packet_sha256 = createHash('sha256').update(old.request.input).digest('hex');
+  old.basis.request_sha256 = createHash('sha256').update(JSON.stringify(old.request)).digest('hex');
+  input.state.status = 'unknown';
+  input.state.plan = { id: 'unverified-old-plan', title: 'Preserved old agreement wording' };
+  const reader = createMainAthleteRslAdapter({ assertFencedAuthority: () => false });
+  assert.throws(() => reader.currentApprovalSnapshot(input), /ATHLETE_RSL_PLAN_NOT_ACCEPTED/u);
+  const before = clone(saved.stats);
+  const recovered = input.adapter.recoverApaComposition({ ...input, ...saved, savedRequest: old });
+  assert.equal(recovered.receipt.no_provider_call, true);
+  assert.deepEqual(recovered.candidate, saved.result.candidate); assert.deepEqual(saved.stats, before);
+  assert.equal(input.state.plan.title, 'Preserved old agreement wording');
+});
+
 test('main recovery accepts an exact legacy raw-ref request only through its static recovery fence and refuses mixed versions', async () => {
   // An offline immutable-request fixture rebuilt from the byte-preserved legacy
   // instructions/schema, not a claim that a new provider invocation occurred.
@@ -568,6 +675,15 @@ test('main recovery accepts an exact legacy raw-ref request only through its sta
   savedRequest.request.instructions = MAIN_APA_LEGACY_COMPOSITION_INSTRUCTIONS;
   savedRequest.request.text.format.name = 'athlete_academy_current_apa_delta';
   savedRequest.request.text.format.schema = MAIN_APA_DELTA_SCHEMA;
+  const legacyPacket = JSON.parse(savedRequest.request.input);
+  legacyPacket.contract = 'athlete_academy_current_apa_composition_packet_v1';
+  delete legacyPacket.current_approval_context;
+  savedRequest.request.input = JSON.stringify(legacyPacket);
+  delete savedRequest.basis.approval_context_contract;
+  delete savedRequest.basis.approval_context_sha256;
+  savedRequest.basis.input_chars = savedRequest.request.input.length;
+  savedRequest.basis.input_bytes = Buffer.byteLength(savedRequest.request.input);
+  savedRequest.basis.packet_sha256 = createHash('sha256').update(savedRequest.request.input).digest('hex');
   savedRequest.basis.request_sha256 = createHash('sha256').update(JSON.stringify(savedRequest.request)).digest('hex');
   savedResponse.response.output_text = JSON.stringify({ contract: MAIN_APA_DELTA_CONTRACT,
     binding: input.adapter.apaDeltaBinding(input), domains: [], futures: [], candidates: [],

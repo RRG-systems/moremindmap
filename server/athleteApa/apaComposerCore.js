@@ -20,6 +20,10 @@ const freeze = value => {
 };
 const digest = value => createHash('sha256').update(value).digest('hex');
 const own = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
+export const APA_CURRENT_APPROVAL_CONTEXT_CONTRACT = 'athlete_apa_current_approval_context_v1';
+const CURRENT_APPROVAL_INSTRUCTIONS = `
+CURRENT APPROVAL CONTEXT — READ ONLY
+current_approval_context is the same selected athlete's exact current approved snapshot, separate from the original assessment's existing_plan. Its approved_learning has already been explicitly approved by that athlete as coaching memory/preferences; do not describe it as still awaiting their approval. It is NOT agreement to a new sporting action or independent observed fact. Its accepted_plan is the exact separately accepted existing plan, not a draft or the new APA One Move; do not claim it was revoked or needs re-approval merely because this APA is being reviewed. Preserve each step's actual owner and exact approvals; athlete approval is never unrecorded coach agreement, tactical permission or completed action. Any new or changed action remains a separate proposal with its own approval requirements. This context supplies no new APA source IDs and cannot replace the one saved athlete-confirmed update as authority for changing goals, priority, dates, source evidence or coach_view. Do not turn a coach note, unknown coach permission, draft, forgotten preference or historical assessment wording into current agreement. This composition neither changes nor approves learning or plans.`;
 
 const matchesSchema = matchesApaSchema;
 
@@ -97,7 +101,7 @@ export function createApaComposerCore(adapter) {
   ensure(!usesCodec || (typeof adapter.legacyInstructions === 'string'
     && typeof adapter.legacySchemaName === 'string'), 'APA_COMPOSITION_AUTHORITY_ADAPTER_REQUIRED');
 
-  function packetFor(input) {
+  function packetFor(input, includeApprovals = true) {
     const { bundle, record, state, confirmedChange, expectedVersion } = input;
     // Validate the exact athlete confirmation and correction target before any
     // provider call. A correction may cite a source in the current report; that
@@ -133,6 +137,22 @@ export function createApaComposerCore(adapter) {
         : currentApa,
       accepted_bos: { reading: bundle.bos.reading, evidence: bundle.bos.evidence },
       saved_athlete_confirmation: source };
+    if (includeApprovals && typeof adapter.currentApprovalSnapshot === 'function') {
+      ensure(typeof adapter.approvalPacketContract === 'string', 'APA_COMPOSITION_AUTHORITY_ADAPTER_REQUIRED');
+      const snapshot = adapter.currentApprovalSnapshot(input);
+      ensure(snapshot && Array.isArray(snapshot.approved_learning)
+        && own(snapshot, 'accepted_plan'), 'APA_COMPOSITION_APPROVAL_CONTEXT_INVALID');
+      packet.contract = adapter.approvalPacketContract;
+      packet.current_approval_context = {
+        contract: APA_CURRENT_APPROVAL_CONTEXT_CONTRACT,
+        selected_athlete: adapter.selectedAthlete(bundle),
+        provenance: 'CURRENT_APPROVED_SNAPSHOT_NOT_HISTORICAL_EVENT',
+        original_bos_sha256: bundle.bos.artifact_sha256,
+        original_apa_sha256: bundle.apa.artifact_sha256,
+        current_apa_sha256: prior.artifact.artifact_sha256,
+        ...clone(snapshot),
+      };
+    }
     const encoded = JSON.stringify(packet);
     ensure(encoded.length <= MAX_INPUT_CHARS, 'APA_COMPOSITION_PACKET_TOO_LARGE');
     return { packet, encoded, prior, confirmedSource: verifiedSource };
@@ -162,7 +182,8 @@ export function createApaComposerCore(adapter) {
     assertApaDeltaSchemaBudget(schema);
     return freeze({ model: MODEL, reasoning: { effort: 'xhigh' },
       store: false, max_output_tokens: 30000,
-      instructions: usesCodec && legacy ? adapter.legacyInstructions : APA_COMPOSITION_INSTRUCTIONS,
+      instructions: (usesCodec && legacy ? adapter.legacyInstructions : APA_COMPOSITION_INSTRUCTIONS)
+        + (prepared.packet.current_approval_context ? CURRENT_APPROVAL_INSTRUCTIONS : ''),
       input: prepared.encoded,
       text: { format: { type: 'json_schema', name: usesCodec && legacy ? adapter.legacySchemaName : adapter.schemaName,
         strict: true, schema } } });
@@ -180,6 +201,10 @@ export function createApaComposerCore(adapter) {
       delta_binding_sha256: currentApaHash(packet.delta_binding),
       input_chars: encoded.length, input_bytes: Buffer.byteLength(encoded),
       packet_sha256: digest(JSON.stringify(packet)),
+      ...(packet.current_approval_context ? {
+        approval_context_contract: APA_CURRENT_APPROVAL_CONTEXT_CONTRACT,
+        approval_context_sha256: digest(JSON.stringify(packet.current_approval_context)),
+      } : {}),
       request_sha256: digest(JSON.stringify(request)), started_at: startedAt };
   }
 
@@ -274,14 +299,22 @@ export function createApaComposerCore(adapter) {
     ensure(typeof startedAt === 'string' && !Number.isNaN(Date.parse(startedAt))
       && new Date(startedAt).toISOString() === startedAt, 'APA_COMPOSITION_RECOVERY_BASIS_MISMATCH');
     const normalizedInput = { ...input, record: input.record ?? null };
-    const prepared = packetFor(normalizedInput);
     // Select only an exact statically rebuilt request. A saved response cannot
     // choose legacy parsing with a flag, mixed contract, or edited request hash.
-    const currentRequest = requestFor(prepared, normalizedInput);
-    const legacyRequest = usesCodec ? requestFor(prepared, normalizedInput, true) : null;
     const isExact = request => JSON.stringify(savedRequest.request) === JSON.stringify(request);
-    const legacy = Boolean(legacyRequest && isExact(legacyRequest));
-    const request = legacy ? legacyRequest : currentRequest;
+    // Rebuild a finite set of static versions. Old immutable requests retain
+    // their old packet/prompt bytes; no saved flag can select a looser parser.
+    const choicesFor = (prepared, allowLegacy = true) => [
+      { prepared, legacy: false, request: requestFor(prepared, normalizedInput) },
+      ...(usesCodec && allowLegacy ? [{ prepared, legacy: true, request: requestFor(prepared, normalizedInput, true) }] : []),
+    ];
+    // Old exact requests never require a new approval projection they did not
+    // contain. New requests must rebuild their actual current approval bytes.
+    let matched = choicesFor(packetFor(normalizedInput, false)).find(choice => isExact(choice.request));
+    if (!matched && typeof adapter.currentApprovalSnapshot === 'function')
+      matched = choicesFor(packetFor(normalizedInput), false).find(choice => isExact(choice.request));
+    ensure(matched, 'APA_COMPOSITION_RECOVERY_REQUEST_MISMATCH');
+    const { prepared, legacy, request } = matched;
     const basis = basisFor(normalizedInput, prepared, request, savedRequest.id, startedAt);
     ensure(isExact(request)
       && savedRequest.basis.request_sha256 === digest(JSON.stringify(savedRequest.request)),
