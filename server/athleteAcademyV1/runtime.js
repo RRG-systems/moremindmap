@@ -6,6 +6,7 @@ import {createRedisRepository,requireValue} from './repository.js';
 import {createAuth} from './auth.js';
 import {createAcademyService} from './service.js';
 import {createCoachingService} from './coaching/service.js';
+import {createCoachNotesService} from './coaching/coachNotes.js';
 import {createDelivery,resendTransport} from './delivery.js';
 import {createAcademyHandler} from './handler.js';
 export function createAcademyRuntime({env,redis,assessmentTransport,coachTransport,mailTransport,now=Date.now}){
@@ -18,8 +19,8 @@ export function createAcademyRuntime({env,redis,assessmentTransport,coachTranspo
  const mailFrom=env.ATHLETE_ACADEMY_MAIL_FROM||env.PUBLIC_PROFILE_OWNERSHIP_EMAIL_FROM;
  const mail=mailTransport||(config.mailEnabled&&mailKey&&mailFrom?resendTransport({key:mailKey,from:mailFrom}):null);
  config.providerEnabled=Boolean(config.providerEnabled&&transport&&coach);config.mailEnabled=Boolean(config.mailEnabled&&mail);
- const auth=createAuth({repo,config,now}),academy=createAcademyService({repo,config,auth,transport,now}),coaching=createCoachingService({repo,config,academy,transport:coach,now}),deliver=createDelivery({repo,config,transport:mail,now});
- return {repo,config,auth,academy,coaching,deliver,ready:()=>awaitAcademyRedisReady(redis),handler:createAcademyHandler({config,auth,academy,coaching,deliver})};
+ const auth=createAuth({repo,config,now}),academy=createAcademyService({repo,config,auth,transport,now}),notes=createCoachNotesService({repo,config,academy,now}),coaching=createCoachingService({repo,config,academy,notes,transport:coach,now}),deliver=createDelivery({repo,config,transport:mail,now});
+ return {repo,config,auth,academy,coaching,notes,deliver,ready:()=>awaitAcademyRedisReady(redis),handler:createAcademyHandler({config,auth,academy,coaching,notes,deliver})};
 }
 export function createAcademyRedis(url,{ca,lazyConnect=false}={}){const parsed=new URL(url);let tls;if(parsed.protocol==='rediss:'){requireValue(typeof ca==='string'&&ca.includes('-----BEGIN CERTIFICATE-----'),'TLS_CA_REQUIRED',503);tls={ca};}const redis=new Redis(url,{maxRetriesPerRequest:0,enableOfflineQueue:false,lazyConnect,autoResendUnfulfilledCommands:false,retryStrategy:attempt=>Math.min(100*attempt,2000),...(tls?{tls}:{})});redis.on('error',()=>{});return redis;}
 export async function awaitAcademyRedisReady(redis,{timeoutMs=15000}={}){
