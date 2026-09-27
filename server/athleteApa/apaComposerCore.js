@@ -100,6 +100,11 @@ export function createApaComposerCore(adapter) {
     && typeof adapter.decodeApaReferenceCodec === 'function';
   ensure(!usesCodec || (typeof adapter.legacyInstructions === 'string'
     && typeof adapter.legacySchemaName === 'string'), 'APA_COMPOSITION_AUTHORITY_ADAPTER_REQUIRED');
+  const hasPreviousCodec = typeof adapter.previousCodecSchema === 'function'
+    && typeof adapter.previousCodecDecoder === 'function'
+    && typeof adapter.previousCodecSchemaName === 'string';
+  ensure(!Object.keys(adapter).some(key => key.startsWith('previousCodec')) || hasPreviousCodec,
+    'APA_COMPOSITION_AUTHORITY_ADAPTER_REQUIRED');
 
   function packetFor(input, includeApprovals = true) {
     const { bundle, record, state, confirmedChange, expectedVersion } = input;
@@ -175,17 +180,18 @@ export function createApaComposerCore(adapter) {
     }
   }
 
-  function requestFor(prepared, input, legacy = false) {
-    const schema = usesCodec && !legacy
-      ? adapter.apaReferenceCodecSchema({ ...input, prior: prepared.prior, confirmedSource: prepared.confirmedSource })
-      : APA_DELTA_SCHEMA;
+  function requestFor(prepared, input, mode = 'current') {
+    const codecInput = { ...input, prior: prepared.prior, confirmedSource: prepared.confirmedSource };
+    const schema = mode === 'previous' ? adapter.previousCodecSchema(codecInput)
+      : usesCodec && mode === 'current' ? adapter.apaReferenceCodecSchema(codecInput) : APA_DELTA_SCHEMA;
     assertApaDeltaSchemaBudget(schema);
     return freeze({ model: MODEL, reasoning: { effort: 'xhigh' },
       store: false, max_output_tokens: 30000,
-      instructions: (usesCodec && legacy ? adapter.legacyInstructions : APA_COMPOSITION_INSTRUCTIONS)
+      instructions: (usesCodec && mode === 'legacy' ? adapter.legacyInstructions : APA_COMPOSITION_INSTRUCTIONS)
         + (prepared.packet.current_approval_context ? CURRENT_APPROVAL_INSTRUCTIONS : ''),
       input: prepared.encoded,
-      text: { format: { type: 'json_schema', name: usesCodec && legacy ? adapter.legacySchemaName : adapter.schemaName,
+      text: { format: { type: 'json_schema', name: mode === 'previous' ? adapter.previousCodecSchemaName
+        : usesCodec && mode === 'legacy' ? adapter.legacySchemaName : adapter.schemaName,
         strict: true, schema } } });
   }
 
@@ -209,8 +215,9 @@ export function createApaComposerCore(adapter) {
   }
 
   // One pure response boundary for live private composition and saved-response
-  // recovery. No alternate schema, candidate shortcut or recovery-only publish.
-  function validateCompositionResponse({ input, prior, confirmedSource, response, request, legacy = false,
+  // recovery. Exact saved codec versions select only their matching wire decoder;
+  // reconstruction and publication dry-run remain shared without shortcuts.
+  function validateCompositionResponse({ input, prior, confirmedSource, response, request, mode = 'current',
     progress = () => {} }) {
     const { bundle, record, state, confirmedChange, expectedVersion } = input;
     let stage, diagnostic = null, outputSize = {}, reconstructionMetadata = {};
@@ -230,9 +237,11 @@ export function createApaComposerCore(adapter) {
     stage = 'reconstruction';
     progress({ stage });
     let reconstructed;
-    try { reconstructed = usesCodec && !legacy
-      ? adapter.decodeApaReferenceCodec({ ...input, encodedDelta: delta, bundle, prior, confirmedChange, confirmedSource })
-      : reconstructApaDelta({ ...input, delta, bundle, prior, confirmedChange, confirmedSource }); }
+    try { reconstructed = mode === 'previous'
+      ? adapter.previousCodecDecoder({ ...input, encodedDelta: delta, bundle, prior, confirmedChange, confirmedSource })
+      : usesCodec && mode === 'current'
+        ? adapter.decodeApaReferenceCodec({ ...input, encodedDelta: delta, bundle, prior, confirmedChange, confirmedSource })
+        : reconstructApaDelta({ ...input, delta, bundle, prior, confirmedChange, confirmedSource }); }
     catch (error) {
       diagnostic = apaValidatorDiagnostic(error, { stage });
       progress({ diagnostic });
@@ -304,17 +313,29 @@ export function createApaComposerCore(adapter) {
     const isExact = request => JSON.stringify(savedRequest.request) === JSON.stringify(request);
     // Rebuild a finite set of static versions. Old immutable requests retain
     // their old packet/prompt bytes; no saved flag can select a looser parser.
-    const choicesFor = (prepared, allowLegacy = true) => [
-      { prepared, legacy: false, request: requestFor(prepared, normalizedInput) },
-      ...(usesCodec && allowLegacy ? [{ prepared, legacy: true, request: requestFor(prepared, normalizedInput, true) }] : []),
-    ];
+    const matchPrepared = (prepared, allowLegacy = true) => {
+      const modes = ['current', ...(hasPreviousCodec ? ['previous'] : []),
+        ...(usesCodec && allowLegacy ? ['legacy'] : [])];
+      for (const mode of modes) {
+        let request;
+        try { request = requestFor(prepared, normalizedInput, mode); }
+        catch (error) {
+          // A newer schema may outgrow its budget on an otherwise valid old
+          // immutable request. Its failure cannot suppress exact older recovery.
+          if (error.message === 'APA_COMPOSITION_REQUEST_SCHEMA_TOO_LARGE') continue;
+          throw error;
+        }
+        if (isExact(request)) return { prepared, mode, request };
+      }
+      return null;
+    };
     // Old exact requests never require a new approval projection they did not
     // contain. New requests must rebuild their actual current approval bytes.
-    let matched = choicesFor(packetFor(normalizedInput, false)).find(choice => isExact(choice.request));
+    let matched = matchPrepared(packetFor(normalizedInput, false));
     if (!matched && typeof adapter.currentApprovalSnapshot === 'function')
-      matched = choicesFor(packetFor(normalizedInput), false).find(choice => isExact(choice.request));
+      matched = matchPrepared(packetFor(normalizedInput), false);
     ensure(matched, 'APA_COMPOSITION_RECOVERY_REQUEST_MISMATCH');
-    const { prepared, legacy, request } = matched;
+    const { prepared, mode, request } = matched;
     const basis = basisFor(normalizedInput, prepared, request, savedRequest.id, startedAt);
     ensure(isExact(request)
       && savedRequest.basis.request_sha256 === digest(JSON.stringify(savedRequest.request)),
@@ -323,7 +344,7 @@ export function createApaComposerCore(adapter) {
       'APA_COMPOSITION_RECOVERY_BASIS_MISMATCH');
     const validated = validateCompositionResponse({ input: normalizedInput,
       prior: prepared.prior, confirmedSource: prepared.confirmedSource, response: savedResponse.response,
-      request, legacy });
+      request, mode });
     const receipt = { ...compositionReceipt(basis, savedResponse.response, validated, null),
       recovery_performed: true, no_provider_call: true,
       original_response_id: savedResponse.id,

@@ -33,4 +33,5 @@ const demoDelta = createApaDeltaCore(Object.freeze({
 }));
 
 export const { APA_DELTA_SCHEMA, APA_REFERENCE_CODEC_CONTRACT, apaDeltaBinding,
-  apaReferenceCodecSchema, decodeApaReferenceCodec, reconstructApaDelta } = demoDelta;
+  apaReferenceCodecSchema, decodeApaReferenceCodec, apaReferenceCodecSchemaV2,
+  decodeApaReferenceCodecV2, reconstructApaDelta } = demoDelta;

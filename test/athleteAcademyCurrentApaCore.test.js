@@ -141,6 +141,17 @@ async function savedComposition(input, { noChange = false, failReceipt = false }
     savedResponse: clone(events.find(event => event.kind === 'response')), events, stats, result };
 }
 
+// This is a request that the pre-repair codec-v2 implementation could have
+// durably written before its response was recovered. The current adapter owns
+// both static schemas; the saved event cannot choose a decoder with a flag.
+function preRepairCodecRequest(input, savedRequest) {
+  const old = clone(savedRequest);
+  old.request.text.format.name = 'athlete_academy_current_apa_reference_codec_v2';
+  old.request.text.format.schema = input.adapter.apaReferenceCodecSchemaV2(input);
+  old.basis.request_sha256 = createHash('sha256').update(JSON.stringify(old.request)).digest('hex');
+  return old;
+}
+
 test('main factory is default-deny without a synchronous server authority checker', () => {
   assert.throws(() => createMainCurrentApaAdapter(), /MAIN_CURRENT_APA_FENCE_REQUIRED/u);
   const input = setup();
@@ -665,6 +676,64 @@ test('exact old codec request recovery does not reinterpret unverified legacy ap
   assert.equal(recovered.receipt.no_provider_call, true);
   assert.deepEqual(recovered.candidate, saved.result.candidate); assert.deepEqual(saved.stats, before);
   assert.equal(input.state.plan.title, 'Preserved old agreement wording');
+});
+
+test('main recovery accepts an exact pre-repair codec-v2 request without replaying provider or publication', async () => {
+  const input = setup(), saved = await savedComposition(input), before = clone(saved.stats);
+  const savedRequest = preRepairCodecRequest(input, saved.savedRequest);
+  assert.notDeepEqual(savedRequest.request.text.format.schema, saved.savedRequest.request.text.format.schema);
+  assert.equal(savedRequest.request.text.format.name, 'athlete_academy_current_apa_reference_codec_v2');
+  input.state.status = 'unknown'; input.calls.length = 0;
+  const original = JSON.stringify({ bundle: input.bundle, state: input.state, savedRequest, savedResponse: saved.savedResponse });
+  const recovered = input.adapter.recoverApaComposition({ ...input, savedRequest, savedResponse: saved.savedResponse });
+  assert.deepEqual(recovered.candidate, saved.result.candidate);
+  assert.equal(recovered.receipt.preview_content_hash, saved.result.receipt.preview_content_hash);
+  assert.equal(recovered.receipt.no_provider_call, true);
+  assert.equal(recovered.publication_performed, false);
+  assert.deepEqual(new Set(input.calls), new Set(['recovery']));
+  assert.deepEqual(saved.stats, before); assert.equal(input.record, null);
+  assert.equal(JSON.stringify({ bundle: input.bundle, state: input.state, savedRequest, savedResponse: saved.savedResponse }), original);
+
+  const edited = clone(savedRequest);
+  edited.request.text.format.schema.properties.candidates.maxItems = 4;
+  edited.basis.request_sha256 = createHash('sha256').update(JSON.stringify(edited.request)).digest('hex');
+  assert.throws(() => input.adapter.recoverApaComposition({ ...input, savedRequest: edited,
+    savedResponse: saved.savedResponse }), /APA_COMPOSITION_RECOVERY_REQUEST_MISMATCH/u);
+  const mixed = clone(savedRequest);
+  mixed.request.text.format.name = saved.savedRequest.request.text.format.name;
+  mixed.basis.request_sha256 = createHash('sha256').update(JSON.stringify(mixed.request)).digest('hex');
+  assert.throws(() => input.adapter.recoverApaComposition({ ...input, savedRequest: mixed,
+    savedResponse: saved.savedResponse }), /APA_COMPOSITION_RECOVERY_REQUEST_MISMATCH/u);
+  assert.deepEqual(saved.stats, before);
+});
+
+test('main pre-repair codec-v2 recovery preserves a source-normalized gate restatement rejected by v3 wire schema', async () => {
+  const input = setup(), saved = await savedComposition(input, { noChange: true }), before = clone(saved.stats);
+  const savedRequest = preRepairCodecRequest(input, saved.savedRequest);
+  const savedResponse = clone(saved.savedResponse), wire = JSON.parse(savedResponse.response.output_text);
+  const prior = input.adapter.currentApaView(input).artifact.report.candidates[0];
+  const { refs: _refs, bos_refs: _bos, ...candidate } = clone(prior);
+  candidate.cite_confirmed_update = false;
+  if (!Object.hasOwn(candidate, 'review_schedule')) candidate.review_schedule = null;
+  candidate.gates = candidate.gates.map((gate, index) => {
+    const { refs: _gateRefs, ...body } = gate;
+    return { ...body, cite_confirmed_update: index === 0 };
+  });
+  // The old codec admitted this string. The hard validator considers it
+  // unchanged after whitespace normalization, so it is not an uncited change.
+  candidate.gates[0].reason = ` ${prior.gates[0].reason} `;
+  wire.candidates = [candidate];
+  savedResponse.response.output_text = JSON.stringify(wire);
+  input.state.status = 'unknown'; input.calls.length = 0;
+  assert.throws(() => input.adapter.decodeApaReferenceCodec({ ...input, encodedDelta: wire }), /APA_DELTA_SCHEMA_INVALID/u);
+  input.calls.length = 0;
+  const recovered = input.adapter.recoverApaComposition({ ...input, savedRequest, savedResponse });
+  assert.deepEqual(recovered.candidate.report.candidates[0].refs, prior.refs);
+  assert.equal(recovered.candidate.report.candidates[0].gates[0].reason, ` ${prior.gates[0].reason} `);
+  assert.deepEqual(recovered.candidate.report.candidates[0].gates[0].refs, [...prior.gates[0].refs, sourceId(input)]);
+  assert.equal(recovered.receipt.no_provider_call, true); assert.equal(recovered.publication_performed, false);
+  assert.deepEqual(new Set(input.calls), new Set(['recovery']));
+  assert.deepEqual(saved.stats, before); assert.equal(input.record, null);
 });
 
 test('main recovery accepts an exact legacy raw-ref request only through its static recovery fence and refuses mixed versions', async () => {

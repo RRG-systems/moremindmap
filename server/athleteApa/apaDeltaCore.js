@@ -225,7 +225,7 @@ export function createApaDeltaCore(adapter) {
   }
 
   const APA_REFERENCE_CODEC_CONTRACT = adapter.codecContract;
-  function apaReferenceCodecSchema(input) {
+  function buildApaReferenceCodecSchema(input, previousCodec = false) {
     requireThat(typeof APA_REFERENCE_CODEC_CONTRACT === 'string', 'APA_DELTA_AUTHORITY_ADAPTER_REQUIRED', 'binding');
     const expected = apaDeltaBinding(input);
     const inactive = new Set([...inactiveSources(input.prior.artifact), ...input.confirmedChange.supersedes]);
@@ -241,13 +241,17 @@ export function createApaDeltaCore(adapter) {
       const properties = clone(schema.properties);
       delete properties.bos_refs; delete properties.refs;
       properties[key] = { type: 'string', enum: [entity[key]] };
-      properties.cite_confirmed_update = candidateCitation === null
+      properties.cite_confirmed_update = previousCodec || candidateCitation === null
         ? citation(entity.refs) : { type: 'boolean', enum: [candidateCitation] };
-      if (properties.gates) properties.gates = { type: 'array', minItems: 5, maxItems: 5,
-        items: { anyOf: entity.gates.flatMap(gate => candidateCitation === true
-          ? [gateSchema(gate, { unchanged: true, cite: false }),
-            gateSchema(gate, { unchanged: false, cite: true })]
-          : [gateSchema(gate, { unchanged: true, cite: false })]) } };
+      if (properties.gates) properties.gates = previousCodec
+        ? { type: 'array', minItems: 5, maxItems: 5,
+          items: { anyOf: entity.gates.map(gate => object({ id: { type: 'string', enum: [gate.id] },
+            pass: { type: 'boolean' }, reason: { type: 'string' }, cite_confirmed_update: citation(gate.refs) })) } }
+        : { type: 'array', minItems: 5, maxItems: 5,
+          items: { anyOf: entity.gates.flatMap(gate => candidateCitation === true
+            ? [gateSchema(gate, { unchanged: true, cite: false }),
+              gateSchema(gate, { unchanged: false, cite: true })]
+            : [gateSchema(gate, { unchanged: true, cite: false })]) } };
       return object(properties);
     }
     const families = [['domains', DOMAIN_SCHEMA, 'id', 4], ['futures', FUTURE_SCHEMA, 'role', 5],
@@ -256,10 +260,12 @@ export function createApaDeltaCore(adapter) {
       binding: object(Object.fromEntries(Object.entries(expected).map(([key, value]) =>
         [key, { type: typeof value === 'number' ? 'integer' : typeof value, enum: [value] }]))) };
     for (const [family, schema, key, maxItems] of families) properties[family] = { type: 'array', maxItems,
-      items: { anyOf: input.prior.artifact.report[family].flatMap(entity => family === 'candidates'
-        ? (citation(entity.refs).enum ? [true] : [false, true])
-          .map(cite => entitySchema(schema, entity, key, cite))
-        : [entitySchema(schema, entity, key)]) } };
+      items: { anyOf: previousCodec
+        ? input.prior.artifact.report[family].map(entity => entitySchema(schema, entity, key))
+        : input.prior.artifact.report[family].flatMap(entity => family === 'candidates'
+          ? (citation(entity.refs).enum ? [true] : [false, true])
+            .map(cite => entitySchema(schema, entity, key, cite))
+          : [entitySchema(schema, entity, key)]) } };
     properties.narratives = { type: 'array', maxItems: APA_NARRATIVE_FIELDS.length,
       items: { anyOf: APA_NARRATIVE_FIELDS.map(field => object({ field: { type: 'string', enum: [field] },
         value: field === 'what_we_dont_know' ? { type: 'array', items: { type: 'string' } } : { type: 'string' },
@@ -268,12 +274,16 @@ export function createApaDeltaCore(adapter) {
     assertApaDeltaSchemaBudget(schema);
     return schema;
   }
+  const apaReferenceCodecSchema = input => buildApaReferenceCodecSchema(input);
+  // The pre-tightening v2 schema is rebuilt only for exact saved-request recovery.
+  // It must remain byte-for-byte stable with immutable request evidence.
+  const apaReferenceCodecSchemaV2 = input => buildApaReferenceCodecSchema(input, true);
 
   // Versioned wire codec, not rejected-ref repair. No provider refs are admitted.
   // Each citation flag refers only to that exact entity/gate; child citations do
   // not imply a parent citation. The old strict reconstruction remains the gate.
-  function decodeApaReferenceCodec({ encodedDelta, ...input }) {
-    const schema = apaReferenceCodecSchema(input);
+  function decodeReferenceCodec({ encodedDelta, ...input }, previousCodec = false) {
+    const schema = previousCodec ? apaReferenceCodecSchemaV2(input) : apaReferenceCodecSchema(input);
     requireThat(matchesSchema(encodedDelta, schema), 'APA_DELTA_SCHEMA_INVALID', 'delta');
     const expected = apaDeltaBinding(input);
     const inactive = new Set([...inactiveSources(input.prior.artifact), ...input.confirmedChange.supersedes]);
@@ -304,6 +314,8 @@ export function createApaDeltaCore(adapter) {
     const reconstructed = reconstructApaDelta({ ...input, delta });
     return freeze({ delta, ...reconstructed });
   }
+  const decodeApaReferenceCodec = input => decodeReferenceCodec(input);
+  const decodeApaReferenceCodecV2 = input => decodeReferenceCodec(input, true);
 
   function verifyRefs(before, after, sourceId, inactive, path) {
     requireThat(before.every(id => inactive.has(id) || after.includes(id))
@@ -406,5 +418,6 @@ export function createApaDeltaCore(adapter) {
   }
 
   return Object.freeze({ APA_DELTA_SCHEMA, APA_REFERENCE_CODEC_CONTRACT, apaDeltaBinding,
-    apaReferenceCodecSchema, decodeApaReferenceCodec, reconstructApaDelta });
+    apaReferenceCodecSchema, decodeApaReferenceCodec, apaReferenceCodecSchemaV2,
+    decodeApaReferenceCodecV2, reconstructApaDelta });
 }

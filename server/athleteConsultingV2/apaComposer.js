@@ -1,6 +1,7 @@
 import { assertCurrentApaConfirmedSource, publishCurrentApa } from './currentApa.js';
 import { APA_DELTA_SCHEMA, APA_REFERENCE_CODEC_CONTRACT, apaDeltaBinding, reconstructApaDelta,
-  apaReferenceCodecSchema, decodeApaReferenceCodec } from './apaDelta.js';
+  apaReferenceCodecSchema, decodeApaReferenceCodec, apaReferenceCodecSchemaV2,
+  decodeApaReferenceCodecV2 } from './apaDelta.js';
 import { createApaComposerCore, makeApaCompositionInstructions, makeApaReferenceCodecInstructions,
   DEMO_APA_COMPOSITION_POLICY } from '../athleteApa/apaComposerCore.js';
 import { athleteCurrentApprovalSnapshot } from './rsl.js';
@@ -18,6 +19,9 @@ export const APA_COMPOSITION_INSTRUCTIONS = makeApaReferenceCodecInstructions({
 const composer = createApaComposerCore(Object.freeze({
   assertCurrentApaConfirmedSource, publishCurrentApa, apaDeltaBinding, reconstructApaDelta,
   apaReferenceCodecSchema, decodeApaReferenceCodec,
+  previousCodecSchema: apaReferenceCodecSchemaV2,
+  previousCodecDecoder: decodeApaReferenceCodecV2,
+  previousCodecSchemaName: 'athlete_current_apa_reference_codec_v2',
   deltaSchema: APA_DELTA_SCHEMA, policy: APA_COMPOSITION_POLICY,
   instructions: APA_COMPOSITION_INSTRUCTIONS,
   legacyInstructions: APA_LEGACY_COMPOSITION_INSTRUCTIONS,
@@ -25,7 +29,7 @@ const composer = createApaComposerCore(Object.freeze({
   packetContract: 'athlete_current_apa_composition_packet_v1',
   approvalPacketContract: 'athlete_current_apa_composition_packet_v2',
   currentApprovalSnapshot: athleteCurrentApprovalSnapshot,
-  schemaName: 'athlete_current_apa_reference_codec_v2',
+  schemaName: 'athlete_current_apa_reference_codec_v3',
   selectedAthlete: bundle => ({ slug: bundle.person.slug, mm: bundle.person.mm,
     synthetic: true, bos_sha256: bundle.bos.artifact_sha256 }),
   evidenceIdentity: bundle => ({ athlete_slug: bundle.person.slug }),

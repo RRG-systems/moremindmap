@@ -3,10 +3,13 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import nia from '../server/athleteConsultingV2/fixtures/nia.json' with { type: 'json' };
 import sofia from '../server/athleteConsultingV2/fixtures/sofia.json' with { type: 'json' };
+import { digest as demoDigest } from '../server/athleteConsultingV2/bundles.js';
+import { selectMove } from '../server/athleteAcademyV1/apa/contract.js';
 import { currentApaView, publishCurrentApa,
   assertCurrentApaConfirmedSource } from '../server/athleteConsultingV2/currentApa.js';
 import { APA_DELTA_SCHEMA, APA_REFERENCE_CODEC_CONTRACT, apaDeltaBinding,
-  apaReferenceCodecSchema, decodeApaReferenceCodec, reconstructApaDelta } from '../server/athleteConsultingV2/apaDelta.js';
+  apaReferenceCodecSchema, decodeApaReferenceCodec, apaReferenceCodecSchemaV2,
+  decodeApaReferenceCodecV2, reconstructApaDelta } from '../server/athleteConsultingV2/apaDelta.js';
 import { APA_NARRATIVE_FIELDS, getApaNarrativeValue } from '../server/athleteConsultingV2/apaNarrative.js';
 import { createApaComposerCore, DEMO_APA_COMPOSITION_POLICY } from '../server/athleteApa/apaComposerCore.js';
 import { APA_LEGACY_COMPOSITION_INSTRUCTIONS, APA_COMPOSITION_INSTRUCTIONS,
@@ -313,6 +316,100 @@ test('legacy immutable saved requests and responses recover only through exact o
   const mixed = clone(savedResponse); mixed.response.output_text = JSON.stringify(wire);
   assert.throws(() => current.recoverApaComposition({ ...input, savedRequest, savedResponse: mixed }),
     /APA_COMPOSITION_RESPONSE_INVALID/u);
+});
+
+test('immutable codec v2 requests recover under v3 only through their exact old schema and response', async () => {
+  const input = setup(), events = [];
+  const identity = { selectedAthlete: bundle => ({ slug: bundle.person.slug, mm: bundle.person.mm,
+    synthetic: true, bos_sha256: bundle.bos.artifact_sha256 }),
+  evidenceIdentity: bundle => ({ athlete_slug: bundle.person.slug }), confirmationIdentity: () => ({}) };
+  const base = { assertCurrentApaConfirmedSource, publishCurrentApa, apaDeltaBinding,
+    reconstructApaDelta, deltaSchema: APA_DELTA_SCHEMA, policy: DEMO_APA_COMPOSITION_POLICY,
+    instructions: APA_COMPOSITION_INSTRUCTIONS, legacyInstructions: APA_LEGACY_COMPOSITION_INSTRUCTIONS,
+    legacySchemaName: 'athlete_current_apa_delta',
+    packetContract: 'athlete_current_apa_composition_packet_v1', ...identity };
+  const previous = createApaComposerCore({ ...base,
+    apaReferenceCodecSchema: apaReferenceCodecSchemaV2, decodeApaReferenceCodec: decodeApaReferenceCodecV2,
+    schemaName: 'athlete_current_apa_reference_codec_v2' });
+  const current = createApaComposerCore({ ...base,
+    apaReferenceCodecSchema, decodeApaReferenceCodec,
+    previousCodecSchema: apaReferenceCodecSchemaV2, previousCodecDecoder: decodeApaReferenceCodecV2,
+    previousCodecSchemaName: 'athlete_current_apa_reference_codec_v2',
+    schemaName: 'athlete_current_apa_reference_codec_v3' });
+  const wire = empty(input), candidate = wireEntity(input.prior.artifact.report.candidates[0], false);
+  const priorReason = candidate.gates[2].reason;
+  candidate.gates[2].reason = `  ${priorReason}  `;
+  wire.candidates = [candidate];
+  // V2 admitted an uncited, whitespace-only gate reason restatement. V3 binds
+  // that unchanged gate to its exact prior reason, without invalidating saved V2 evidence.
+  assert.notEqual(candidate.gates[2].reason, priorReason);
+  assert.equal(matchesApaSchema(wire, apaReferenceCodecSchemaV2(input)), true);
+  assert.equal(matchesApaSchema(wire, apaReferenceCodecSchema(input)), false);
+  const original = await previous.createApaComposer({ env: {}, evidenceSink: event => events.push(event),
+    transport: async () => ({ status: 'completed', model: 'gpt-5.6-sol', output_text: JSON.stringify(wire) }) })(input);
+  const [savedRequest, savedResponse] = events;
+  assert.deepEqual(events.map(event => event.kind), ['request', 'response', 'receipt']);
+  assert.equal(savedRequest.request.text.format.name, 'athlete_current_apa_reference_codec_v2');
+  assert.deepEqual(savedRequest.request.text.format.schema, apaReferenceCodecSchemaV2(input));
+  assert.equal(savedRequest.request.instructions, APA_COMPOSITION_INSTRUCTIONS);
+  const recovered = current.recoverApaComposition({ ...input, savedRequest, savedResponse });
+  assert.deepEqual(recovered.candidate, original.candidate);
+  assert.equal(recovered.receipt.preview_content_hash, original.receipt.preview_content_hash);
+  assert.equal(recovered.receipt.no_provider_call, true);
+  assert.equal(recovered.publication_performed, false);
+
+  for (const mutate of [request => { request.text.format.name = 'athlete_current_apa_reference_codec_v3'; },
+    request => { request.instructions += ' Unreviewed instruction.'; }]) {
+    const edited = clone(savedRequest); mutate(edited.request);
+    edited.basis.request_sha256 = createHash('sha256').update(JSON.stringify(edited.request)).digest('hex');
+    assert.throws(() => current.recoverApaComposition({ ...input, savedRequest: edited, savedResponse }),
+      /APA_COMPOSITION_RECOVERY_REQUEST_MISMATCH/u);
+  }
+
+  const nextEvents = [];
+  const next = await current.createApaComposer({ env: {}, evidenceSink: event => nextEvents.push(event),
+    transport: async () => ({ status: 'completed', model: 'gpt-5.6-sol', output_text: JSON.stringify(empty(input)) }) })(input);
+  assert.equal(nextEvents[0].request.text.format.name, 'athlete_current_apa_reference_codec_v3');
+  assert.deepEqual(nextEvents[0].request.text.format.schema, apaReferenceCodecSchema(input));
+  assert.equal(nextEvents[0].request.text.format.strict, true);
+  assert.equal(next.publication_performed, false);
+  assert.equal(currentApaView(nia).version, 0);
+});
+
+test('an oversized current v3 schema cannot suppress exact immutable v2 recovery', async () => {
+  const bundle = clone(nia);
+  const longReason = ' This remains an unchanged synthetic gate reason.'.repeat(70);
+  for (const candidate of bundle.apa.report.candidates)
+    for (const gate of candidate.gates) gate.reason += longReason;
+  Object.assign(bundle.apa, selectMove(bundle.apa.report));
+  const { artifact_sha256: _oldHash, ...body } = bundle.apa;
+  bundle.apa.artifact_sha256 = demoDigest(body);
+  const input = setup(bundle), events = [];
+  assert.doesNotThrow(() => apaReferenceCodecSchemaV2(input));
+  assert.throws(() => apaReferenceCodecSchema(input), /APA_COMPOSITION_REQUEST_SCHEMA_TOO_LARGE/u);
+  const identity = { selectedAthlete: value => ({ slug: value.person.slug, mm: value.person.mm,
+    synthetic: true, bos_sha256: value.bos.artifact_sha256 }),
+  evidenceIdentity: value => ({ athlete_slug: value.person.slug }), confirmationIdentity: () => ({}) };
+  const base = { assertCurrentApaConfirmedSource, publishCurrentApa, apaDeltaBinding,
+    reconstructApaDelta, deltaSchema: APA_DELTA_SCHEMA, policy: DEMO_APA_COMPOSITION_POLICY,
+    instructions: APA_COMPOSITION_INSTRUCTIONS, legacyInstructions: APA_LEGACY_COMPOSITION_INSTRUCTIONS,
+    legacySchemaName: 'athlete_current_apa_delta',
+    packetContract: 'athlete_current_apa_composition_packet_v1', ...identity };
+  const previous = createApaComposerCore({ ...base,
+    apaReferenceCodecSchema: apaReferenceCodecSchemaV2, decodeApaReferenceCodec: decodeApaReferenceCodecV2,
+    schemaName: 'athlete_current_apa_reference_codec_v2' });
+  const current = createApaComposerCore({ ...base,
+    apaReferenceCodecSchema, decodeApaReferenceCodec,
+    previousCodecSchema: apaReferenceCodecSchemaV2, previousCodecDecoder: decodeApaReferenceCodecV2,
+    previousCodecSchemaName: 'athlete_current_apa_reference_codec_v2',
+    schemaName: 'athlete_current_apa_reference_codec_v3' });
+  const original = await previous.createApaComposer({ env: {}, evidenceSink: event => events.push(event),
+    transport: async () => ({ status: 'completed', model: 'gpt-5.6-sol', output_text: JSON.stringify(empty(input)) }) })(input);
+  assert.deepEqual(events.map(event => event.kind), ['request', 'response', 'receipt']);
+  const recovered = current.recoverApaComposition({ ...input, savedRequest: events[0], savedResponse: events[1] });
+  assert.deepEqual(recovered.candidate, original.candidate);
+  assert.equal(recovered.receipt.no_provider_call, true);
+  assert.equal(recovered.publication_performed, false);
 });
 
 test('new live composition rejects an old raw response and records the failed version boundary without retry', async () => {

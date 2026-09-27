@@ -211,7 +211,7 @@ test('one synthetic confirmed message composes a source-bound private candidate,
       assert.equal(request.text.format.strict, true);
       assert.deepEqual(request.text.format.schema, apaReferenceCodecSchema({ bundle: submitted.bundle,
         prior: currentApaView(submitted.bundle), confirmedChange: submitted.confirmedChange }));
-      assert.equal(request.text.format.name, 'athlete_current_apa_reference_codec_v2');
+      assert.equal(request.text.format.name, 'athlete_current_apa_reference_codec_v3');
       assert.equal(Object.isFrozen(request.text.format.schema), true);
       assert.equal(options.maxRetries, 0);
       assert.equal(options.timeout, 600000);

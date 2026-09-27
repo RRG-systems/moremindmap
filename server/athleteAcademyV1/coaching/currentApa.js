@@ -111,6 +111,8 @@ export function createMainCurrentApaAdapter({ assertFencedAuthority } = {}) {
   const reconstructApaDelta = input => delta.reconstructApaDelta(deltaInput(input, 'reconstruction'));
   const apaReferenceCodecSchema = input => delta.apaReferenceCodecSchema(deltaInput(input, 'reconstruction'));
   const decodeApaReferenceCodec = input => delta.decodeApaReferenceCodec(deltaInput(input, 'reconstruction'));
+  const apaReferenceCodecSchemaV2 = input => delta.apaReferenceCodecSchemaV2(deltaInput(input, 'reconstruction'));
+  const decodeApaReferenceCodecV2 = input => delta.decodeApaReferenceCodecV2(deltaInput(input, 'reconstruction'));
   function publish(input, operation = 'publication') {
     fenced(input, operation);
     return core.publishCurrentApa(input);
@@ -122,7 +124,8 @@ export function createMainCurrentApaAdapter({ assertFencedAuthority } = {}) {
     legacySchemaName: 'athlete_academy_current_apa_delta',
     packetContract: 'athlete_academy_current_apa_composition_packet_v1',
     approvalPacketContract: 'athlete_academy_current_apa_composition_packet_v2',
-    schemaName: 'athlete_academy_current_apa_reference_codec_v2',
+    schemaName: 'athlete_academy_current_apa_reference_codec_v3',
+    previousCodecSchemaName: 'athlete_academy_current_apa_reference_codec_v2',
     selectedAthlete: bundle => ({ actorId: bundle.binding.actorId, mm: bundle.person.mm,
       ...(own(bundle.person, 'synthetic') ? { synthetic: bundle.person.synthetic } : {}),
       bos_sha256: bundle.bos.artifact_sha256 }),
@@ -137,6 +140,8 @@ export function createMainCurrentApaAdapter({ assertFencedAuthority } = {}) {
     assertCurrentApaConfirmedSource: input => source(input, 'composition'),
     publishCurrentApa: input => publish(input, 'publication_dry_run'),
     apaDeltaBinding, reconstructApaDelta, apaReferenceCodecSchema, decodeApaReferenceCodec,
+    previousCodecSchema: apaReferenceCodecSchemaV2,
+    previousCodecDecoder: decodeApaReferenceCodecV2,
   }));
   // Statically separate recovery authority: nested validation cannot switch
   // itself into a live operation or accept a request-selected bypass flag.
@@ -151,10 +156,13 @@ export function createMainCurrentApaAdapter({ assertFencedAuthority } = {}) {
     reconstructApaDelta: input => delta.reconstructApaDelta(deltaInput(input, 'recovery')),
     apaReferenceCodecSchema: input => delta.apaReferenceCodecSchema(deltaInput(input, 'recovery')),
     decodeApaReferenceCodec: input => delta.decodeApaReferenceCodec(deltaInput(input, 'recovery')),
+    previousCodecSchema: input => delta.apaReferenceCodecSchemaV2(deltaInput(input, 'recovery')),
+    previousCodecDecoder: input => delta.decodeApaReferenceCodecV2(deltaInput(input, 'recovery')),
   }));
   return Object.freeze({ currentApaView: read,
     assertCurrentApaConfirmedSource: input => source(input), publishCurrentApa: input => publish(input),
     apaDeltaBinding, reconstructApaDelta, apaReferenceCodecSchema, decodeApaReferenceCodec,
+    apaReferenceCodecSchemaV2,
     createApaComposer: composer.createApaComposer,
     validateApaPublicationDryRun: composer.validateApaPublicationDryRun,
     recoverApaComposition(input) {
