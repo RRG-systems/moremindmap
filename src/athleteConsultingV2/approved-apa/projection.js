@@ -5,6 +5,13 @@ const APA_BOXES=new Set(['where','futures','move','plan','evidence']);
 const APA_READINGS=new Set(['current','original','preview','historical','unverified']);
 const APA_OBJECT_IDS=new Set(['move','connection','sources','agreement','version',
  ...DOMAINS.map(domain=>`domain-${domain.id}`),...ROLES.map(role=>`future-${role}`)]);
+const object=value=>value!==null&&typeof value==='object'&&!Array.isArray(value);
+const canonical=value=>Array.isArray(value)?value.map(canonical):object(value)
+ ?Object.fromEntries(Object.keys(value).sort().map(key=>[key,canonical(value[key])])):value;
+const hash=value=>sha256Text(JSON.stringify(canonical(value)));
+const same=(a,b)=>hash(a)===hash(b);
+const uuid=value=>typeof value==='string'&&/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/iu.test(value);
+const digest=value=>typeof value==='string'&&/^[a-f0-9]{64}$/u.test(value);
 const fail=()=>{throw Error('The latest APA version could not be verified. Reload this reading.');};
 export function apaBoxContextMessage(slug,destination,{reading='current',objectId=null}={}){
  if(!['nia','sofia'].includes(slug)||!APA_READINGS.has(reading)
@@ -22,12 +29,34 @@ export function requestedApaReading(event,{origin,parent,slug}){
 function verifyRecord(record,bundle){
  if(record==null)return;
  const baseline=bundle.apa,a=record.artifact,last=record.receipts?.at(-1);
- if(record.contract!==CURRENT_CONTRACT||!Number.isSafeInteger(record.version)||record.version<1
+ if(record.contract!==CURRENT_CONTRACT||!Number.isSafeInteger(record.version)||record.version<1||record.version>24
+  ||!Array.isArray(record.receipts)||!Array.isArray(a?.sources)
   ||record.version!==record.receipts?.length||record.binding?.slug!==bundle.person.slug
   ||record.binding?.mm!==bundle.person.mm||record.binding?.baseline_hash!==baseline.artifact_sha256
   ||record.binding?.bos_hash!==bundle.bos?.artifact_sha256||a?.mm!==bundle.person.mm
   ||a?.baseline_artifact_sha256!==baseline.artifact_sha256||a?.bos_sha256!==bundle.bos?.artifact_sha256
-  ||a?.current_apa_version!==record.version||last?.content_hash!==a?.artifact_sha256)fail();
+  ||a?.synthetic!==true||a?.current_apa_version!==record.version||last?.content_hash!==a?.artifact_sha256)fail();
+ const {artifact_sha256,...artifactBody}=a;
+ if(!digest(artifact_sha256)||hash(artifactBody)!==artifact_sha256
+  ||!same(a.sources.slice(0,baseline.sources.length),baseline.sources)
+  ||a.sources.length!==baseline.sources.length+record.version
+  ||!same(a.bos_sources,baseline.bos_sources))fail();
+ let prior=baseline.artifact_sha256,previousContent=baseline.artifact_sha256,governed=false;
+ for(const [index,receipt] of record.receipts.entries()){
+  if(!object(receipt))fail();
+  const {receipt_hash,...body}=receipt,source=a.sources.find(item=>item.id===receipt.source_id);
+  governed ||= Object.hasOwn(receipt,'narrative_changes');
+  if(receipt.version!==index+1||receipt.prior_hash!==prior||!digest(receipt_hash)||hash(body)!==receipt_hash
+   ||!uuid(receipt.change_id)||!uuid(receipt.source_message_id)
+   ||receipt.source_id!==`APA:CURRENT:${receipt.change_id}`
+   ||source?.epistemic!=='ATHLETE_CONFIRMED'||source.source!=='Athlete-confirmed coaching update'
+   ||source.source_message_id!==receipt.source_message_id||source.at!==receipt.at
+   ||!same(source.supersedes,receipt.supersedes)
+   ||(governed||Object.hasOwn(receipt,'prior_version')||Object.hasOwn(receipt,'prior_artifact_sha256'))
+    &&(receipt.prior_version!==index||receipt.prior_artifact_sha256!==previousContent))fail();
+  prior=receipt_hash;
+  previousContent=receipt.content_hash;
+ }
 }
 export function resolveApaReading(bundle,state,{showOriginal=false,showPreview=false}={}){
  if(!bundle?.apa||!bundle?.person||!state||!Number.isSafeInteger(state.revision)||state.mm!==bundle.person.mm)fail();
@@ -36,12 +65,14 @@ export function resolveApaReading(bundle,state,{showOriginal=false,showPreview=f
  const draft=state.apaDraft||null,preview=draft?.previewRecord||null;
  if(draft){
   verifyRecord(preview,bundle);
-  if(!preview||draft.expectedVersion!==(record?.version||0)
+  if(!uuid(draft.id)||!digest(draft.hash)||!preview||draft.expectedVersion!==(record?.version||0)
    ||preview.version!==(record?.version||0)+1
-   ||draft.receipt?.receipt_hash!==undefined&&draft.receipt.receipt_hash!==preview.receipts.at(-1)?.receipt_hash
-   ||record&&preview.receipts.at(-2)?.receipt_hash!==record.receipts.at(-1)?.receipt_hash
-   ||draft.confirmedChange?.mm!==bundle.person.mm
-   ||draft.confirmedChange?.athlete_slug!==bundle.person.slug)fail();
+   ||!same(preview.receipts.slice(0,-1),record?.receipts||[])
+   ||preview.receipts.at(-1).prior_version!==draft.expectedVersion
+   ||preview.receipts.at(-1).prior_artifact_sha256!==(record?.artifact||baseline).artifact_sha256)fail();
+  // visibleState intentionally omits private confirmedChange/candidate/receipt.
+  // Identity and source proof belong to the public bound artifact and hashed
+  // receipt chain; the server still fences exact draft publication separately.
  }
  const current=record?.artifact||baseline;
  const selectedPreview=Boolean(showPreview&&preview&&!showOriginal);

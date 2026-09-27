@@ -130,7 +130,7 @@ test('CONFIRM evidence always uses immutable saved source text, never evolving p
 test('prepared draft has exact proposed values/evidence but cannot claim a saved or current priority', () => {
   const { state, result } = publication();
   state.currentApa = null;
-  state.apaDraft = { expectedVersion: 0, confirmedChange: { mm: nia.person.mm, athlete_slug: 'nia' },
+  state.apaDraft = { id: '22222222-2222-4222-8222-222222222222', hash: 'f'.repeat(64), expectedVersion: 0,
     previewRecord: result.record };
   const current = view(state), proposed = view(state, { showPreview: true });
   assert.equal(current.model.layer0.nextStep, nia.apa.confirmation.priority);

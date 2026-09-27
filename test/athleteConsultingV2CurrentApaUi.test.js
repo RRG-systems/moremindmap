@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import nia from '../server/athleteConsultingV2/fixtures/nia.json' with { type: 'json' };
 import sofia from '../server/athleteConsultingV2/fixtures/sofia.json' with { type: 'json' };
-import { publishCurrentApa } from '../server/athleteConsultingV2/currentApa.js';
+import { currentApaView, publishCurrentApa } from '../server/athleteConsultingV2/currentApa.js';
 import { APA_NARRATIVE_FIELDS, getApaNarrativeValue } from '../server/athleteConsultingV2/apaNarrative.js';
 import { apaBoxContextMessage, project, requestedApaReading, resolveApaReading, shouldRefreshApa } from '../src/athleteConsultingV2/approved-apa/projection.js';
 
@@ -10,28 +10,35 @@ const clone = value => structuredClone(value);
 const messageId = '11111111-1111-4111-8111-111111111111';
 const changeId = '22222222-2222-4222-8222-222222222222';
 
-function currentState() {
+function currentState({ change = changeId, message = messageId } = {}) {
   const state = { mm: nia.person.mm, revision: 4,
-    messages: [{ id: messageId, role: 'user', speaker: 'athlete',
+    messages: [{ id: message, role: 'user', speaker: 'athlete',
       text: 'My Tuesday practice is now shorter and I have more time for the passing cue.',
       at: '2026-09-25T08:00:00.000Z' }],
     plan: { id: 'agreed-plan', title: 'A separate chosen plan', why: 'It fits the week.',
       steps: [{ action: 'Try one cue', when: 'Thursday', notice: 'A calmer choice', owner: 'athlete' }],
       review: 'Next week', accepted_at: '2026-09-25T08:02:00.000Z' } };
   const candidate = { confirmation: clone(nia.apa.confirmation), report: clone(nia.apa.report) };
-  const source = `APA:CURRENT:${changeId}`;
+  const source = `APA:CURRENT:${change}`;
   candidate.report.domains[1].gap = 'A shorter Tuesday practice now leaves room for a passing cue.';
   candidate.report.domains[1].refs.push(source);
   candidate.report.futures[0].headline = 'A shorter practice with a clear cue';
   candidate.report.futures[0].refs.push(source);
   const published = publishCurrentApa({ bundle: nia, state, confirmedChange: {
-    id: changeId, source_message_id: messageId, athlete_slug: 'nia', mm: nia.person.mm,
+    id: change, source_message_id: message, athlete_slug: 'nia', mm: nia.person.mm,
     kind: 'reality', supersedes: [], confirmed: true, confirmed_by: 'athlete',
     confirmed_at: '2026-09-25T08:01:00.000Z', reason: 'Nia confirmed her practice schedule changed.',
   }, candidate, expectedVersion: 0 });
   state.currentApa = published.record;
   return state;
 }
+
+test('public reader accepts server-valid historical UUID case and version without a new authority rule', () => {
+  const state = currentState({ change: 'ABCDEF12-ABCD-7ABC-ABCD-ABCDEF123456',
+    message: 'ABCDEF13-ABCD-7ABC-ABCD-ABCDEF123456' });
+  assert.equal(currentApaView(nia, state.currentApa).version, 1);
+  assert.equal(resolveApaReading(nia, state).version, 1);
+});
 
 test('all overview cards, evidence drawer and accepted-plan card derive from one current artifact', () => {
   const state = currentState();
@@ -74,8 +81,8 @@ test('a prepared proposal is selectable across all boxes but is never represente
   const state = currentState();
   const proposed = state.currentApa;
   state.currentApa = null;
-  state.apaDraft = { id: 'synthetic-draft', expectedVersion: 0,
-    confirmedChange: { mm: nia.person.mm, athlete_slug: 'nia' }, previewRecord: proposed };
+  state.apaDraft = { id: changeId, hash: 'f'.repeat(64), expectedVersion: 0,
+    previewRecord: proposed };
   const current = resolveApaReading(nia, state);
   assert.equal(current.artifact, nia.apa);
   assert.equal(current.version, 0);

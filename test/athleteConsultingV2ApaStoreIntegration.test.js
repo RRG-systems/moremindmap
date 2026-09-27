@@ -3,7 +3,8 @@ import { randomUUID } from 'node:crypto';
 import test from 'node:test';
 import { bundles } from '../server/athleteConsultingV2/bundles.js';
 import { flagshipCoachingInput } from '../server/athleteConsultingV2/coach.js';
-import { currentApaView } from '../server/athleteConsultingV2/currentApa.js';
+import { currentApaHash, currentApaView } from '../server/athleteConsultingV2/currentApa.js';
+import { project, resolveApaReading } from '../src/athleteConsultingV2/approved-apa/projection.js';
 import { APA_NARRATIVE_FIELDS, APA_CONFIRMATION_NARRATIVE_FIELDS,
   getApaNarrativeValue, setApaNarrativeValue } from '../server/athleteConsultingV2/apaNarrative.js';
 import { athleteConsultingV2Keys, createStore, PERSIST_LUA } from '../server/athleteConsultingV2/store.js';
@@ -96,6 +97,135 @@ async function publishDraft(store, slug, prepared) {
   return store.act(slug, { action: 'publish_apa', id: prepared.apaDraft.id,
     hash: prepared.apaDraft.hash, revision: prepared.revision, requestId: randomUUID() });
 }
+
+test('real sanitized store DTO opens a cold proposal for either selected synthetic athlete without publication', async () => {
+  for (const slug of ['nia', 'sofia']) {
+    const { store, redis, scopeId } = fixture();
+    const sourceMessageId = await savedMessage(store, slug);
+    const prepared = await store.act(slug, updateBody(await store.read(slug), sourceMessageId));
+    assert.deepEqual(Object.keys(prepared.apaDraft).sort(), ['expectedVersion', 'hash', 'id', 'previewRecord']);
+    for (const privateKey of ['confirmedChange', 'candidate', 'source_hash', 'receipt', 'reviewRequirementIds']) {
+      assert.equal(Object.hasOwn(prepared.apaDraft, privateKey), false);
+    }
+    const cold = createStore({ redis, bundles, scopeId,
+      coach: async () => { throw Error('UNEXPECTED_MODEL'); },
+      apaComposer: async () => { throw Error('UNEXPECTED_COMPOSER'); } });
+    const state = await cold.read(slug), before = clone(state);
+    const current = resolveApaReading(bundles[slug], state);
+    const preview = resolveApaReading(bundles[slug], state, { showPreview: true });
+    const original = resolveApaReading(bundles[slug], state, { showOriginal: true });
+    assert.deepEqual(current.artifact, bundles[slug].apa);
+    assert.equal(current.version, 0);
+    assert.equal(preview.version, 1);
+    assert.equal(preview.showPreview, true);
+    assert.deepEqual(preview.artifact, state.apaDraft.previewRecord.artifact);
+    assert.deepEqual(original.artifact, bundles[slug].apa);
+    const view = project(preview.artifact, { ...preview, acceptedPlan: preview.acceptedPlan });
+    assert.deepEqual(view.nav.map(item => item.id), ['where', 'futures', 'move', 'plan', 'evidence']);
+    assert.match(view.objects.version.display_payload.title, /not current/u);
+    assert.deepEqual(await cold.read(slug), before);
+    assert.equal((await cold.read(slug === 'nia' ? 'sofia' : 'nia')).apaDraft ?? null, null);
+  }
+});
+
+test('sanitized public proposal rejects foreign identity, source, version, receipt and artifact seams', async t => {
+  const { store } = fixture(), sourceMessageId = await savedMessage(store);
+  const prepared = await store.act('nia', updateBody(await store.read('nia'), sourceMessageId));
+  const mutations = {
+    missing_draft_id: draft => { delete draft.id; },
+    malformed_draft_hash: draft => { draft.hash = 'not-a-hash'; },
+    foreign_slug: draft => { draft.previewRecord.binding.slug = 'sofia'; },
+    foreign_mm: draft => { draft.previewRecord.binding.mm = bundles.sofia.person.mm; },
+    foreign_baseline: draft => { draft.previewRecord.binding.baseline_hash = bundles.sofia.apa.artifact_sha256; },
+    foreign_bos: draft => { draft.previewRecord.binding.bos_hash = bundles.sofia.bos.artifact_sha256; },
+    foreign_artifact: draft => { draft.previewRecord.artifact.mm = bundles.sofia.person.mm; },
+    non_synthetic_artifact: draft => { draft.previewRecord.artifact.synthetic = false; },
+    stale_expected_version: draft => { draft.expectedVersion = 1; },
+    stale_preview_version: draft => { draft.previewRecord.version = 2; },
+    receipt_hash: draft => { draft.previewRecord.receipts.at(-1).receipt_hash = '0'.repeat(64); },
+    receipt_source_id: draft => { draft.previewRecord.receipts.at(-1).source_id = 'APA:CURRENT:foreign'; },
+    receipt_message_id: draft => { draft.previewRecord.receipts.at(-1).source_message_id = randomUUID(); },
+    foreign_source_message: draft => { draft.previewRecord.artifact.sources.at(-1).source_message_id = randomUUID(); },
+    coach_source: draft => { draft.previewRecord.artifact.sources.at(-1).epistemic = 'COACH_OBSERVATION'; },
+    source_time: draft => { draft.previewRecord.artifact.sources.at(-1).at = '2026-09-24T00:00:00.000Z'; },
+    artifact_content: draft => { draft.previewRecord.artifact.confirmation.priority = 'Unreviewed value'; },
+    prior_artifact: draft => { draft.previewRecord.receipts.at(-1).prior_artifact_sha256 = '0'.repeat(64); },
+    prior_hash: draft => { draft.previewRecord.receipts.at(-1).prior_hash = '0'.repeat(64); },
+    original_source: draft => { draft.previewRecord.artifact.sources[0].text = 'Changed original answer'; },
+    original_bos: draft => { draft.previewRecord.artifact.bos_sources[0].text = 'Changed original BOS'; },
+  };
+  for (const [name, mutate] of Object.entries(mutations)) await t.test(name, () => {
+    const state = clone(prepared);
+    mutate(state.apaDraft);
+    assert.throws(() => resolveApaReading(bundles.nia, state, { showPreview: true }),
+      /latest APA version could not be verified/u);
+  });
+  // Even independently rehashed receipt tampering cannot detach the public
+  // receipt from its source or substitute a different prior artifact.
+  for (const field of ['source_message_id', 'source_id', 'prior_artifact_sha256']) await t.test(`rehashed_${field}`, () => {
+    const state = clone(prepared), receipt = state.apaDraft.previewRecord.receipts.at(-1);
+    receipt[field] = field === 'source_message_id' ? randomUUID() : '0'.repeat(64);
+    const { receipt_hash: _hash, ...body } = receipt;
+    receipt.receipt_hash = currentApaHash(body);
+    assert.throws(() => resolveApaReading(bundles.nia, state, { showPreview: true }),
+      /latest APA version could not be verified/u);
+  });
+  for (const field of ['original_source', 'original_bos', 'coach_source', 'source_time', 'foreign_source_message', 'non_synthetic_artifact']) await t.test(`rehashed_${field}`, () => {
+    const state = clone(prepared), record = state.apaDraft.previewRecord;
+    mutations[field](state.apaDraft);
+    const { artifact_sha256: _artifactHash, ...artifact } = record.artifact;
+    record.artifact.artifact_sha256 = currentApaHash(artifact);
+    const receipt = record.receipts.at(-1);
+    receipt.content_hash = record.artifact.artifact_sha256;
+    const { receipt_hash: _receiptHash, ...body } = receipt;
+    receipt.receipt_hash = currentApaHash(body);
+    assert.throws(() => resolveApaReading(bundles.nia, state, { showPreview: true }),
+      /latest APA version could not be verified/u);
+  });
+});
+
+test('real version-two sanitized proposal retains exact prior receipt history and remains separate', async () => {
+  const { store, redis, scopeId } = fixture(input => {
+    const result = candidateFor(input);
+    if (input.record) result.candidate.report.domains.find(item => item.id === 'training').gap =
+      'The athlete confirmed another changed constraint for the next practice week.';
+    return result;
+  }), firstSource = await savedMessage(store);
+  const firstDraft = await store.act('nia', updateBody(await store.read('nia'), firstSource));
+  const published = await publishDraft(store, 'nia', firstDraft);
+  const message = await act(store, 'nia', { action: 'message', speaker: 'athlete',
+    text: 'My next practice week now has another changed constraint.' });
+  const source = message.messages.filter(item => item.role === 'user').at(-1).id;
+  const second = await store.act('nia', updateBody(await store.read('nia'), source, randomUUID(), 1));
+  assert.equal(second.apaDraft.previewRecord.version, 2);
+  const cold = createStore({ redis, bundles, scopeId,
+    coach: async () => { throw Error('UNEXPECTED_MODEL'); },
+    apaComposer: async () => { throw Error('UNEXPECTED_COMPOSER'); } });
+  const state = await cold.read('nia');
+  assert.equal(resolveApaReading(bundles.nia, state).version, 1);
+  assert.equal(resolveApaReading(bundles.nia, state, { showPreview: true }).version, 2);
+  assert.deepEqual(state.currentApa, published.currentApa);
+  for (const field of ['prior_version', 'prior_artifact_sha256']) {
+    const invalid = clone(state.currentApa), receipt = invalid.receipts[0];
+    receipt[field] = field === 'prior_version' ? 1 : '0'.repeat(64);
+    const { receipt_hash: _hash, ...body } = receipt;
+    receipt.receipt_hash = currentApaHash(body);
+    assert.throws(() => resolveApaReading(bundles.nia, { ...state, currentApa: invalid, apaDraft: null }),
+      /latest APA version could not be verified/u);
+  }
+  const bad = clone(state), preview = bad.apaDraft.previewRecord;
+  preview.receipts[0].reason = 'Different history';
+  const { receipt_hash: _firstHash, ...first } = preview.receipts[0];
+  preview.receipts[0].receipt_hash = currentApaHash(first);
+  preview.receipts[1].prior_hash = preview.receipts[0].receipt_hash;
+  const { receipt_hash: _secondHash, ...last } = preview.receipts[1];
+  preview.receipts[1].receipt_hash = currentApaHash(last);
+  assert.throws(() => resolveApaReading(bundles.nia, bad, { showPreview: true }),
+    /latest APA version could not be verified/u);
+  const final = await publishDraft(cold, 'nia', state);
+  assert.equal(resolveApaReading(bundles.nia, final).version, 2);
+  assert.deepEqual(resolveApaReading(bundles.nia, final, { showOriginal: true }).artifact, bundles.nia.apa);
+});
 
 test('athlete priority and timing remain a reviewed exact draft until separate manual publication', async () => {
   let composerCalls = 0;
