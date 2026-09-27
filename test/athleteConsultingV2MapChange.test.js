@@ -185,9 +185,14 @@ test('a changed One Move names both actions and the current fit instead of expos
   const result = publish(bundles.nia, state, { decorateCandidate(candidate, source) {
     const original = candidate.report.candidates.find(item => item.candidate_id === originalMove.candidate_id);
     original.refs.push(source);
+    original.why += ' This earlier option still needs its own guidance check.';
     original.gates[0].pass = false;
     original.gates[0].reason = 'Nia confirmed this step needs a different coach agreement first.';
     original.gates[0].refs.push(source);
+    for (const option of candidate.report.candidates.filter(item => item.candidate_id !== originalMove.candidate_id)) {
+      option.why += ' This is still a suggestion, not an accepted plan.';
+      option.refs.push(source);
+    }
   } });
   const changed = buildSessionMapChange({ bundle: bundles.nia, state, startMap: start });
   const move = changed.apa.entries.find(entry => entry.path === 'move.selection');
@@ -206,6 +211,18 @@ test('a changed One Move names both actions and the current fit instead of expos
   assert.match(row.value, /During Monday and Wednesday team practice/u);
   assert.match(row.note, /Why this fits now:/u);
   assert.doesNotMatch(row.value, /candidate_id|\bM[1-4]\b|\{"status"/u);
+  const currentId = result.record.artifact.move.candidate_id;
+  assert.notEqual(currentId, originalMove.candidate_id);
+  const earlier = changed.object.details.filter(item => item.path.startsWith(`report.candidates.${originalMove.candidate_id}.`));
+  assert(earlier.length > 1); assert(earlier.every(item => item.label.startsWith('Your earlier suggested One Move')));
+  const currentWhyPath = `report.candidates.${currentId}.why`;
+  const currentWhy = changed.object.details.find(item => item.path === currentWhyPath);
+  assert.equal(currentWhy.label, 'Your suggested One Move · why it may fit');
+  assert.equal(currentWhy.now, result.record.artifact.report.candidates.find(item => item.candidate_id === currentId).why);
+  const currentWhyRow = changed.object.items.find(item => item.label === currentWhy.label);
+  assert(currentWhyRow); assert(!changed.object.items.some(item => item.label.startsWith('Your earlier suggested One Move')));
+  assert.equal(move.now, result.record.artifact.move.action);
+  assert.equal(move.now_rationale, result.record.artifact.move.why);
 });
 
 test('same-title accepted-plan timing edit has a meaningful before-to-now line and exact binding', () => {

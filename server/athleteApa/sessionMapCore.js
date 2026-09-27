@@ -178,8 +178,9 @@ function label(path, before, now) {
   if (parts[1] === 'domains') return `${domainNames[parts[2]]} · ${domainLabels[parts[3]]}`;
   if (parts[1] === 'futures') return `${futureNames[parts[2]]} · ${futureLabels[parts[3]]}`;
   if (parts[1] === 'candidates') {
-    const selected = [before?.fields['move.selection']?.candidate_id, now?.fields['move.selection']?.candidate_id].includes(parts[2]);
-    const prefix = selected ? 'Your suggested One Move' : 'Another assessment option';
+    const current = now?.fields['move.selection']?.candidate_id === parts[2];
+    const earlier = before?.fields['move.selection']?.candidate_id === parts[2];
+    const prefix = current ? 'Your suggested One Move' : earlier ? 'Your earlier suggested One Move' : 'Another assessment option';
     return parts[3] === 'gates' ? `${prefix} · ${gateNames[parts[4]]} check`
       : `${prefix} · ${optionLabels[parts[3]]}`;
   }
@@ -352,7 +353,7 @@ function highlight(entry, before, now) {
         : 'Saved reading detail changed. Its recorded athlete review is below.' };
 }
 
-function representativeEntries(entries, before, now, limit = 8) {
+function representativeEntries(entries, now, limit = 8) {
   const selected = [];
   const pick = predicate => {
     const entry = entries.find(item => predicate(item.path) && !selected.includes(item));
@@ -363,8 +364,8 @@ function representativeEntries(entries, before, now, limit = 8) {
   pick(path => path.startsWith('confirmation.goals.') || path.startsWith('report.domains.'));
   pick(path => path.startsWith('report.futures.') && !path.endsWith('.sufficient_evidence'));
   pick(path => path === 'move.selection');
-  const selectedIds = [now.fields['move.selection']?.candidate_id, before.fields['move.selection']?.candidate_id].filter(Boolean);
-  for (const id of selectedIds) pick(path => path.startsWith(`report.candidates.${id}.`)
+  const selectedId = now.fields['move.selection']?.candidate_id;
+  if (selectedId) pick(path => path.startsWith(`report.candidates.${selectedId}.`)
     && !path.includes('.gates.') && !path.endsWith('.selection_signals'));
   for (const entry of entries) {
     if (selected.length >= limit) break;
@@ -444,7 +445,7 @@ function buildSessionMapChange(input) {
         : versionAdvanced ? `Your saved APA was revised this session, but its current map matches where this session began.${planChanged ? ' The accepted plan changed.' : ''}`
         : planChanged ? 'The accepted plan changed this session; the saved APA did not.'
           : 'No saved APA or accepted-plan change this session.';
-  const representatives = representativeEntries(entries, comparison.before, comparison.now);
+  const representatives = representativeEntries(entries, comparison.now);
   const planPreview = planEntries.length
     ? `${short(planEntries[0].label, 45)}: ${shortPair(planEntries[0].before, planEntries[0].now, 62)}`
     : shortPair(planLine(startMap.plan), planLine(nowPlan), 88);
