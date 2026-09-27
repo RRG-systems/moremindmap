@@ -13,11 +13,32 @@ const CANDIDATE_FIELDS = ['domain', 'action', 'why', 'when', 'who', 'action_sign
   'progress_signal', 'review', 'review_schedule', 'stop_or_change', 'bos_fit', 'selection_signals'];
 const REPORT_FIELDS = ['headline', 'opening', 'connection', 'main_obstacle', 'what_we_dont_know'];
 const NEW_SUMMARY_FIELDS = ['headline', 'opening'];
-const summaryLabel = { headline: 'APA heading', opening: 'Your whole picture',
+const summaryLabel = { headline: 'Your whole-picture heading', opening: 'Your whole picture',
   connection: 'How it connects', main_obstacle: 'Main obstacle', what_we_dont_know: 'What is still unknown',
   'confirmation.priority': 'Your current priority',
   'confirmation.review_date': 'Your agreed review date',
-  'confirmation.horizon_date': 'Your agreed horizon date' };
+  'confirmation.horizon_date': 'Your planning horizon' };
+const domainNames = { sport: 'Sport', training: 'Training', mindset: 'Mindset', school: 'School', coordination: 'Coordination' };
+const domainLabels = { goal: 'goal', strength: 'strength', gap: 'current challenge', help: 'help that may fit',
+  detail: 'what this means', bos_connection: 'connection to your portrait', unknowns: 'what remains unknown' };
+const futureNames = { current_course: 'Your current-course future', emerging_future: 'Your emerging future',
+  better_future: 'Your better future', bold_future: 'Your bold future', downside_future: 'What could go wrong' };
+const futureLabels = { headline: 'direction', what: 'possibility', conditions: 'conditions', first_sign: 'first sign',
+  details: 'what this means', sufficient_evidence: 'evidence support' };
+const optionLabels = { domain: 'part of your life', action: 'suggested action', why: 'why it may fit', when: 'timing',
+  who: 'who would be involved', action_signal: 'first action', progress_signal: 'what to notice', review: 'review',
+  review_schedule: 'check-in timing', stop_or_change: 'when to stop or change', bos_fit: 'fit with your portrait',
+  selection_signals: 'comparison evidence', removed: 'removed from the assessment' };
+const gateNames = { athlete_agency: 'your choice', real_week: 'fit with your week', qualified_guidance: 'guidance',
+  school_and_recovery: 'school and recovery', understandable: 'clarity' };
+const signalNames = { constraint_leverage: 'Effect on the current obstacle', causal_reach: 'Reach of the proposed change',
+  evidence_support: 'Evidence support', execution_feasibility: 'Feasibility now', time_to_signal: 'Time to notice a signal',
+  reversibility_low_regret: 'Reversibility', trajectory_leverage: 'Effect on future paths', dependency_burden: 'Outside dependencies' };
+const signalValues = { NONE: 'None', WEAK: 'Weak', MATERIAL: 'Material', DIRECT: 'Direct', SYMPTOM_ONLY: 'Symptom only',
+  LOCAL: 'Local', MECHANISM_CHAIN: 'Mechanism chain', SYSTEMIC: 'Systemic', MODERATE: 'Moderate', STRONG: 'Strong',
+  INFEASIBLE: 'Infeasible', DIFFICULT: 'Difficult', FEASIBLE: 'Feasible', READY: 'Ready', DISTANT: 'Distant', LONG: 'Long',
+  MEDIUM: 'Medium', NEAR: 'Near', HIGH_REGRET: 'High regret', LOCK_IN: 'Lock-in', REVERSIBLE: 'Reversible',
+  BOUNDED_TEST: 'Bounded test', INDIRECT: 'Indirect', HIGH: 'High', LOW: 'Low' };
 const UUID = /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/iu;
 const ensure = (condition, code) => { if (!condition) throw new Error(code); };
 const clone = value => structuredClone(value);
@@ -127,8 +148,17 @@ const short = (value, limit = 150) => {
   const text = String(value);
   return text.length <= limit ? text : `${text.slice(0, limit - 1)}…`;
 };
+function comparisonExcerpt(value, other, limit) {
+  const chars = Array.from(String(value)), compared = Array.from(String(other));
+  if (chars.length <= limit) return chars.join('');
+  let difference = 0;
+  while (difference < chars.length && difference < compared.length && chars[difference] === compared[difference]) difference++;
+  const start = Math.min(Math.max(0, difference - Math.floor(limit / 3)), chars.length - limit + 2);
+  const content = chars.slice(start, start + limit - 2).join('');
+  return `${start ? '…' : ''}${content}${start + limit - 2 < chars.length ? '…' : ''}`;
+}
 const shortPair = (before, now, sideLimit = 88) =>
-  `${short(before, sideLimit)} → ${short(now, sideLimit)}`;
+  `${comparisonExcerpt(before, now, sideLimit)} → ${comparisonExcerpt(now, before, sideLimit)}`;
 
 function display(value, present) {
   if (!present) return 'Not present';
@@ -137,19 +167,23 @@ function display(value, present) {
   return JSON.stringify(value);
 }
 
-function label(path) {
+function label(path, before, now) {
   if (path === 'move.selection') return 'Your One Move';
   const parts = path.split('.');
   if (parts[0] === 'narrative_provenance') return `${summaryLabel[path.slice('narrative_provenance.'.length)]} · evidence`;
   if (Object.hasOwn(summaryLabel, path)) return summaryLabel[path];
   if (parts[0] === 'report' && Object.hasOwn(summaryLabel, parts[1])) return summaryLabel[parts[1]];
   if (parts[0] === 'confirmation' && parts[1] === 'goals')
-    return `${parts[2]} goal`;
-  if (parts[0] === 'confirmation') return `APA ${parts[1].replaceAll('_', ' ')}`;
-  if (parts[1] === 'domains') return `${parts[2]} · ${parts[3].replaceAll('_', ' ')}`;
-  if (parts[1] === 'futures') return `${parts[2].replaceAll('_', ' ')} future · ${parts[3].replaceAll('_', ' ')}`;
-  if (parts[1] === 'candidates') return `${parts[2]} option · ${parts[3].replaceAll('_', ' ')}`;
-  return `APA ${parts.slice(1).join(' ').replaceAll('_', ' ')}`;
+    return `${domainNames[parts[2]]} goal`;
+  if (parts[1] === 'domains') return `${domainNames[parts[2]]} · ${domainLabels[parts[3]]}`;
+  if (parts[1] === 'futures') return `${futureNames[parts[2]]} · ${futureLabels[parts[3]]}`;
+  if (parts[1] === 'candidates') {
+    const selected = [before?.fields['move.selection']?.candidate_id, now?.fields['move.selection']?.candidate_id].includes(parts[2]);
+    const prefix = selected ? 'Your suggested One Move' : 'Another assessment option';
+    return parts[3] === 'gates' ? `${prefix} · ${gateNames[parts[4]]} check`
+      : `${prefix} · ${optionLabels[parts[3]]}`;
+  }
+  return 'Other saved reading detail';
 }
 
 function provenanceDisplay(value, present) {
@@ -210,7 +244,7 @@ function changedFields(before, now, receipts) {
       || path === `narrative_provenance.${field}`);
     const beforeEvidence = narrativeField ? before.fields[`narrative_provenance.${narrativeField}`] : null;
     const afterEvidence = narrativeField ? now.fields[`narrative_provenance.${narrativeField}`] : null;
-    entries.push({ path, label: label(path),
+    entries.push({ path, label: label(path, before, now),
       before: path === 'move.selection' ? before.move_copy?.action || 'No One Move suggestion'
         : path.startsWith('narrative_provenance.') ? provenanceDisplay(oldValue, beforePresent)
         : display(oldValue, beforePresent),
@@ -238,7 +272,7 @@ function changedFields(before, now, receipts) {
   for (const id of [...removed].sort()) {
     const path = `report.candidates.${id}.removed`, lineage = supported.get(path);
     ensure(lineage?.length, 'MAP_CHANGE_UNRECEIPTED_FIELD');
-    entries.push({ path, label: label(path), before: 'Present', now: 'Removed',
+    entries.push({ path, label: label(path, before, now), before: 'Present', now: 'Removed',
       receipts: lineage.map(receipt => ({ version: receipt.version,
         receipt_hash: receipt.receipt_hash, source_id: receipt.source_id,
         source_message_id: receipt.source_message_id, reason: receipt.reason,
@@ -254,12 +288,14 @@ function changedPlanFields(before, now) {
     entries.push({ path, label: labelText, before: display(prior, prior !== undefined),
       now: display(current, current !== undefined) });
   };
+  const planLabels = { title: 'Accepted plan title', why: 'Why your plan fits', review: 'Agreed plan review' };
+  const stepLabels = { action: 'agreed action', when: 'timing', notice: 'what to notice', owner: 'who owns it' };
   for (const field of ['title', 'why', 'review'])
-    add(`plan.${field}`, `Plan ${field}`, before?.[field], now?.[field]);
+    add(`plan.${field}`, planLabels[field], before?.[field], now?.[field]);
   const length = Math.max(before?.steps.length || 0, now?.steps.length || 0);
   for (let index = 0; index < length; index++)
     for (const field of ['action', 'when', 'notice', 'owner'])
-      add(`plan.steps.${index}.${field}`, `Step ${index + 1} ${field}`,
+      add(`plan.steps.${index}.${field}`, `Step ${index + 1} · ${stepLabels[field]}`,
         before?.steps[index]?.[field], now?.steps[index]?.[field]);
   if (before && now && entries.length === 0 && before.hash !== now.hash)
     add('plan.acceptance', 'Plan acceptance',
@@ -267,22 +303,77 @@ function changedPlanFields(before, now) {
   return entries;
 }
 
-function representativeEntries(entries, limit = 6) {
+function detailValue(path, value, present) {
+  if (!present || value === null || typeof value === 'string') return { text: display(value, present) };
+  if (Array.isArray(value) && value.every(item => typeof item === 'string'))
+    return { text: value.join('\n'), lines: clone(value) };
+  if (typeof value === 'boolean') return { text: path.endsWith('.sufficient_evidence')
+    ? value ? 'Enough evidence for this path' : 'Not enough evidence for this path'
+    : value ? 'Check passed' : 'Check not passed' };
+  if (path.endsWith('.selection_signals')) {
+    const lines = Object.entries(value).map(([key, level]) => `${signalNames[key]}: ${signalValues[level]}`);
+    ensure(lines.every(line => !line.includes('undefined')), 'MAP_CHANGE_PRESENTATION_INVALID');
+    return { text: lines.join('\n'), lines };
+  }
+  if (path.endsWith('.review_schedule')) {
+    const lines = [`Setup check: ${value.setup_check}`, `Progress check: ${value.progress_check}`];
+    return { text: lines.join('\n'), lines };
+  }
+  if (path.endsWith('.domain')) return { text: domainNames[value] };
+  // No caller-selected object or metadata JSON is dumped into visual copy.
+  ensure(false, 'MAP_CHANGE_PRESENTATION_INVALID');
+}
+
+function mapDetails(entries, before, now) {
+  return entries.map(entry => {
+    const evidence = entry.path.startsWith('narrative_provenance.') && entry.narrative_evidence?.value_changed === false;
+    const values = entry.path === 'move.selection' || entry.path.endsWith('.removed')
+      || entry.path.startsWith('narrative_provenance.')
+      ? { before: { text: entry.before }, now: { text: entry.now } }
+      : { before: detailValue(entry.path, before.fields[entry.path], Object.hasOwn(before.fields, entry.path)),
+        now: detailValue(entry.path, now.fields[entry.path], Object.hasOwn(now.fields, entry.path)) };
+    return { path: entry.path, label: entry.label, change_type: evidence ? 'EVIDENCE' : 'CONTENT',
+      before: values.before.text, now: values.now.text,
+      ...(values.before.lines ? { before_lines: values.before.lines } : {}),
+      ...(values.now.lines ? { now_lines: values.now.lines } : {}),
+      ...(entry.path === 'move.selection' ? { before_rationale: entry.before_rationale, now_rationale: entry.now_rationale } : {}),
+      sourceIds: [...new Set(entry.receipts.map(receipt => `athlete-source-apa-receipt-v${receipt.version}`))],
+      evidence_note: `Recorded athlete review: ${entry.receipts.at(-1).reason}` };
+  });
+}
+
+function highlight(entry, before, now) {
+  const detail = mapDetails([entry], before, now)[0];
+  const excerpt = Array.from(detail.before).length > 88 || Array.from(detail.now).length > 88;
+  return { label: detail.label, value: shortPair(detail.before, detail.now),
+    note: entry.path === 'move.selection' && entry.now_rationale
+      ? `${short(`Why this fits now: ${entry.now_rationale}`, excerpt ? 153 : 210)}${excerpt ? ' Excerpt; full wording is below.' : ''}`
+      : excerpt ? 'Excerpt; full wording and recorded review are below.'
+        : 'Saved reading detail changed. Its recorded athlete review is below.' };
+}
+
+function representativeEntries(entries, before, now, limit = 8) {
   const selected = [];
   const pick = predicate => {
     const entry = entries.find(item => predicate(item.path) && !selected.includes(item));
     if (entry) selected.push(entry);
   };
-  pick(path => path.startsWith('confirmation.') || path.startsWith('report.domains.')
-    || REPORT_FIELDS.some(field => path === `report.${field}`));
-  pick(path => path.startsWith('report.futures.'));
+  for (const path of ['confirmation.priority', 'confirmation.review_date', 'confirmation.horizon_date']) pick(value => value === path);
+  for (const path of ['report.opening', 'report.headline']) pick(value => value === path);
+  pick(path => path.startsWith('confirmation.goals.') || path.startsWith('report.domains.'));
+  pick(path => path.startsWith('report.futures.') && !path.endsWith('.sufficient_evidence'));
   pick(path => path === 'move.selection');
-  pick(path => path.startsWith('report.candidates.'));
+  const selectedIds = [now.fields['move.selection']?.candidate_id, before.fields['move.selection']?.candidate_id].filter(Boolean);
+  for (const id of selectedIds) pick(path => path.startsWith(`report.candidates.${id}.`)
+    && !path.includes('.gates.') && !path.endsWith('.selection_signals'));
   for (const entry of entries) {
     if (selected.length >= limit) break;
-    if (!selected.includes(entry)) selected.push(entry);
+    // Evidence/selector metadata and unselected options stay in exact details,
+    // never become a first-match personal headline.
+    if (!selected.includes(entry) && !entry.path.startsWith('narrative_provenance.') && !entry.path.endsWith('.sufficient_evidence')
+      && !entry.path.startsWith('report.candidates.')) selected.push(entry);
   }
-  return selected;
+  return selected.slice(0, limit);
 }
 
 function pendingApa(bundle, state, current, input) {
@@ -323,6 +414,7 @@ function buildSessionMapChange(input) {
   const entries = changedFields(comparison.before, comparison.now, newReceipts);
   const versionAdvanced = current.version > startMap.apa.version;
   const apaChanged = entries.length > 0;
+  const wordingChanged = entries.some(entry => !entry.path.startsWith('narrative_provenance.'));
   const planChanged = !same(startMap.plan, nowPlan);
   const planEntries = changedPlanFields(startMap.plan, nowPlan);
   const pending = pendingApa(bundle, state, current, input);
@@ -346,34 +438,35 @@ function buildSessionMapChange(input) {
     classification: policy.classification('PROPOSED_ONLY', bundle), hash: pending.artifact_hash });
   const statement = needsReview
     ? `An earlier saved APA is historical and awaiting athlete review.${planChanged ? ' The accepted plan changed this session.' : ''}`
+    : apaChanged && !wordingChanged ? `Your saved wording is unchanged; its reviewed evidence changed this session.${planChanged ? ' The accepted plan changed.' : ' The accepted plan did not.'}`
     : apaChanged && planChanged ? 'The saved APA and accepted plan changed this session.'
       : apaChanged ? 'The saved APA changed this session; the accepted plan did not.'
         : versionAdvanced ? `Your saved APA was revised this session, but its current map matches where this session began.${planChanged ? ' The accepted plan changed.' : ''}`
         : planChanged ? 'The accepted plan changed this session; the saved APA did not.'
           : 'No saved APA or accepted-plan change this session.';
-  const representatives = representativeEntries(entries);
+  const representatives = representativeEntries(entries, comparison.before, comparison.now);
   const planPreview = planEntries.length
     ? `${short(planEntries[0].label, 45)}: ${shortPair(planEntries[0].before, planEntries[0].now, 62)}`
     : shortPair(planLine(startMap.plan), planLine(nowPlan), 88);
   const items = [
+    ...representatives.map(entry => highlight(entry, comparison.before, comparison.now)),
+    ...(entries.some(entry => entry.path.startsWith('narrative_provenance.')) ? [{ label: 'Reviewed evidence',
+      value: entries.some(entry => entry.path.startsWith('narrative_provenance.') && entry.narrative_evidence?.value_changed)
+        ? 'Evidence for your saved wording was reviewed.' : 'Same wording, reviewed evidence.',
+      note: 'Evidence changes are separate from wording changes. Review the full comparison below.' }] : []),
     { label: 'Saved APA', value: `Version ${startMap.apa.version} → ${nowApa.version}`,
       note: needsReview ? 'The earlier reading is historical and awaiting athlete review.'
         : apaChanged ? 'Only separately published athlete-reviewed versions count.'
           : versionAdvanced ? 'A saved version was updated, but the visible map has no net change.'
           : 'No published APA change this session.' },
-    ...representatives.map(entry => ({ label: short(entry.label, 90),
-      value: shortPair(entry.before, entry.now),
-      note: entry.path === 'move.selection' && entry.now_rationale
-        ? `${short(`Why it changed: ${entry.receipts.at(-1).reason}`, 99)} · ${short(`Why this fits now: ${entry.now_rationale}`, 106)}`
-        : short(`Why: ${entry.receipts.at(-1).reason}`, 210) })),
     { label: 'Accepted plan', value: planPreview,
-      note: planChanged ? short(nowPlan?.why || 'The previous accepted plan is no longer saved.', 210)
+      note: planChanged ? `${short(nowPlan?.why || 'The previous accepted plan is no longer saved.', 140)}${planEntries.some(entry => entry.before.length > 62 || entry.now.length > 62) ? ' Excerpt; full plan details are below.' : ''}`
         : 'No accepted-plan change this session.' },
     ...(pending ? [{ label: 'APA proposal', value: `Version ${pending.proposed_version} · not published`,
       note: 'This proposed reading is separate from the saved APA.' }] : []),
-    ...(entries.length > representatives.length ? [{ label: 'More map details',
-      value: `${entries.length - representatives.length} other saved details changed`,
-      note: 'These are highlights. See Your Sport for the full current report.' }] : []),
+    ...(entries.length > representatives.length ? [{ label: 'Complete comparison',
+      value: 'Review all saved changes',
+      note: 'The full wording and reviewed evidence are below, separate from these highlights.' }] : []),
     ...(comparison.limits.length ? [{ label: 'Earlier comparison limit',
       value: 'Some summary evidence was not captured at session start',
       note: 'No earlier summary value or field citation has been invented.' }] : []),
@@ -405,7 +498,12 @@ function buildSessionMapChange(input) {
       title: 'This is how your map has changed', statement,
       qualifier: pending ? 'A proposed APA is separate from the saved map.'
         : needsReview ? 'The historical APA is not current coaching truth.' : null,
-      items, sourceIds: sources.map(source => source.id) } };
+      items, details: [...mapDetails(entries, comparison.before, comparison.now),
+        ...planEntries.map(entry => ({ path: entry.path, label: entry.label, change_type: 'ACCEPTED_PLAN',
+          before: entry.before, now: entry.now,
+          sourceIds: ['athlete-source-start-plan', 'athlete-source-accepted-plan'].filter(id => sources.some(source => source.id === id)),
+          evidence_note: 'A separately accepted plan, not an APA suggestion.' }))],
+      sourceIds: sources.map(source => source.id) } };
   return bounded(result);
 }
 

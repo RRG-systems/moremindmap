@@ -175,7 +175,8 @@ test('candidate gate and BOS-fit changes use exact granular receipt paths and ba
   const labels = changed.object.items.map(item => item.label).join(' ');
   assert.match(labels, /training/iu);
   assert.match(labels, /future/iu);
-  assert.match(labels, /option/iu);
+  assert.ok(changed.object.details.some(item => /option|One Move/iu.test(item.label)));
+  assert.ok(changed.object.details.every(item => !/\bM[1-4]\b|bos_fit|gates\./u.test(item.label)));
 });
 
 test('a changed One Move names both actions and the current fit instead of exposing selector IDs', () => {
@@ -246,7 +247,7 @@ test('bounded visual rows still show both sides of long APA and plan changes', (
   state.plan = revised;
   state.revision++;
   const changed = buildSessionMapChange({ bundle: bundles.nia, state, startMap: start });
-  const apaRow = changed.object.items.find(item => item.label.includes('training'));
+  const apaRow = changed.object.items.find(item => /training/iu.test(item.label));
   const planRow = changed.object.items.find(item => item.label === 'Accepted plan');
   assert.match(apaRow.value, /Earlier practice detail:/u);
   assert.match(apaRow.value, /→ New practice detail:/u);
@@ -261,8 +262,10 @@ test('bounded visual rows still show both sides of long APA and plan changes', (
 test('a newly accepted copy of identical plan details is labeled reaffirmed, without UUIDs in visual copy', () => {
   const state = stateFor();
   state.plan = acceptedPlan();
+  state.plan.source_version = { source_version: 1, artifact_hash: 'a'.repeat(64) };
   const start = captureSessionStartMap({ bundle: bundles.nia, state });
   const reaffirmed = acceptedPlan();
+  reaffirmed.source_version = { source_version: 2, artifact_hash: 'b'.repeat(64) };
   reaffirmed.id = '99999999-9999-4999-8999-999999999999';
   reaffirmed.accepted_at = '2026-09-25T09:00:00.000Z';
   state.plan = reaffirmed;
@@ -273,6 +276,13 @@ test('a newly accepted copy of identical plan details is labeled reaffirmed, wit
   assert.doesNotMatch(planRow.value, /99999999|55555555/u);
   assert.equal(result.plan.binding.before.id, start.plan.id);
   assert.equal(result.plan.binding.now.id, reaffirmed.id);
+  const detail = result.object.details.find(item => item.path === 'plan.acceptance');
+  assert.ok(detail); assert.equal(detail.change_type, 'ACCEPTED_PLAN');
+  assert.match(detail.before, /Earlier saved agreement/u); assert.match(detail.now, /reaffirmed/u);
+  assert.doesNotMatch(JSON.stringify(result.object), /source_version|artifact_hash|55555555|99999999/u);
+  assert.equal(result.plan.before.title, result.plan.now.title);
+  assert.deepEqual(result.plan.before.steps, result.plan.now.steps);
+  assert.equal(result.plan.before.review, result.plan.now.review);
 });
 
 test('published revisions that net back to the starting map do not claim a material saved change', () => {

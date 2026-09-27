@@ -24,6 +24,16 @@
 .athlete-visual-items dt{font-size:11px;font-weight:700;color:var(--av-accent);line-height:1.45}
 .athlete-visual-items dd{font-size:12px;line-height:1.55;color:var(--av-ink);margin:3px 0 0;overflow-wrap:anywhere}
 .athlete-visual-items .athlete-visual-item-note{color:var(--av-muted)}
+.athlete-visual-change-details{border-top:1px solid #ffffff20;margin-top:14px;padding-top:8px}
+.athlete-visual-change-details>summary,.athlete-visual-change-evidence>summary{cursor:pointer;color:var(--av-accent);font-size:12px;line-height:1.5;padding:8px 0}
+.athlete-visual-change-details article{border-top:1px solid #ffffff20;padding:14px 0;min-width:0;overflow-wrap:anywhere}
+.athlete-visual-change-details h5{font-size:14px;line-height:1.5;margin:0 0 10px;color:var(--av-ink)}
+.athlete-visual-change-details dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,235px),1fr));gap:14px;margin:8px 0}
+.athlete-visual-change-details dt{font-size:11px;font-weight:700;color:var(--av-accent);line-height:1.5}
+.athlete-visual-change-details dd{margin:5px 0 0;font-size:12px;line-height:1.6}
+.athlete-visual-change-details dd p,.athlete-visual-change-details dd ul{margin:0 0 8px}
+.athlete-visual-change-details dd ul{padding-left:18px}
+.athlete-visual-change-evidence p{font-size:11px;color:var(--av-muted);line-height:1.6;margin:5px 0;overflow-wrap:anywhere}
 .athlete-visual-sources{margin-top:15px;border-top:1px solid #ffffff20;padding-top:8px}
 .athlete-visual-sources summary{cursor:pointer;color:var(--av-accent);font-size:11px;line-height:1.5;padding:8px 0}
 .athlete-visual-sources ul{margin:2px 0 4px;padding-left:18px;color:var(--av-muted);font-size:11px;line-height:1.6}

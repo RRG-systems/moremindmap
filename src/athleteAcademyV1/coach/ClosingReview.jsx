@@ -1,6 +1,6 @@
 import React from 'react';
 import AthleteVisual from '../../athleteConsultingV2/AthleteVisual.jsx';
-const Text = ({value}) => String(value||'').split(/\n\s*\n/u).map((p,i)=><p key={i}>{p}</p>);
+import AthleteText from '../../athleteConsultingV2/AthleteText.jsx';
 
 export default function ClosingReview({state,visual,working,remember,setRemember,act,navigate,setChatOpen,reviewRef}) {
   if (!state.closing) return null;
@@ -14,7 +14,7 @@ export default function ClosingReview({state,visual,working,remember,setRemember
   return <section ref={reviewRef} className="closing-card" aria-label="Session closing review" tabIndex="-1">
     <span className="eyebrow">BEFORE YOU GO</span>
     {visual&&<AthleteVisual plan={visual.plan} className="athlete-visual-closing"/>}
-    <Text value={state.closing.summary}/>
+    <AthleteText value={state.closing.summary}/>
     {state.draft&&<button onClick={()=>{navigate('plan');setChatOpen(false);}}>Review proposed plan →</button>}
     {state.suggestedLearning.length>0&&<fieldset><legend>Keep for next time?</legend>
       {state.suggestedLearning.map((t,i)=><label className="check-label" key={i}><input type="checkbox"

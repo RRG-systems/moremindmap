@@ -1,0 +1,5 @@
+.athlete-text{min-width:0;overflow-wrap:anywhere}
+.athlete-text p{margin:0 0 12px}
+.athlete-text ul,.athlete-text ol{padding-left:22px;margin:10px 0 16px}
+.athlete-text li{padding-left:2px;margin:7px 0;line-height:1.6}
+.athlete-text>:last-child{margin-bottom:0}

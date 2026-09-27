@@ -187,7 +187,7 @@ test('priority and timing changes carry exact net before-after/evidence without 
   }
   assert.equal(map.plan.status, 'UNCHANGED');
   assert.deepEqual(map.apa.comparison_limits, []);
-  assert.ok(map.apa.entries.some(item => item.label === 'Your agreed horizon date · evidence'));
+  assert.ok(map.apa.entries.some(item => item.label === 'Your planning horizon · evidence'));
 });
 
 test('an unpublished timing proposal is pending only and preserves the current comparison', () => {

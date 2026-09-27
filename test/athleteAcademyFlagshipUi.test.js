@@ -15,6 +15,7 @@ import { confirmationReadingScope } from '../src/athleteAcademyV1/apa/projection
 import { selectMainAthleteVisuals, selectMainClosingVisual,
   presentClosingAthleteReview } from '../src/athleteAcademyV1/coach/visualUi.js';
 import { frameViewContext } from '../src/athleteAcademyV1/coach/viewContextUi.js';
+import { athleteTextBlocks, athleteTextSegments } from '../src/athleteConsultingV2/athleteText.js';
 
 const clone = value => structuredClone(value);
 const source = path => readFileSync(new URL(path, import.meta.url), 'utf8');
@@ -82,9 +83,13 @@ function component(path, imports, named = null) {
   runInNewContext(transformed, { module, __imports: Object.freeze(imports), structuredClone }, { timeout: 1000 });
   return module.exports;
 }
-const AthleteVisual = component('../src/athleteConsultingV2/AthleteVisual.jsx', { react: React });
+const AthleteText = component('../src/athleteConsultingV2/AthleteText.jsx', {
+  react: React, './athleteText.js': { athleteTextBlocks, athleteTextSegments } });
+const AthleteVisual = component('../src/athleteConsultingV2/AthleteVisual.jsx', {
+  react: React, './AthleteText.jsx': AthleteText });
 const ClosingReview = component('../src/athleteAcademyV1/coach/ClosingReview.jsx', {
-  react: React, '../../athleteConsultingV2/AthleteVisual.jsx': AthleteVisual });
+  react: React, '../../athleteConsultingV2/AthleteVisual.jsx': AthleteVisual,
+  '../../athleteConsultingV2/AthleteText.jsx': AthleteText });
 const MemoryContinuity = component('../src/athleteAcademyV1/coach/MemoryContinuity.jsx', {
   react: React, './currentApaUi.js': { eligibleApaMessages } });
 const Home = component('../src/athleteAcademyV1/coach/App.jsx', { react: React,

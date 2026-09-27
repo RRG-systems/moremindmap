@@ -1,5 +1,31 @@
 import React from 'react';
+import AthleteText from './AthleteText.jsx';
 import './athlete-visual.css';
+
+function ChangeValue({ value, lines }) {
+  return Array.isArray(lines) && lines.every(line => typeof line === 'string')
+    ? <ul>{lines.map((line, index) => <li key={index}>{line}</li>)}</ul> : <p>{value}</p>;
+}
+
+function SavedChangeDetails({ value }) {
+  const details = Array.isArray(value.details) ? value.details : [];
+  if (!details.length || value.kind !== 'MAP_CHANGE_REVEAL') return null;
+  return <details className="athlete-visual-change-details">
+    <summary>Review all saved changes</summary>
+    {details.map((detail, index) => <article key={`${detail.path}-${index}`}>
+      <h5>{detail.label}</h5>
+      {detail.change_type === 'EVIDENCE' && <p className="athlete-visual-qualifier">Same wording, reviewed evidence</p>}
+      {detail.change_type === 'ACCEPTED_PLAN' && <p className="athlete-visual-qualifier">Separately accepted plan</p>}
+      <dl><div><dt>At the start of this session</dt><dd><ChangeValue value={detail.before} lines={detail.before_lines}/>
+        {detail.before_rationale && <p>Why it fit then: {detail.before_rationale}</p>}</dd></div>
+      <div><dt>Saved now</dt><dd><ChangeValue value={detail.now} lines={detail.now_lines}/>
+        {detail.now_rationale && <p>Why it fits now: {detail.now_rationale}</p>}</dd></div></dl>
+      {detail.evidence_note && <details className="athlete-visual-change-evidence">
+        <summary>Recorded athlete review</summary><p>{detail.evidence_note}</p>
+      </details>}
+    </article>)}
+  </details>;
+}
 
 function GovernedObject({ value }) {
   if (!value) return null;
@@ -11,13 +37,16 @@ function GovernedObject({ value }) {
       {value.kind === 'ACCEPTED_PLAN' && <small>Agreed plan</small>}
       {value.kind === 'APA_OPTION' && <small>Assessment option</small>}
     </div>
-    {value.statement && <p className="athlete-visual-statement">{value.statement}</p>}
+    {value.statement && (value.kind === 'SESSION_RECAP'
+      ? <AthleteText value={value.statement} className="athlete-visual-statement"/>
+      : <p className="athlete-visual-statement">{value.statement}</p>)}
     {value.qualifier && <p className="athlete-visual-qualifier">{value.qualifier}</p>}
     {items.length > 0 && <dl className="athlete-visual-items">{items.map((item, index) => <div key={`${value.id}-${index}`}>
       <dt>{item.label}</dt>
       {item.value && <dd>{item.value}</dd>}
       {item.note && <dd className="athlete-visual-item-note">{item.note}</dd>}
     </div>)}</dl>}
+    <SavedChangeDetails value={value}/>
   </div>;
 }
 
