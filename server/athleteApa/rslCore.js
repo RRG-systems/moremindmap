@@ -271,4 +271,3 @@ function athleteRslActiveCorrectionTargets({ scope, events, maxItems = 32,
     replayRsl: replayAthleteRsl, validateRslSources: validateAthleteRslSourceMessages,
     retrieveRslContext: athleteRslRetrievalContext, retrieveRslCorrectionTargets: athleteRslActiveCorrectionTargets });
 }
-
