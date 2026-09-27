@@ -14,7 +14,7 @@ const RECRUITING_DEMO_COOKIE = '__Host-more_recruiting_demo';
 const ATHLETE_CONSULTING_DEMO_COOKIE = '__Host-more_athlete_consult_demo';
 const ATHLETE_CONSULTING_SUBJECTS = Object.freeze(['mika', 'avery']);
 const ATHLETE_CONSULTING_V2_SUBJECTS = Object.freeze(['nia', 'sofia']);
-const athleteSubjects = (env) => env.ATHLETE_CONSULTING_V2_ENABLED === 'true'
+const athleteSubjects = (env) => athleteConsultingV2Enabled(env)
   ? ATHLETE_CONSULTING_V2_SUBJECTS : ATHLETE_CONSULTING_SUBJECTS;
 const HASH = /^[a-f0-9]{64}$/u;
 
@@ -62,6 +62,17 @@ export function leadershipDemoEnabled(env = globalThis.process?.env || {}) {
 export function athleteConsultingDarrenDemoEnabled(env = globalThis.process?.env || {}) {
   return leadershipDemoEnabled(env)
     && env.ATHLETE_CONSULTING_DARREN_DEMO_ENABLED === 'true';
+}
+
+// Candidate-only operator control. A Consulting hold must never select the
+// legacy writable lane or change the existing Nia/Sofia capability subjects.
+export function athleteConsultingDemoConsultingWriteHold(env = globalThis.process?.env || {}) {
+  return env.ATHLETE_CONSULTING_DEMO_CONSULTING_WRITE_HOLD === 'true';
+}
+
+export function athleteConsultingV2Enabled(env = globalThis.process?.env || {}) {
+  return env.ATHLETE_CONSULTING_V2_ENABLED === 'true'
+    || athleteConsultingDemoConsultingWriteHold(env);
 }
 
 export function darrenDemoLibraryEnabled(env = globalThis.process?.env || {}) {

@@ -2,6 +2,7 @@ import { Buffer } from 'node:buffer';
 import { createHash, randomUUID, timingSafeEqual } from 'node:crypto';
 import {
   athleteConsultingDarrenDemoEnabled, authenticateAthleteConsultingDemoRequest,
+  athleteConsultingV2Enabled, athleteConsultingDemoConsultingWriteHold,
   issueAthleteConsultingDemoCsrf, consumeAthleteConsultingDemoCsrf,
   sameOriginLeadershipDemoRequest, enforceAthleteConsultingDemoRateLimit,
   deriveAthleteConsultingActorCapabilities,
@@ -49,7 +50,7 @@ export function createAthleteConsultingV2Handler({ env = globalThis.process?.env
   logVoiceFailure = (event) => console.error(JSON.stringify(event)) } = {}) {
   return async (req, res) => {
     try {
-      if (!athleteConsultingDarrenDemoEnabled(env) || env.ATHLETE_CONSULTING_V2_ENABLED !== 'true') return send(res, 404, { error: 'ATHLETE_V2_DISABLED' });
+      if (!athleteConsultingDarrenDemoEnabled(env) || !athleteConsultingV2Enabled(env)) return send(res, 404, { error: 'ATHLETE_V2_DISABLED' });
       const method = req.method || 'GET';
       if (!['GET', 'POST'].includes(method)) return send(res, 405, { error: 'METHOD_NOT_ALLOWED' });
       if (!sameOriginLeadershipDemoRequest(req, { allowMissingForGet: method === 'GET' })) return send(res, 403, { error: 'ORIGIN_DENIED' });
@@ -76,7 +77,9 @@ export function createAthleteConsultingV2Handler({ env = globalThis.process?.env
         if (await redis.set(key, raw, 'EX', 30 * 86400, 'NX') !== 'OK') throw Error('EVIDENCE_ALREADY_EXISTS');
       };
       const flagship = env.ATHLETE_CONSULTING_FLAGSHIP_ENABLED === 'true';
+      const consultingWriteHold = athleteConsultingDemoConsultingWriteHold(env);
       const store = createStore({ redis, bundles, scopeId, localAction: applyLiveCapture,
+        consultingWriteHold,
         coach: injectedCoach || createCoach({ env, evidenceSink, transport: transport || null }),
         visualComposer: flagship ? injectedVisualComposer || createAthleteVisualComposer({ env, evidenceSink }) : null,
         apaComposer: flagship ? injectedApaComposer || createApaComposer({ env, evidenceSink }) : null });
@@ -89,6 +92,14 @@ export function createAthleteConsultingV2Handler({ env = globalThis.process?.env
       if (kind === 'state' && method === 'GET') return send(res, 200, await responseState(await store.read(slug)));
       if (!['action','transcribe'].includes(kind) || method !== 'POST') return send(res, 404, { error: 'NOT_FOUND' });
       const body = await bodyOf(req);
+      // Only the existing reviewed Coach Connect note/voice lane stays writable.
+      // Neither route is allowed to recover or advance Consulting state.
+      if (consultingWriteHold && !(kind === 'transcribe' && body.action === 'transcribe_coach_voice')
+        && !(kind === 'action' && body.action === 'capture_demo'
+          && body.capture?.role === 'coach' && body.capture?.channel === 'coach_connect_box04_v1')) {
+        return send(res, 503, { error: 'ATHLETE_CONSULTING_READ_ONLY',
+          message: 'Consulting is temporarily read-only. Your saved current APA, plan, history and unfinished attempt are preserved. Coach Connect remains available.' });
+      }
       if (!flagship && ['confirm_fact', 'update_apa', 'publish_apa', 'discard_apa'].includes(body.action)) return send(res, 404, { error: 'NOT_FOUND' });
       if (kind === 'transcribe' && (env.ATHLETE_COACH_CONNECT_VOICE_TRANSCRIPTION_ENABLED !== 'true'
         || body.action !== 'transcribe_coach_voice')) return send(res, 404, { error: 'VOICE_TRANSCRIPTION_DISABLED' });

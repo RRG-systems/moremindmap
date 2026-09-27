@@ -13,6 +13,7 @@ import { createMainVisualAdapter, MAIN_VISUAL_PLAN_VERSION,
   MAIN_VISUAL_WORLD_CONTRACT } from '../server/athleteAcademyV1/coaching/visual.js';
 import { buildAthleteVisualWorld as demoWorld } from '../server/athleteConsultingV2/visual.js';
 import { captureSessionStartMap as demoStart } from '../server/athleteConsultingV2/mapChange.js';
+import { resolveSessionMapEntries } from '../server/athleteApa/sessionMapCore.js';
 
 const clone = value => structuredClone(value);
 const at = '2026-09-27T18:01:00.000Z';
@@ -165,7 +166,7 @@ test('main visual always reads the full current-APA reader, rejecting foreign, u
   const map = f.maps.buildSessionMapChange(f.input({ startMap: start }));
   assert.equal(map.apa.status, 'PUBLISHED_CHANGE');
   assert.equal(map.apa.receipts[0].receipt_hash, result.receipt.receipt_hash);
-  assert.equal(map.apa.entries.find(entry => entry.path === 'report.domains.training.gap').now,
+  assert.equal(resolveSessionMapEntries(map).find(entry => entry.path === 'report.domains.training.gap').detail.now,
     result.record.artifact.report.domains[1].gap);
   f.state.currentApa.receipts[0].reason = 'Changed without resealing';
   assert.throws(() => f.world());

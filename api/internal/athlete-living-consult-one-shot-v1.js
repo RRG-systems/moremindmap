@@ -3,6 +3,7 @@ import { createAthleteConsultingV2Handler } from '../../server/athleteConsulting
 import { hashCanonicalJson } from '../../src/lib/intelligenceFabric/hashing.js';
 import {
   athleteConsultingDarrenDemoEnabled,
+  athleteConsultingV2Enabled,
   authenticateAthleteConsultingDemoRequest,
   bindAthleteConsultingGovernedActor,
   consumeAthleteConsultingDemoCsrf,
@@ -282,9 +283,9 @@ export function createAthleteLivingConsultOneShotHandlerV1({
         return send(response, 404, { ok: false, code: 'ATHLETE_CONSULTING_DEMO_DEFAULT_OFF' });
       }
       if (request.method === 'GET' && requestUrl(request).searchParams.get('version_only') === '1') {
-        return send(response, 200, { version: env.ATHLETE_CONSULTING_V2_ENABLED === 'true' ? 2 : 1 });
+        return send(response, 200, { version: athleteConsultingV2Enabled(env) ? 2 : 1 });
       }
-      if (env.ATHLETE_CONSULTING_V2_ENABLED === 'true') return await v2Handler(request, response);
+      if (athleteConsultingV2Enabled(env)) return await v2Handler(request, response);
       const method = String(request.method || 'GET').toUpperCase();
       if (!sameOriginLeadershipDemoRequest(request, { allowMissingForGet: method === 'GET' })) {
         return send(response, 403, { ok: false, code: 'ATHLETE_LIVING_CONSULT_ORIGIN_DENIED' });

@@ -3,6 +3,7 @@
 import {
   authenticateLeadershipLauncher,
   athleteConsultingDarrenDemoEnabled,
+  athleteConsultingV2Enabled,
   clearLeadershipDemoCookies,
   consumeLeadershipEntryCsrf,
   consumeLeadershipLauncherCsrf,
@@ -53,13 +54,13 @@ export default async function leadershipDemoEntryHandler(req, res) {
             { id: 'subscription-model-2', title: 'SUBSCRIPTION MODEL 2' },
             ...(athleteConsultingDarrenDemoEnabled(process.env)
               && auth.capability.allowed_products?.includes('athlete-consulting-tool')
-              ? [{ id: 'athlete-consulting-tool', ...(process.env.ATHLETE_CONSULTING_V2_ENABLED === 'true'
+              ? [{ id: 'athlete-consulting-tool', ...(athleteConsultingV2Enabled(process.env)
                 ? { title: 'ATHLETE CONSULTING TOOL V2', version: 2 }
                 : { title: 'ATHLETE CONSULTING TOOL' }) }]
               : []),
             ...(athleteConsultingDarrenDemoEnabled(process.env)
               && auth.capability.allowed_products?.includes('athlete-consulting-tool')
-              && process.env.ATHLETE_CONSULTING_V2_ENABLED === 'true'
+              && athleteConsultingV2Enabled(process.env)
               ? [{ id: 'athlete-coach-connect', title: 'ATHLETE COACH CONNECT', version: 2 }]
               : []),
             ...(darrenDemoLibraryEnabled(process.env)
@@ -136,7 +137,7 @@ export default async function leadershipDemoEntryHandler(req, res) {
 
     if (action === 'LAUNCH_ATHLETE_CONSULTING_TOOL' || action === 'LAUNCH_ATHLETE_COACH_CONNECT') {
       if (!athleteConsultingDarrenDemoEnabled(process.env)
-        || (action === 'LAUNCH_ATHLETE_COACH_CONNECT' && process.env.ATHLETE_CONSULTING_V2_ENABLED !== 'true')) {
+        || (action === 'LAUNCH_ATHLETE_COACH_CONNECT' && !athleteConsultingV2Enabled(process.env))) {
         return send(res, 404, { ok: false, code: 'ATHLETE_CONSULTING_DEMO_DEFAULT_OFF' });
       }
       const issued = await issueAthleteConsultingDemoCapability({

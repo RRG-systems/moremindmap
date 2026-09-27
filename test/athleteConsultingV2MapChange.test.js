@@ -5,8 +5,13 @@ import { currentApaHash, currentApaView, publishCurrentApa } from '../server/ath
 import { APA_NARRATIVE_FIELDS, getApaNarrativeValue } from '../server/athleteConsultingV2/apaNarrative.js';
 import { buildLegacySessionMapChange, buildSessionMapChange, captureSessionStartMap,
   SESSION_MAP_CHANGE_CONTRACT, SESSION_MAP_START_CONTRACT } from '../server/athleteConsultingV2/mapChange.js';
+import { resolveSessionMapEntries } from '../server/athleteApa/sessionMapCore.js';
 
 const clone = value => structuredClone(value);
+// This is the complete human-readable detail view, not a reconstruction of the
+// removed raw-JSON diagnostic fields. Receipts resolve to their canonical table.
+const comparisonEntries = map => resolveSessionMapEntries(map)
+  .map(({ detail, ...metadata }) => ({ ...detail, ...metadata }));
 const firstMessage = '11111111-1111-4111-8111-111111111111';
 const firstChange = '22222222-2222-4222-8222-222222222222';
 const secondMessage = '33333333-3333-4333-8333-333333333333';
@@ -88,7 +93,7 @@ test('published APA is an exact before-to-now change with source receipt and bas
   assert.equal(result.apa.now.version, 1);
   assert.equal(result.apa.before.artifact_hash, bundles.nia.apa.artifact_sha256);
   assert.equal(result.apa.now.artifact_hash, published.record.artifact.artifact_sha256);
-  const entry = result.apa.entries.find(item => item.path === 'report.domains.training.gap');
+  const entry = comparisonEntries(result).find(item => item.path === 'report.domains.training.gap');
   assert.ok(entry);
   assert.equal(entry.before, bundles.nia.apa.report.domains.find(item => item.id === 'training').gap);
   assert.equal(entry.now, published.record.artifact.report.domains.find(item => item.id === 'training').gap);
@@ -150,7 +155,7 @@ test('correction chains from session-start version and attributes exact newer re
   assert.equal(result.apa.receipts.length, 1);
   assert.equal(result.apa.receipts[0].prior_hash, first.receipt.receipt_hash);
   assert.equal(result.apa.receipts[0].receipt_hash, corrected.receipt.receipt_hash);
-  const entry = result.apa.entries.find(item => item.path === 'report.domains.training.gap');
+  const entry = comparisonEntries(result).find(item => item.path === 'report.domains.training.gap');
   assert.equal(entry.receipts[0].reason, 'The athlete corrected the day of practice.');
   assert.equal(entry.now, 'Thursday, not Tuesday, is now the shorter practice.');
 });
@@ -195,7 +200,7 @@ test('a changed One Move names both actions and the current fit instead of expos
     }
   } });
   const changed = buildSessionMapChange({ bundle: bundles.nia, state, startMap: start });
-  const move = changed.apa.entries.find(entry => entry.path === 'move.selection');
+  const move = comparisonEntries(changed).find(entry => entry.path === 'move.selection');
   assert.ok(move);
   assert.equal(move.label, 'Your One Move');
   assert.equal(move.before, originalMove.action);
@@ -272,7 +277,7 @@ test('bounded visual rows still show both sides of long APA and plan changes', (
   assert.match(planRow.value, /→ New timing:/u);
   assert.ok(apaRow.value.length <= 179);
   assert.ok(planRow.value.length <= 174);
-  assert.equal(changed.apa.entries.find(item => item.path === 'report.domains.training.gap').now,
+  assert.equal(comparisonEntries(changed).find(item => item.path === 'report.domains.training.gap').now,
     newGap);
 });
 

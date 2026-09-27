@@ -2,6 +2,139 @@ import { Buffer } from 'node:buffer';
 import { currentApaHash } from './currentApaCore.js';
 import { APA_NARRATIVE_FIELDS, apaNarrativePath, getApaNarrativeValue } from '../athleteConsultingV2/apaNarrative.js';
 
+export const SESSION_MAP_DETAIL_REFS_CONTRACT = 'athlete_session_map_detail_refs_v1';
+const refsEnsure = condition => { if (!condition) throw new Error('MAP_CHANGE_DETAIL_REFS_INVALID'); };
+const refsObject = value => value !== null && typeof value === 'object' && !Array.isArray(value);
+const refsKeys = (value, required, optional = []) => refsObject(value)
+  && required.every(key => Object.hasOwn(value, key))
+  && Object.keys(value).every(key => [...required, ...optional].includes(key));
+const refsSame = (a, b) => currentApaHash(a) === currentApaHash(b);
+const refsStrings = value => Array.isArray(value) && value.every(item => typeof item === 'string' && item)
+  && new Set(value).size === value.length;
+const refsHash = value => typeof value === 'string' && /^[a-f0-9]{64}$/u.test(value);
+const receiptProjection = receipt => ({ version: receipt.version, receipt_hash: receipt.receipt_hash,
+  source_id: receipt.source_id, source_message_id: receipt.source_message_id,
+  reason: receipt.reason, at: receipt.at });
+
+// The canonical human-readable comparison lives only in object.details. This
+// resolver does NOT recreate the removed raw-JSON diagnostic before/now fields.
+// It validates reference integrity, not authority to publish an APA: producers
+// still verify the full current artifact/receipt chain before making this view.
+// Selection identity is checked against the producer's canonical transient
+// comparison below; path-only receipts cannot independently reconstruct it.
+export function resolveSessionMapEntries(packet) {
+  refsEnsure(refsObject(packet?.apa) && packet.apa.entries_contract === SESSION_MAP_DETAIL_REFS_CONTRACT
+    && Array.isArray(packet.apa.entries) && Array.isArray(packet.apa.receipts)
+    && Array.isArray(packet.plan?.entries) && Array.isArray(packet.sources)
+    && packet.object?.id === 'athlete-map-change' && packet.object.kind === 'MAP_CHANGE_REVEAL');
+  const entries = packet.apa.entries, receipts = packet.apa.receipts;
+  const details = packet.comparison === 'UNAVAILABLE_START_SNAPSHOT' && !Object.hasOwn(packet.object, 'details')
+    ? [] : packet.object.details;
+  refsEnsure(Array.isArray(details) && details.length === entries.length + packet.plan.entries.length
+    && new Set(details.map(detail => detail?.path)).size === details.length
+    && refsStrings(packet.sources.map(source => source?.id)) && refsStrings(packet.object.sourceIds)
+    && refsSame(packet.object.sourceIds, packet.sources.map(source => source.id)));
+  const sources = new Map(packet.sources.map(source => [source.id, source]));
+  const receiptByVersion = new Map();
+  for (const [index, receipt] of receipts.entries()) {
+    refsEnsure(refsKeys(receipt, ['version', 'receipt_hash', 'prior_hash', 'content_hash', 'source_id',
+      'source_message_id', 'reason', 'material_paths', 'narrative_changes', 'at'])
+      && Number.isSafeInteger(receipt.version) && receipt.version === packet.apa.before?.version + index + 1
+      && refsHash(receipt.receipt_hash) && refsHash(receipt.prior_hash) && refsHash(receipt.content_hash)
+      && typeof receipt.source_id === 'string' && receipt.source_id
+      && typeof receipt.source_message_id === 'string' && receipt.source_message_id
+      && typeof receipt.reason === 'string' && typeof receipt.at === 'string'
+      && refsStrings(receipt.material_paths) && Array.isArray(receipt.narrative_changes)
+      && receipt.narrative_changes.every(change => refsObject(change) && APA_NARRATIVE_FIELDS.includes(change.field))
+      && sources.get(`athlete-source-apa-receipt-v${receipt.version}`)?.hash === receipt.receipt_hash
+      && (index > 0 ? receipt.prior_hash === receipts[index - 1].receipt_hash
+        : packet.apa.before.version !== 0 || receipt.prior_hash === packet.apa.before.artifact_hash)
+      && !receiptByVersion.has(receipt.version));
+    receiptByVersion.set(receipt.version, receipt);
+  }
+  if (packet.comparison !== 'UNAVAILABLE_START_SNAPSHOT')
+    refsEnsure(Number.isSafeInteger(packet.apa.before?.version) && Number.isSafeInteger(packet.apa.now?.version)
+      && receipts.length === packet.apa.now.version - packet.apa.before.version
+      && (!receipts.length || receipts.at(-1).content_hash === packet.apa.now.artifact_hash));
+  const entryPaths = new Set(entries.map(entry => entry?.path));
+  refsEnsure(entryPaths.size === entries.length);
+  const resolved = entries.map((entry, index) => {
+    const field = APA_NARRATIVE_FIELDS.find(value => entry?.path === apaNarrativePath(value)
+      || entry?.path === `narrative_provenance.${value}`);
+    const move = entry?.path === 'move.selection';
+    refsEnsure(refsKeys(entry, ['path', 'detail_index', 'detail_sha256', 'receipt_refs'],
+      [...(field ? ['narrative_evidence', 'narrative_evidence_unavailable'] : []), ...(move ? ['selection'] : [])])
+      && typeof entry.path === 'string' && entry.path && entry.detail_index === index
+      && (!field || Number(Object.hasOwn(entry, 'narrative_evidence'))
+        + Number(Object.hasOwn(entry, 'narrative_evidence_unavailable')) === 1)
+      && (!move || Object.hasOwn(entry, 'selection')) && Array.isArray(entry.receipt_refs));
+    const detail = details[entry.detail_index];
+    refsEnsure(refsKeys(detail, ['path', 'label', 'change_type', 'before', 'now', 'sourceIds', 'evidence_note'],
+      ['before_lines', 'now_lines', 'before_rationale', 'now_rationale'])
+      && detail.path === entry.path && refsHash(entry.detail_sha256) && entry.detail_sha256 === currentApaHash(detail)
+      && typeof detail.label === 'string'
+      && ['CONTENT', 'EVIDENCE'].includes(detail.change_type)
+      && typeof detail.before === 'string' && typeof detail.now === 'string'
+      && ['before_lines', 'now_lines'].every(key => !Object.hasOwn(detail, key)
+        || (Array.isArray(detail[key]) && detail[key].every(line => typeof line === 'string'))));
+    const lineage = receipts.filter(receipt => receipt.material_paths.includes(entry.path));
+    refsEnsure(lineage.length > 0 && entry.receipt_refs.length === lineage.length);
+    for (const [refIndex, ref] of entry.receipt_refs.entries())
+      refsEnsure(refsKeys(ref, ['version', 'receipt_hash'])
+        && ref.version === lineage[refIndex].version && ref.receipt_hash === lineage[refIndex].receipt_hash
+        && receiptByVersion.get(ref.version) === lineage[refIndex]);
+    refsEnsure(refsSame(detail.sourceIds, lineage.map(receipt => `athlete-source-apa-receipt-v${receipt.version}`))
+      && detail.evidence_note === `Recorded athlete review: ${lineage.at(-1).reason}`);
+    if (field && Object.hasOwn(entry, 'narrative_evidence_unavailable')) {
+      // A valid older snapshot can retain an exact value but have no linked
+      // field-provenance witness. Keep that limit, never invent prior refs.
+      refsEnsure(entry.narrative_evidence_unavailable === 'START_FIELD_EVIDENCE_UNAVAILABLE'
+        && entry.path === apaNarrativePath(field)
+        && packet.apa.comparison_limits?.includes(`narrative_provenance.${field}`)
+        && detail.change_type === 'CONTENT');
+    } else if (field) {
+      const evidence = entry.narrative_evidence;
+      refsEnsure(refsKeys(evidence, ['before_refs', 'after_refs', 'prior_provenance', 'value_changed',
+        'reference_changed', 'source_id', 'source_message_id'])
+        && (evidence.before_refs === null || refsStrings(evidence.before_refs)) && refsStrings(evidence.after_refs)
+        && ['SOURCE_BOUND', 'BASELINE_FIELD_UNCITED', 'START_FIELD_EVIDENCE_UNAVAILABLE'].includes(evidence.prior_provenance)
+        && (evidence.prior_provenance === 'SOURCE_BOUND') === (evidence.before_refs !== null)
+        && typeof evidence.value_changed === 'boolean' && typeof evidence.reference_changed === 'boolean');
+      const changes = receipts.flatMap(receipt => receipt.narrative_changes.filter(change => change.field === field)
+        .map(change => ({ receipt, change })));
+      const first = changes[0], last = changes.at(-1);
+      refsEnsure(first && last && refsSame(evidence.after_refs, last.change.after_refs)
+        && evidence.source_id === last.receipt.source_id && evidence.source_message_id === last.receipt.source_message_id
+        && evidence.source_id === last.change.source_id && evidence.source_message_id === last.change.source_message_id
+        && (evidence.prior_provenance === 'START_FIELD_EVIDENCE_UNAVAILABLE'
+          ? packet.apa.comparison_limits?.includes(`narrative_provenance.${field}`)
+          : refsSame(evidence.before_refs, first.change.before_refs)
+            && evidence.prior_provenance === first.change.prior_provenance)
+        && evidence.value_changed === !refsSame(first.change.before, last.change.after)
+        && evidence.reference_changed === (evidence.before_refs === null || !refsSame(evidence.before_refs, evidence.after_refs))
+        && detail.change_type === (entry.path.startsWith('narrative_provenance.') && !evidence.value_changed ? 'EVIDENCE' : 'CONTENT'));
+    }
+    if (move) refsEnsure(refsKeys(entry.selection, ['before', 'now'])
+      && ['before', 'now'].every(side => refsKeys(entry.selection[side], ['status', 'candidate_id'])
+        && typeof entry.selection[side].status === 'string'
+        && (entry.selection[side].candidate_id === null || typeof entry.selection[side].candidate_id === 'string'))
+      && ['before_rationale', 'now_rationale'].every(key => Object.hasOwn(detail, key)
+        && (detail[key] === null || typeof detail[key] === 'string')));
+    return { path: entry.path, detail, receipts: lineage,
+      ...(entry.narrative_evidence ? { narrative_evidence: entry.narrative_evidence } : {}),
+      ...(entry.narrative_evidence_unavailable ? { narrative_evidence_unavailable: entry.narrative_evidence_unavailable } : {}),
+      ...(move ? { selection: entry.selection } : {}) };
+  });
+  for (const [index, entry] of packet.plan.entries.entries()) {
+    const detail = details[entries.length + index];
+    refsEnsure(detail?.path === entry.path && detail.label === entry.label && detail.change_type === 'ACCEPTED_PLAN'
+      && detail.before === entry.before && detail.now === entry.now
+      && refsSame(detail.sourceIds, ['athlete-source-start-plan', 'athlete-source-accepted-plan'].filter(id => sources.has(id)))
+      && detail.evidence_note === 'A separately accepted plan, not an APA suggestion.');
+  }
+  return resolved;
+}
+
 export function createSessionMapCore(policy) {
   if (!policy || !Object.isFrozen(policy) || !['binding', 'currentApaView', 'acceptedPlan', 'classification'].every(key => typeof policy[key] === 'function')) throw new TypeError('MAP_CHANGE_POLICY_REQUIRED');
   const SESSION_MAP_START_CONTRACT = policy.startContract;
@@ -472,6 +605,11 @@ function buildSessionMapChange(input) {
       value: 'Some summary evidence was not captured at session start',
       note: 'No earlier summary value or field citation has been invented.' }] : []),
   ];
+  const details = [...mapDetails(entries, comparison.before, comparison.now),
+    ...planEntries.map(entry => ({ path: entry.path, label: entry.label, change_type: 'ACCEPTED_PLAN',
+      before: entry.before, now: entry.now,
+      sourceIds: ['athlete-source-start-plan', 'athlete-source-accepted-plan'].filter(id => sources.some(source => source.id === id)),
+      evidence_note: 'A separately accepted plan, not an APA suggestion.' }))];
   const result = { contract: SESSION_MAP_CHANGE_CONTRACT,
     binding: { ...clone(startMap.binding), session_id: startMap.session_id },
     apa: { status: needsReview ? 'HISTORICAL_AWAITING_ATHLETE_REVIEW'
@@ -481,7 +619,16 @@ function buildSessionMapChange(input) {
       needs_review: startMap.apa_needs_review },
     now: { version: nowApa.version, artifact_hash: nowApa.artifact_hash,
       needs_review: needsReview },
-    entries, comparison_limits: comparison.limits, receipts: newReceipts.map(receipt => ({ version: receipt.version,
+    entries_contract: SESSION_MAP_DETAIL_REFS_CONTRACT,
+    entries: entries.map((entry, detail_index) => ({ path: entry.path, detail_index,
+      detail_sha256: currentApaHash(details[detail_index]),
+      receipt_refs: entry.receipts.map(receipt => ({ version: receipt.version, receipt_hash: receipt.receipt_hash })),
+      ...(entry.narrative_evidence ? { narrative_evidence: clone(entry.narrative_evidence) } : {}),
+      ...(!entry.narrative_evidence && APA_NARRATIVE_FIELDS.some(field => entry.path === apaNarrativePath(field)
+        && comparison.limits.includes(`narrative_provenance.${field}`))
+        ? { narrative_evidence_unavailable: 'START_FIELD_EVIDENCE_UNAVAILABLE' } : {}),
+      ...(entry.selection ? { selection: clone(entry.selection) } : {}) })),
+    comparison_limits: comparison.limits, receipts: newReceipts.map(receipt => ({ version: receipt.version,
       receipt_hash: receipt.receipt_hash, prior_hash: receipt.prior_hash,
       content_hash: receipt.content_hash, source_id: receipt.source_id,
       source_message_id: receipt.source_message_id, reason: receipt.reason,
@@ -499,12 +646,17 @@ function buildSessionMapChange(input) {
       title: 'This is how your map has changed', statement,
       qualifier: pending ? 'A proposed APA is separate from the saved map.'
         : needsReview ? 'The historical APA is not current coaching truth.' : null,
-      items, details: [...mapDetails(entries, comparison.before, comparison.now),
-        ...planEntries.map(entry => ({ path: entry.path, label: entry.label, change_type: 'ACCEPTED_PLAN',
-          before: entry.before, now: entry.now,
-          sourceIds: ['athlete-source-start-plan', 'athlete-source-accepted-plan'].filter(id => sources.some(source => source.id === id)),
-          evidence_note: 'A separately accepted plan, not an APA suggestion.' }))],
+      items, details,
       sourceIds: sources.map(source => source.id) } };
+  // Assert every compact reference against the canonical transient comparison,
+  // without adding a second serialized copy of its text or receipt metadata.
+  const resolved = resolveSessionMapEntries(result);
+  for (const [index, entry] of entries.entries()) {
+    ensure(resolved[index].detail.path === entry.path && resolved[index].detail.label === entry.label
+      && same(resolved[index].receipts.map(receiptProjection), entry.receipts)
+      && same(resolved[index].narrative_evidence, entry.narrative_evidence)
+      && same(resolved[index].selection, entry.selection), 'MAP_CHANGE_DETAIL_REFS_INVALID');
+  }
   return bounded(result);
 }
 
@@ -542,17 +694,19 @@ function buildLegacySessionMapChange(input) {
     ...(pending ? [{ label: 'APA proposal', value: `Version ${pending.proposed_version} · not published`,
       note: 'This proposed reading is separate from the saved APA.' }] : [])],
     sourceIds: sources.map(source => source.id) };
-  return bounded({ contract: SESSION_MAP_CHANGE_CONTRACT,
+  const result = { contract: SESSION_MAP_CHANGE_CONTRACT,
     comparison: 'UNAVAILABLE_START_SNAPSHOT',
     binding: { ...sessionBinding, session_id: state.sessionId },
     apa: { status: 'START_UNAVAILABLE', before: null,
       now: { version: apa.version, artifact_hash: apa.artifact_hash, needs_review: needsReview },
-      entries: [], receipts: [] },
+      entries_contract: SESSION_MAP_DETAIL_REFS_CONTRACT, entries: [], receipts: [] },
     plan: { status: 'START_UNAVAILABLE', before: null, now: clone(plan),
       entries: [], reason: null },
     pendingApa: pending,
     unchanged: { saved_apa: null, accepted_plan: null },
-    sources, object });
+    sources, object };
+  resolveSessionMapEntries(result);
+  return bounded(result);
 }
 
   return Object.freeze({ captureSessionStartMap, buildSessionMapChange, buildLegacySessionMapChange, compareSessionMapSummaries });

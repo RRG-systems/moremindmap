@@ -248,11 +248,12 @@ function seal(envelope) {
 }
 
 export function createStore({ redis, bundles, coach, scopeId, localAction = applyLocalAction,
-  visualComposer = null, apaComposer = null }) {
+  visualComposer = null, apaComposer = null, consultingWriteHold = false }) {
   requireThat(redis && typeof redis.get === 'function' && typeof redis.set === 'function' && typeof redis.eval === 'function', 'ATHLETE_V2_STORAGE_REQUIRED');
   requireThat(typeof coach === 'function', 'ATHLETE_V2_COACH_REQUIRED');
   requireThat(visualComposer === null || typeof visualComposer === 'function', 'ATHLETE_V2_VISUAL_REQUIRED');
   requireThat(apaComposer === null || typeof apaComposer === 'function', 'ATHLETE_V2_APA_COMPOSER_REQUIRED');
+  requireThat(typeof consultingWriteHold === 'boolean', 'ATHLETE_V2_HOLD_INVALID');
   const context = (slug) => {
     requireThat(['nia', 'sofia'].includes(slug) && Object.hasOwn(bundles, slug), 'UNKNOWN_ATHLETE');
     return { bundle: bundles[slug], keys: athleteConsultingV2Keys({ scopeId, slug, bundle: bundles[slug] }),
@@ -326,6 +327,11 @@ export function createStore({ redis, bundles, coach, scopeId, localAction = appl
     view.coachNoteHandoff = coachNoteHandoffStatus(state, bundle);
     view.flagship_enabled = Boolean(visualComposer && apaComposer);
     view.closing_reveal_ready = view.flagship_enabled && closingRevealReady(state, bundle);
+    if (consultingWriteHold) view.consulting_write_hold = {
+      contract: 'athlete_consulting_demo_read_hold_v1', active: true,
+      evolved_state_preserved: true, consulting_mutation_or_recovery_admitted: false,
+      coach_connect_available: true,
+    };
     return view;
   };
   function middleVisualEligible(state, body) {
@@ -376,6 +382,7 @@ export function createStore({ redis, bundles, coach, scopeId, localAction = appl
   }
   async function read(slug) {
     const ctx = context(slug), saved = await load(ctx);
+    if (consultingWriteHold) return visibleState(saved.envelope.state, ctx.bundle);
     if (saved.envelope.state.status !== 'working') return visibleState(saved.envelope.state, ctx.bundle);
     try {
       return await leaseOperation(ctx, async (lease) => visibleState((await recover(ctx, lease, await load(ctx))).envelope.state, ctx.bundle));
@@ -385,12 +392,15 @@ export function createStore({ redis, bundles, coach, scopeId, localAction = appl
     }
   }
   async function act(slug, body) {
+    if (consultingWriteHold) requireThat(body?.action === 'capture_demo'
+      && body.capture?.role === 'coach' && body.capture?.reviewed === true
+      && body.capture?.channel === 'coach_connect_box04_v1', 'ATHLETE_CONSULTING_READ_ONLY');
     requireThat(object(body) && typeof body.requestId === 'string' && /^[A-Za-z0-9._:-]{1,160}$/u.test(body.requestId)
       && !['__proto__', 'constructor', 'prototype'].includes(body.requestId)
       && Number.isSafeInteger(body.revision) && body.revision >= 0, 'STATE_CHANGED_RELOAD');
     const ctx = context(slug), requestHash = semanticRequestHash(body);
     return leaseOperation(ctx, async (lease) => {
-      let saved = await recover(ctx, lease, await load(ctx));
+      let saved = consultingWriteHold ? await load(ctx) : await recover(ctx, lease, await load(ctx));
       const existing = Object.hasOwn(saved.envelope.operations, body.requestId) ? saved.envelope.operations[body.requestId] : null;
       if (existing) {
         requireThat(existing.hash === requestHash, 'REQUEST_ID_REUSED');
@@ -603,9 +613,9 @@ export function createStore({ redis, bundles, coach, scopeId, localAction = appl
             'CLOSING_REVIEW_REFRESH_REQUIRED');
         const before = clone(state);
         localAction(state, body, ctx.bundle);
-        appendRslAction(ctx, before, state, body);
+        if (!consultingWriteHold) appendRslAction(ctx, before, state, body);
       }
-      if (state.apaDraft && state.apaDraft.source_hash !== apaDraftSourceHash(ctx, state,
+      if (!consultingWriteHold && state.apaDraft && state.apaDraft.source_hash !== apaDraftSourceHash(ctx, state,
         state.apaDraft.confirmedChange.source_message_id)) {
         state.events.push({ type: 'current_apa_draft_invalidated', draft_id: state.apaDraft.id,
           reason: 'SOURCE_LINEAGE_CHANGED', at: new Date().toISOString() });

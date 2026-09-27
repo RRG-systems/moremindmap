@@ -6,11 +6,16 @@ import { buildSessionMapChange, captureSessionStartMap,
   compareSessionMapSummaries } from '../server/athleteConsultingV2/mapChange.js';
 import { APA_CONFIRMATION_NARRATIVE_FIELDS, getApaNarrativeValue,
   setApaNarrativeValue } from '../server/athleteConsultingV2/apaNarrative.js';
+import { resolveSessionMapEntries } from '../server/athleteApa/sessionMapCore.js';
 
 const messageId = '11111111-1111-4111-8111-111111111111';
 const changeId = '22222222-2222-4222-8222-222222222222';
 const sourceId = `APA:CURRENT:${changeId}`;
 const clone = value => structuredClone(value);
+// Resolve the canonical complete UI detail; raw JSON diagnostic strings are
+// intentionally not recreated by the new internal reference contract.
+const comparisonEntries = map => resolveSessionMapEntries(map)
+  .map(({ detail, ...metadata }) => ({ ...detail, ...metadata }));
 function stateFor() {
   return { mm: nia.person.mm, revision: 0, currentApa: null,
     sessionId: '77777777-7777-4777-8777-777777777777', apaDraft: null,
@@ -42,12 +47,16 @@ test('summary-only publication has exact before-after/evidence in saved and pend
   state.currentApa = published.record; state.revision++;
   const map = buildSessionMapChange({ bundle: nia, state, startMap: start });
   for (const field of ['headline', 'opening', 'what_we_dont_know']) {
-    const entry = map.apa.entries.find(item => item.path === `report.${field}`);
+    const entry = comparisonEntries(map).find(item => item.path === `report.${field}`);
     assert.ok(entry);
     assert.equal(entry.before, typeof nia.apa.report[field] === 'string'
-      ? nia.apa.report[field] : JSON.stringify(nia.apa.report[field]));
+      ? nia.apa.report[field] : nia.apa.report[field].join('\n'));
     assert.equal(entry.now, typeof published.record.artifact.report[field] === 'string'
-      ? published.record.artifact.report[field] : JSON.stringify(published.record.artifact.report[field]));
+      ? published.record.artifact.report[field] : published.record.artifact.report[field].join('\n'));
+    if (Array.isArray(nia.apa.report[field])) {
+      assert.deepEqual(entry.before_lines, nia.apa.report[field]);
+      assert.deepEqual(entry.now_lines, published.record.artifact.report[field]);
+    }
     assert.equal(entry.narrative_evidence.before_refs, null);
     assert.deepEqual(entry.narrative_evidence.after_refs, [sourceId]);
     assert.ok(map.apa.entries.some(item => item.path === `narrative_provenance.${field}`));
@@ -74,7 +83,7 @@ test('an old baseline snapshot gains missing summary values only through exact i
   start.snapshot_hash = currentApaHash(body);
   const result = summaryPublication(state); state.currentApa = result.record; state.revision++;
   const map = buildSessionMapChange({ bundle: nia, state, startMap: start });
-  assert.equal(map.apa.entries.find(item => item.path === 'report.opening').before, nia.apa.report.opening);
+  assert.equal(comparisonEntries(map).find(item => item.path === 'report.opening').before, nia.apa.report.opening);
   assert.deepEqual(map.apa.comparison_limits, []);
 });
 
@@ -110,7 +119,7 @@ test('two publications compare exact start-to-final narrative evidence, not inte
   }
   assert.equal(map.apa.receipts.length, 2);
   assert.equal(map.apa.receipts[1].narrative_changes[0].value_changed, false);
-  assert.equal(map.apa.entries.find(entry => entry.path === 'report.opening').before, nia.apa.report.opening);
+  assert.equal(comparisonEntries(map).find(entry => entry.path === 'report.opening').before, nia.apa.report.opening);
 });
 
 test('old current snapshots require matching immediate prior version AND artifact hash', () => {
@@ -183,11 +192,11 @@ test('priority and timing changes carry exact net before-after/evidence without 
       assert.equal(entry.narrative_evidence.reference_changed, true);
       assert.equal(entry.narrative_evidence.source_message_id, '33333333-3333-4333-8333-333333333333');
     }
-    assert.equal(map.apa.entries.find(item => item.path === field).before, getApaNarrativeValue(nia.apa, field));
+    assert.equal(comparisonEntries(map).find(item => item.path === field).before, getApaNarrativeValue(nia.apa, field));
   }
   assert.equal(map.plan.status, 'UNCHANGED');
   assert.deepEqual(map.apa.comparison_limits, []);
-  assert.ok(map.apa.entries.some(item => item.label === 'Your planning horizon · evidence'));
+  assert.ok(comparisonEntries(map).some(item => item.label === 'Your planning horizon · evidence'));
 });
 
 test('an unpublished timing proposal is pending only and preserves the current comparison', () => {
