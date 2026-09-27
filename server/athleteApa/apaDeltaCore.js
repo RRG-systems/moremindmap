@@ -231,14 +231,23 @@ export function createApaDeltaCore(adapter) {
     const inactive = new Set([...inactiveSources(input.prior.artifact), ...input.confirmedChange.supersedes]);
     const citation = refs => ({ type: 'boolean',
       ...(!refs.some(id => !inactive.has(id)) ? { enum: [true] } : {}) });
-    function entitySchema(schema, entity, key) {
+    function gateSchema(gate, { unchanged, cite }) {
+      return object({ id: { type: 'string', enum: [gate.id] },
+        pass: unchanged ? { type: 'boolean', enum: [gate.pass] } : { type: 'boolean' },
+        reason: unchanged ? { type: 'string', enum: [gate.reason] } : { type: 'string' },
+        cite_confirmed_update: cite ? { type: 'boolean', enum: [true] } : citation(gate.refs) });
+    }
+    function entitySchema(schema, entity, key, candidateCitation = null) {
       const properties = clone(schema.properties);
       delete properties.bos_refs; delete properties.refs;
       properties[key] = { type: 'string', enum: [entity[key]] };
-      properties.cite_confirmed_update = citation(entity.refs);
+      properties.cite_confirmed_update = candidateCitation === null
+        ? citation(entity.refs) : { type: 'boolean', enum: [candidateCitation] };
       if (properties.gates) properties.gates = { type: 'array', minItems: 5, maxItems: 5,
-        items: { anyOf: entity.gates.map(gate => object({ id: { type: 'string', enum: [gate.id] },
-          pass: { type: 'boolean' }, reason: { type: 'string' }, cite_confirmed_update: citation(gate.refs) })) } };
+        items: { anyOf: entity.gates.flatMap(gate => candidateCitation === true
+          ? [gateSchema(gate, { unchanged: true, cite: false }),
+            gateSchema(gate, { unchanged: false, cite: true })]
+          : [gateSchema(gate, { unchanged: true, cite: false })]) } };
       return object(properties);
     }
     const families = [['domains', DOMAIN_SCHEMA, 'id', 4], ['futures', FUTURE_SCHEMA, 'role', 5],
@@ -247,7 +256,10 @@ export function createApaDeltaCore(adapter) {
       binding: object(Object.fromEntries(Object.entries(expected).map(([key, value]) =>
         [key, { type: typeof value === 'number' ? 'integer' : typeof value, enum: [value] }]))) };
     for (const [family, schema, key, maxItems] of families) properties[family] = { type: 'array', maxItems,
-      items: { anyOf: input.prior.artifact.report[family].map(entity => entitySchema(schema, entity, key)) } };
+      items: { anyOf: input.prior.artifact.report[family].flatMap(entity => family === 'candidates'
+        ? (citation(entity.refs).enum ? [true] : [false, true])
+          .map(cite => entitySchema(schema, entity, key, cite))
+        : [entitySchema(schema, entity, key)]) } };
     properties.narratives = { type: 'array', maxItems: APA_NARRATIVE_FIELDS.length,
       items: { anyOf: APA_NARRATIVE_FIELDS.map(field => object({ field: { type: 'string', enum: [field] },
         value: field === 'what_we_dont_know' ? { type: 'array', items: { type: 'string' } } : { type: 'string' },

@@ -63,7 +63,7 @@ test('codec is a frozen strict versioned envelope with exact entity, gate and ei
     assert.deepEqual(schema.required, ['contract', 'binding', 'domains', 'futures', 'candidates', 'narratives']);
     assert.deepEqual(schema.properties.contract.enum, [APA_REFERENCE_CODEC_CONTRACT]);
     for (const [family, key] of [['domains', 'id'], ['futures', 'role'], ['candidates', 'candidate_id']]) {
-      assert.deepEqual(schema.properties[family].items.anyOf.map(branch => branch.properties[key].enum[0]),
+      assert.deepEqual([...new Set(schema.properties[family].items.anyOf.map(branch => branch.properties[key].enum[0]))],
         input.prior.artifact.report[family].map(entity => entity[key]));
       for (const branch of schema.properties[family].items.anyOf) {
         assert.equal(branch.additionalProperties, false);
@@ -74,6 +74,31 @@ test('codec is a frozen strict versioned envelope with exact entity, gate and ei
     }
     assert.deepEqual(schema.properties.narratives.items.anyOf.map(branch => branch.properties.field.enum[0]), APA_NARRATIVE_FIELDS);
     assert.ok(apaDeltaSchemaMetrics(schema).total_schema_string_chars < 20000);
+  }
+});
+
+test('provider wire schema keeps complete strict nested anyOf arms within the bounded subset', () => {
+  function inspect(node) {
+    if (Array.isArray(node)) return node.forEach(inspect);
+    if (!node || typeof node !== 'object') return;
+    for (const key of ['allOf', 'not', 'if', 'then', 'else', 'dependentRequired', 'dependentSchemas'])
+      assert.equal(Object.hasOwn(node, key), false);
+    if (node.type === 'object') {
+      assert.equal(node.additionalProperties, false);
+      assert.deepEqual(node.required, Object.keys(node.properties));
+    }
+    Object.values(node).forEach(inspect);
+  }
+  for (const bundle of [nia, sofia]) {
+    const schema = apaReferenceCodecSchema(setup(bundle));
+    assert.equal(schema.type, 'object');
+    assert.equal(Object.hasOwn(schema, 'anyOf'), false);
+    inspect(schema);
+    const metrics = apaDeltaSchemaMetrics(schema);
+    assert.ok(metrics.properties < 5000);
+    assert.ok(metrics.max_depth <= 10);
+    assert.ok(metrics.enum_values < 1000);
+    assert.ok(metrics.total_schema_string_chars < 20000);
   }
 });
 
@@ -124,7 +149,7 @@ test('same-entity material changes still require their own explicit true citatio
 });
 
 test('gate changes require independent true flags on their exact candidate and gate; no child-to-parent autocitation', async context => {
-  const input = setup(), wire = empty(input);
+  const input = setup(), wire = empty(input), schema = apaReferenceCodecSchema(input);
   const candidate = wireEntity(input.prior.artifact.report.candidates[0], false);
   candidate.gates[0].pass = !candidate.gates[0].pass;
   candidate.gates[0].reason = 'The athlete has not agreed to this proposed test under the changed week.';
@@ -132,9 +157,11 @@ test('gate changes require independent true flags on their exact candidate and g
   for (const [parent, child] of [[false, false], [false, true], [true, false]]) await context.test(`${parent}/${child}`, () => {
     const value = clone(wire); value.candidates[0].cite_confirmed_update = parent;
     value.candidates[0].gates[0].cite_confirmed_update = child;
-    assert.throws(() => decode(input, value), /APA_DELTA_CHANGE_NOT_SOURCE_BOUND/u);
+    assert.equal(matchesApaSchema(value, schema), false);
+    assert.throws(() => decode(input, value), /APA_DELTA_SCHEMA_INVALID/u);
   });
   candidate.cite_confirmed_update = true; candidate.gates[0].cite_confirmed_update = true;
+  assert.equal(matchesApaSchema(wire, schema), true);
   const result = decode(input, wire);
   assert.ok(result.candidate.report.candidates[0].refs.includes(source(input)));
   assert.ok(result.candidate.report.candidates[0].gates[0].refs.includes(source(input)));
@@ -145,6 +172,27 @@ test('gate changes require independent true flags on their exact candidate and g
     value => { value.candidates[0].gates.reverse(); }]) {
     const value = clone(wire); mutate(value);
     assert.throws(() => decode(input, value), /APA_DELTA_SCHEMA_INVALID|APA_DELTA_GATE_STRUCTURE_CHANGED/u);
+  }
+});
+
+test('schema blocks the exact third-gate reason or pass contradiction before reconstruction', () => {
+  for (const bundle of [nia, sofia]) {
+    const input = setup(bundle), schema = apaReferenceCodecSchema(input);
+    const previous = input.prior.artifact.report.candidates[0].gates[2];
+    for (const field of ['reason', 'pass']) {
+      const candidate = wireEntity(input.prior.artifact.report.candidates[0], false);
+      candidate.gates[2][field] = field === 'reason'
+        ? 'A new reason would require this athlete-confirmed source.' : !previous.pass;
+      const wire = { ...empty(input), candidates: [candidate] };
+      for (const [parent, gate] of [[false, false], [false, true], [true, false]]) {
+        candidate.cite_confirmed_update = parent;
+        candidate.gates[2].cite_confirmed_update = gate;
+        assert.equal(matchesApaSchema(wire, schema), false);
+      }
+      candidate.cite_confirmed_update = true;
+      candidate.gates[2].cite_confirmed_update = true;
+      assert.equal(matchesApaSchema(wire, schema), true);
+    }
   }
 });
 
