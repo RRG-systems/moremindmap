@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import nia from '../server/athleteConsultingV2/fixtures/nia.json' with { type: 'json' };
 import sofia from '../server/athleteConsultingV2/fixtures/sofia.json' with { type: 'json' };
 import { publishCurrentApa } from '../server/athleteConsultingV2/currentApa.js';
+import { APA_NARRATIVE_FIELDS, getApaNarrativeValue } from '../server/athleteConsultingV2/apaNarrative.js';
 import { apaBoxContextMessage, project, requestedApaReading, resolveApaReading, shouldRefreshApa } from '../src/athleteConsultingV2/approved-apa/projection.js';
 
 const clone = value => structuredClone(value);
@@ -193,8 +194,8 @@ test('evidence drawer distinguishes a confirmed correction from its superseded s
   candidate.report.futures[0].headline = 'Thursday offers the shorter cue';
   candidate.report.futures[0].refs = candidate.report.futures[0].refs.filter(id => id !== firstSource);
   candidate.report.futures[0].refs.push(nextSource);
-  candidate.narrative_updates = ['headline', 'opening', 'connection', 'main_obstacle', 'what_we_dont_know']
-    .map(field => ({ field, value: clone(candidate.report[field]), refs: [nextSource] }));
+  candidate.narrative_updates = APA_NARRATIVE_FIELDS
+    .map(field => ({ field, value: clone(getApaNarrativeValue(candidate, field)), refs: [nextSource] }));
   const second = publishCurrentApa({ bundle: nia, state, record: state.currentApa,
     confirmedChange: { id: nextChangeId, source_message_id: nextMessageId,
       athlete_slug: 'nia', mm: nia.person.mm, kind: 'correction', supersedes: [firstSource],

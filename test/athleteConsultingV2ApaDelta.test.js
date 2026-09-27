@@ -4,7 +4,8 @@ import nia from '../server/athleteConsultingV2/fixtures/nia.json' with { type: '
 import sofia from '../server/athleteConsultingV2/fixtures/sofia.json' with { type: 'json' };
 import { currentApaView, currentApaHash, publishCurrentApa } from '../server/athleteConsultingV2/currentApa.js';
 import { APA_DELTA_SCHEMA, apaDeltaBinding, reconstructApaDelta } from '../server/athleteConsultingV2/apaDelta.js';
-import { APA_NARRATIVE_FIELDS } from '../server/athleteConsultingV2/apaNarrative.js';
+import { APA_NARRATIVE_FIELDS, APA_REPORT_NARRATIVE_FIELDS, APA_CONFIRMATION_NARRATIVE_FIELDS,
+  getApaNarrativeValue } from '../server/athleteConsultingV2/apaNarrative.js';
 
 const clone = value => structuredClone(value);
 const messageId = '11111111-1111-4111-8111-111111111111';
@@ -22,7 +23,8 @@ function setup(bundle = nia, options = {}) {
     text: 'Training now happens on Tuesdays, and my passing decision still feels rushed.',
     at: '2026-09-25T08:00:00.000Z' }] };
   const prior = currentApaView(bundle, options.record || null);
-  return { bundle, prior, confirmedChange, state, record: options.record || null, expectedVersion: prior.version };
+  return { bundle, prior, confirmedChange, confirmedSource: state.messages[0],
+    state, record: options.record || null, expectedVersion: prior.version };
 }
 function entity(value) {
   const copy = clone(value);
@@ -47,7 +49,7 @@ function materialDelta(input) {
     // An original uncited summary is not secretly assigned legacy citations.
     // The selected synthetic athlete must explicitly review/reconfirm it.
     delta.narratives = APA_NARRATIVE_FIELDS.map(field => ({ field,
-      value: clone(input.prior.artifact.report[field]), refs: [source] }));
+      value: clone(getApaNarrativeValue(input.prior.artifact, field)), refs: [source] }));
   }
   return delta;
 }
@@ -76,7 +78,7 @@ test('delta schema is a strict bounded complete-entity envelope with no writable
   assert.ok(APA_DELTA_SCHEMA.properties.candidates.items.required.includes('review_schedule'));
   assert.ok(APA_DELTA_SCHEMA.properties.candidates.items.required.includes('gates'));
   assert.ok(APA_DELTA_SCHEMA.properties.candidates.items.required.includes('selection_signals'));
-  assert.equal(APA_DELTA_SCHEMA.properties.narratives.maxItems, 5);
+  assert.equal(APA_DELTA_SCHEMA.properties.narratives.maxItems, 8);
 });
 
 test('binding pins the synthetic athlete, source, baseline and exact current revision', () => {
@@ -112,7 +114,9 @@ test('receipt is content-free with exact strict before/after hashes and target I
     hash_basis: 'STRICT_FULL_COMPOSITION_CANDIDATE', before_sha256: currentApaHash(strictBefore),
     after_sha256: currentApaHash(result.candidate),
     targeted_entities: { domains: ['training'], futures: ['current_course'], candidates: [], narratives: [] },
-    unchanged_copy: { frozen_confirmation_fields: true, copied_report_fields: [...APA_NARRATIVE_FIELDS, 'coach_view'],
+    unchanged_copy: { frozen_confirmation_fields: ['assessment_date', 'confirmed'],
+      copied_confirmation_fields: [...APA_CONFIRMATION_NARRATIVE_FIELDS],
+      copied_report_fields: [...APA_REPORT_NARRATIVE_FIELDS, 'coach_view'],
       bos_refs: true, untargeted_entities: true },
     legacy_review_schedule_padding: input.prior.artifact.report.candidates.filter(c => !Object.hasOwn(c, 'review_schedule')).length });
   assert.equal(JSON.stringify(result.receipt).includes(input.state.messages[0].text), false);
@@ -395,13 +399,13 @@ test('all five typed narrative values remain hash/source bound and receipt metad
     connection: 'Your newly reported Tuesday timing connects training and school without changing your four chosen goals.',
     main_obstacle: 'The changed Tuesday timing may make the original practice cue harder to fit.',
     what_we_dont_know: ['Whether a shorter cue fits the newly reported Tuesday practice.'] };
-  delta.narratives = APA_NARRATIVE_FIELDS.map(field => ({ field, value: values[field], refs: [sourceId(changeId)] }));
+  delta.narratives = APA_REPORT_NARRATIVE_FIELDS.map(field => ({ field, value: values[field], refs: [sourceId(changeId)] }));
   const result = run(input, delta), published = publish(input, result.candidate);
   assert.deepEqual(result.receipt.unchanged_copy.copied_report_fields, ['coach_view']);
   assert.deepEqual(result.candidate.confirmation, input.prior.artifact.confirmation);
   assert.deepEqual(result.candidate.report.coach_view, input.prior.artifact.report.coach_view);
   assert.deepEqual(published.record.artifact.bos_sources, input.prior.artifact.bos_sources);
-  for (const [index, field] of APA_NARRATIVE_FIELDS.entries()) {
+  for (const [index, field] of APA_REPORT_NARRATIVE_FIELDS.entries()) {
     assert.deepEqual(result.candidate.report[field], values[field]);
     const provenance = published.record.artifact.narrative_provenance.fields[index];
     assert.equal(provenance.field, field);
@@ -419,6 +423,52 @@ test('all five typed narrative values remain hash/source bound and receipt metad
   assert.equal(result.receipt.after_sha256, currentApaHash(result.candidate));
 });
 
+test('priority and timing deltas reproduce explicit publication and preserve original assessment custody', () => {
+  const input = setup(), delta = deltaFor(input);
+  const values = ['Protect schoolwork while practising the first pass.', '2026-10-03', '2026-10-16'];
+  input.state.messages[0].text = `My priority is ${values[0]} My APA review date is ${values[1]}; my planning horizon is ${values[2]}.`;
+  delta.narratives = APA_CONFIRMATION_NARRATIVE_FIELDS.map((field, index) => ({
+    field, value: values[index], refs: [sourceId(changeId)] }));
+  const before = clone(input), result = run(input, delta), published = publish(input, result.candidate);
+  assert.deepEqual(input, before);
+  assert.deepEqual(result.candidate.report, run(input, deltaFor(input)).candidate.report);
+  assert.deepEqual(result.receipt.unchanged_copy.copied_confirmation_fields, []);
+  assert.equal(result.candidate.confirmation.assessment_date, nia.apa.confirmation.assessment_date);
+  assert.deepEqual(published.record.artifact.sources.slice(0, nia.apa.sources.length), nia.apa.sources);
+  assert.deepEqual(published.record.artifact.bos_sources, nia.apa.bos_sources);
+  for (const [index, field] of APA_CONFIRMATION_NARRATIVE_FIELDS.entries()) {
+    assert.equal(getApaNarrativeValue(result.candidate, field), values[index]);
+    const receipt = published.receipt.narrative_changes.find(item => item.field === field);
+    assert.equal(receipt.path, field);
+    assert.equal(receipt.after, values[index]);
+    assert.equal(receipt.source_message_id, messageId);
+    assert.ok(published.receipt.material_paths.includes(field));
+    assert.ok(published.receipt.material_paths.includes(`narrative_provenance.${field}`));
+  }
+  assert.deepEqual(currentApaView(nia, JSON.parse(JSON.stringify(published.record))).artifact, published.record.artifact);
+});
+
+test('a reconstructed priority or date cannot bypass canonical publication grounding', () => {
+  const input = setup(), delta = deltaFor(input), field = 'confirmation.review_date';
+  delta.narratives = [{ field, value: '2026-10-03', refs: [sourceId(changeId)] }];
+  assert.throws(() => run(input, delta), /APA_NARRATIVE_SOURCE_TEXT_REQUIRED/u);
+  const result = reconstructApaDelta({ ...input, delta,
+    confirmedSource: { ...input.confirmedSource, text: 'My review date is 2026-10-03.' } });
+  assert.throws(() => publish(input, result.candidate), /APA_NARRATIVE_SOURCE_TEXT_REQUIRED/u);
+  assert.equal(input.record, null);
+  assert.equal(input.prior.version, 0);
+});
+
+test('new confirmation fields remain closed to assessment, identity and arbitrary path targets', () => {
+  const input = setup();
+  for (const field of ['confirmation.assessment_date', 'confirmation.confirmed', 'confirmation.goals.school',
+    'report.confirmation.priority', 'constructor', '__proto__']) {
+    const delta = deltaFor(input);
+    delta.narratives = [{ field, value: '2026-10-03', refs: [sourceId(changeId)] }];
+    assert.throws(() => run(input, delta), /APA_DELTA_SCHEMA_INVALID/u);
+  }
+});
+
 test('narrative target/type/order bounds and forbidden metadata fail before candidate delivery', () => {
   const input = setup();
   for (const update of [
@@ -432,7 +482,7 @@ test('narrative target/type/order bounds and forbidden metadata fail before cand
   for (const updates of [
     [{ field: 'private-unrecognized-narrative', value: 'Not allowed.', refs: [sourceId(changeId)] }],
     [{ field: 'headline', value: 'Not allowed.', refs: [sourceId(changeId)], bos_refs: [] }],
-    Array(6).fill({ field: 'headline', value: 'Not allowed.', refs: [sourceId(changeId)] }),
+    Array(9).fill({ field: 'headline', value: 'Not allowed.', refs: [sourceId(changeId)] }),
   ]) {
     const delta = deltaFor(input); delta.narratives = updates;
     assert.throws(() => run(input, delta), error => error.message === 'APA_DELTA_SCHEMA_INVALID'
@@ -489,19 +539,19 @@ test('legacy unknown narrative dependencies require explicit correction review w
     assert.deepEqual(field.refs, [sourceId(secondChangeId)]);
     assert.equal(field.status, 'SOURCE_BOUND');
   }
-  assert.deepEqual(record.artifact.narrative_provenance.fields.map(field => field.refs), [[], [], [], [], []]);
+  assert.deepEqual(record.artifact.narrative_provenance.fields.map(field => field.refs), Array.from({ length: 8 }, () => []));
 });
 
 test('known narrative correction dependencies cannot be omitted and old refs cannot resurrect', () => {
   const first = setup(), firstDelta = deltaFor(first);
   firstDelta.narratives = APA_NARRATIVE_FIELDS.map(field => ({ field,
-    value: clone(first.prior.artifact.report[field]), refs: [sourceId(changeId)] }));
+    value: clone(getApaNarrativeValue(first.prior.artifact, field)), refs: [sourceId(changeId)] }));
   const record = publish(first, run(first, firstDelta).candidate).record;
   const correction = setup(nia, { record, messageId: secondMessageId, changeId: secondChangeId,
     kind: 'correction', supersedes: [sourceId(changeId)] });
   const complete = deltaFor(correction);
   complete.narratives = APA_NARRATIVE_FIELDS.map(field => ({ field,
-    value: clone(correction.prior.artifact.report[field]), refs: [sourceId(secondChangeId)] }));
+    value: clone(getApaNarrativeValue(correction.prior.artifact, field)), refs: [sourceId(secondChangeId)] }));
   const omitted = clone(complete); omitted.narratives.shift();
   assert.throws(() => run(correction, omitted), /APA_NARRATIVE_CORRECTION_REVIEW_REQUIRED/u);
   const resurrected = clone(complete); resurrected.narratives[0].refs.push(sourceId(changeId));

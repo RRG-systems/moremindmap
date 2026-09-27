@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import nia from '../server/athleteConsultingV2/fixtures/nia.json' with { type: 'json' };
 import sofia from '../server/athleteConsultingV2/fixtures/sofia.json' with { type: 'json' };
-import { APA_NARRATIVE_FIELDS, verifyApaNarrativeProvenance } from '../server/athleteConsultingV2/apaNarrative.js';
+import { APA_NARRATIVE_FIELDS, APA_REPORT_NARRATIVE_FIELDS, getApaNarrativeValue,
+  setApaNarrativeValue, verifyApaNarrativeProvenance } from '../server/athleteConsultingV2/apaNarrative.js';
 import { currentApaHash, currentApaView, publishCurrentApa } from '../server/athleteConsultingV2/currentApa.js';
 
 const clone = value => structuredClone(value);
@@ -24,8 +25,8 @@ function input(bundle = nia, record = null, number = 1, supersedes = []) {
 const sourceId = submitted => `APA:CURRENT:${submitted.confirmedChange.id}`;
 function review(submitted, fields, values = {}, previousRefs = {}) {
   submitted.candidate.narrative_updates = fields.map(field => {
-    const value = clone(Object.hasOwn(values, field) ? values[field] : submitted.candidate.report[field]);
-    submitted.candidate.report[field] = clone(value);
+    const value = clone(Object.hasOwn(values, field) ? values[field] : getApaNarrativeValue(submitted.candidate, field));
+    setApaNarrativeValue(submitted.candidate, field, value);
     return { field, value, refs: [...(previousRefs[field] || []), sourceId(submitted)] };
   });
   return submitted;
@@ -77,7 +78,7 @@ test('a source-bound summary-only publication stores exact typed before/after, e
 });
 
 test('all five typed fields and what-we-do-not-know array can publish under the same companion contract', () => {
-  const submitted = review(input(sofia), APA_NARRATIVE_FIELDS, {
+  const submitted = review(input(sofia), APA_REPORT_NARRATIVE_FIELDS, {
     headline: 'One manageable cue for the changed week', opening: 'Thursday practice is shorter now.',
     connection: 'Keep the cue small enough to protect school and recovery.',
     main_obstacle: 'The athlete still feels rushed during short practice.',
@@ -85,7 +86,8 @@ test('all five typed fields and what-we-do-not-know array can publish under the 
   const result = publishCurrentApa(submitted), artifact = currentApaView(sofia, result.record).artifact;
   assert.equal(result.receipt.narrative_changes.length, 5);
   assert.deepEqual(result.receipt.narrative_changes.at(-1).after, submitted.candidate.report.what_we_dont_know);
-  assert.deepEqual(artifact.narrative_provenance.fields.map(field => field.status), Array(5).fill('SOURCE_BOUND'));
+  assert.deepEqual(artifact.narrative_provenance.fields.slice(0, 5).map(field => field.status), Array(5).fill('SOURCE_BOUND'));
+  assert.deepEqual(artifact.narrative_provenance.fields.slice(5).map(field => field.status), Array(3).fill('BASELINE_UNCITED_AT_FIELD_LEVEL'));
 });
 
 test('explicit unchanged-value reconfirmation publishes provenance without claiming changed text', () => {
@@ -141,7 +143,7 @@ test('known current provenance is retained exactly and active refs cannot be sil
   assert.throws(() => publishCurrentApa(secondInput), /APA_NARRATIVE_SOURCE_REFERENCES_CHANGED/u);
 });
 
-test('unknown legacy summary dependencies make corrections fail closed until all five are explicitly reviewed', () => {
+test('unknown legacy whole-APA dependencies make corrections fail closed until all eight are explicitly reviewed', () => {
   const firstInput = input();
   firstInput.candidate.report.domains[1].gap = 'Thursday practice is shorter this week.';
   firstInput.candidate.report.domains[1].refs.push(sourceId(firstInput));
@@ -240,6 +242,7 @@ test('historical record with frozen uncited narratives reads honestly and can ac
   const first = publishCurrentApa(submitted), legacy = clone(first.record);
   delete legacy.artifact.narrative_provenance;
   delete legacy.receipts[0].narrative_changes; delete legacy.receipts[0].prior_version;
+  delete legacy.receipts[0].narrative_contract;
   delete legacy.receipts[0].prior_artifact_sha256; rehash(legacy);
   assert.equal(currentApaView(nia, legacy).version, 1);
   const next = publishCurrentApa(review(input(nia, legacy, 2), ['opening']));

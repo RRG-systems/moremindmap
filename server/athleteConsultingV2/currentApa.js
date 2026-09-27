@@ -2,7 +2,8 @@ import { createHash } from 'node:crypto';
 import { validateBundle } from './bundles.js';
 import { CANDIDATE_SCHEMA, REPORT_SCHEMA } from '../athleteAcademyV1/apa/schema.js';
 import { validateReport, selectMove } from '../athleteAcademyV1/apa/contract.js';
-import { APA_NARRATIVE_FIELDS, validateApaNarrativeCandidate,
+import { APA_NARRATIVE_FIELDS, APA_REPORT_NARRATIVE_FIELDS, APA_NARRATIVE_CONTRACT,
+  getApaNarrativeValue, validateApaNarrativeCandidate,
   verifyApaNarrativeProvenance, verifyApaNarrativeReceipt } from './apaNarrative.js';
 
 // This record lives INSIDE the existing scope-, athlete-, BOS- and baseline-APA-
@@ -112,15 +113,20 @@ function verifyArtifact(artifact, bundle, version) {
 // field-level citations. Before-values and provenance must match this replay,
 // not merely a caller-recomputed receipt hash.
 function verifyNarrativeHistory(bundle, record, artifact) {
-  const values = Object.fromEntries(APA_NARRATIVE_FIELDS.map(field => [field, clone(bundle.apa.report[field])]));
+  const values = Object.fromEntries(APA_NARRATIVE_FIELDS.map(field => [field, clone(getApaNarrativeValue(bundle.apa, field))]));
   const provenance = verifyApaNarrativeProvenance(bundle.apa);
   let previousContentHash = bundle.apa.artifact_sha256;
   let governed = false;
+  let wholeApaGoverned = false;
   const inactive = new Set();
   for (const [index, receipt] of record.receipts.entries()) {
     for (const id of receipt.supersedes || []) inactive.add(id);
     const sources = artifact.sources.slice(0, bundle.apa.sources.length + index + 1);
     governed ||= own(receipt, 'narrative_changes');
+    wholeApaGoverned ||= receipt.narrative_contract === APA_NARRATIVE_CONTRACT;
+    ensure(!wholeApaGoverned || (receipt.narrative_contract === APA_NARRATIVE_CONTRACT
+      && own(receipt, 'narrative_changes')),
+      'APA_NARRATIVE_PROVENANCE_INVALID', 'narrative_provenance');
     ensure(!governed || own(receipt, 'narrative_changes'),
       'APA_NARRATIVE_PROVENANCE_INVALID', 'narrative_provenance');
     if (governed || own(receipt, 'prior_version') || own(receipt, 'prior_artifact_sha256'))
@@ -130,11 +136,16 @@ function verifyNarrativeHistory(bundle, record, artifact) {
       priorArtifactSha256: previousContentHash, inactiveSourceIds: [...inactive] });
     if (governed && receipt.supersedes?.length) {
       const reviewed = new Set(receipt.narrative_changes.map(change => change.field));
-      for (const [fieldIndex, before] of provenance.fields.entries())
+      for (const [fieldIndex, before] of provenance.fields.entries()) {
+        if (!wholeApaGoverned && !APA_REPORT_NARRATIVE_FIELDS.includes(before.field)) continue;
         ensure((before.status !== 'BASELINE_UNCITED_AT_FIELD_LEVEL'
             && !before.refs.some(id => inactive.has(id))) || reviewed.has(before.field),
         'APA_NARRATIVE_PROVENANCE_INVALID', `narrative_provenance.fields.${fieldIndex}`);
+      }
     }
+    verifyConfirmation({ ...bundle.apa.confirmation,
+      priority: values['confirmation.priority'], review_date: values['confirmation.review_date'],
+      horizon_date: values['confirmation.horizon_date'] }, bundle.apa);
     for (const change of receipt.narrative_changes || []) {
       const fieldIndex = APA_NARRATIVE_FIELDS.indexOf(change.field), before = provenance.fields[fieldIndex];
       const uncited = before.status === 'BASELINE_UNCITED_AT_FIELD_LEVEL';
@@ -151,7 +162,9 @@ function verifyNarrativeHistory(bundle, record, artifact) {
   }
   ensure(!artifact.narrative_provenance || governed,
     'APA_NARRATIVE_PROVENANCE_INVALID', 'narrative_provenance');
-  ensure(APA_NARRATIVE_FIELDS.every(field => same(values[field], artifact.report[field]))
+  ensure(artifact.narrative_provenance?.contract !== APA_NARRATIVE_CONTRACT || wholeApaGoverned,
+    'APA_NARRATIVE_PROVENANCE_INVALID', 'narrative_provenance');
+  ensure(APA_NARRATIVE_FIELDS.every(field => same(values[field], getApaNarrativeValue(artifact, field)))
     && same(provenance, verifyApaNarrativeProvenance(artifact)),
   'APA_NARRATIVE_PROVENANCE_INVALID', 'narrative_provenance');
 }
@@ -239,11 +252,8 @@ function materialDifferences(previous, next, source, inactiveSourceIds) {
       && after.every(id => before.includes(id) || id === source.id),
     'CURRENT_APA_SOURCE_REFERENCES_CHANGED', path);
   };
-  // Date and priority agreement stays historical. Visible narrative fields
-  // are governed separately by the exact operation companion and provenance.
-  frozen(previous.confirmation.priority, next.confirmation.priority, 'confirmation.priority');
-  frozen(previous.confirmation.review_date, next.confirmation.review_date, 'confirmation.review_date');
-  frozen(previous.confirmation.horizon_date, next.confirmation.horizon_date, 'confirmation.horizon_date');
+  // Whole-APA narrative, priority and follow-up timing are governed separately
+  // by the exact operation companion. Assessment identity remains historical.
   for (const [index, domain] of next.report.domains.entries()) {
     const prior = previous.report.domains.find(item => item.id === domain.id);
     ensure(prior, 'CURRENT_APA_STRUCTURE_CHANGED', `report.domains.${index}`);
@@ -331,6 +341,7 @@ export function publishCurrentApa({ bundle, record = null, state, confirmedChang
   const version = prior.version + 1;
   const narrative = validateApaNarrativeCandidate({ priorArtifact: prior.artifact, candidate,
     sourceId: source.id, sourceMessageId: source.source_message_id, sourceVersion: version,
+    sourceText: source.text,
     inactiveSourceIds, supersedes: confirmedChange.supersedes });
   changes.push(...narrative.material_paths.map(path => ({ path })));
   if (!changes.length) return { record, changed: false, receipt: null };
@@ -354,6 +365,7 @@ export function publishCurrentApa({ bundle, record = null, state, confirmedChang
     change_id: confirmedChange.id, source_id: source.id, source_message_id: source.source_message_id,
     kind: confirmedChange.kind, supersedes: [...confirmedChange.supersedes],
     material_paths: [...new Set(changes.map(item => item.path))], narrative_changes: narrative.changes,
+    narrative_contract: APA_NARRATIVE_CONTRACT,
     reason: confirmedChange.reason.trim(),
     at: confirmedChange.confirmed_at };
   const receipt = { ...receiptBody, receipt_hash: currentApaHash(receiptBody) };

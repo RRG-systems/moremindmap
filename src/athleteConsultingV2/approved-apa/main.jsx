@@ -84,9 +84,9 @@ export default function ApprovedApa(){
   {stale&&<div className="apa-refresh-failure" role="alert"><p>The last verified reading remains available, but its currency cannot be confirmed. Do not treat it as the latest APA until refresh succeeds.</p><button type="button" onClick={()=>reload()} disabled={refreshing}>{refreshing?'Retrying…':'Retry latest APA'}</button></div>}
   {refreshing&&<p role="status" className="apa-note">Refreshing the current APA…</p>}
   {(reading.availableCurrentVersion>0||reading.preview||reading.needsReview)&&<section className="panel apa-connection" aria-label="APA reading version">
-   <p className="eyebrow green">{reading.showPreview?`PROPOSED UPDATE · VERSION ${reading.version} · NOT CURRENT`:reading.showOriginal?'ORIGINAL SAVED APA':reading.needsReview?'PREVIOUS APA · REVIEW NEEDED':reading.availableCurrentVersion>0?`CURRENT APA · VERSION ${reading.availableCurrentVersion}`:'CURRENT APA · ORIGINAL READING'}</p>
-   <p>{reading.showPreview?'This is a proposed update for your review. It is not your current APA and has not been published. Your accepted plan is separate.':reading.showOriginal?'This is the preserved original assessment. The saved reading remains available beside it.':reading.needsReview?'A correction or retraction has changed the evidence. This earlier APA is historical until the athlete reviews and publishes an updated reading.':reading.availableCurrentVersion>0?`Updated from an athlete-confirmed change. ${reading.receipt.reason} The original assessment remains saved.`:'Your original assessment is still the current APA. A proposed update is available for review but has not been published.'}</p>
-   {!reading.showOriginal&&<p>Original assessment dates are preserved, not newly agreed deadlines. Your chosen plan has its own review timing.</p>}
+   <p className="eyebrow green">{stale?'LAST VERIFIED APA · CURRENCY UNCONFIRMED':reading.showPreview?`PROPOSED UPDATE · VERSION ${reading.version} · NOT CURRENT`:reading.showOriginal?'ORIGINAL SAVED APA':reading.needsReview?'PREVIOUS APA · REVIEW NEEDED':reading.availableCurrentVersion>0?`CURRENT APA · VERSION ${reading.availableCurrentVersion}`:'CURRENT APA · ORIGINAL READING'}</p>
+   <p>{stale?'This is the last verified reading. Its currency cannot be confirmed until refresh succeeds.':reading.showPreview?'This is a proposed update for your review. It is not your current APA and has not been published. Your accepted plan is separate.':reading.showOriginal?'This is the preserved original assessment. The saved reading remains available beside it.':reading.needsReview?'A correction or retraction has changed the evidence. This earlier APA is historical until the athlete reviews and publishes an updated reading.':reading.availableCurrentVersion>0?`Updated from an athlete-confirmed change. ${reading.receipt.reason} The original assessment remains saved.`:'Your original assessment is still the current APA. A proposed update is available for review but has not been published.'}</p>
+   {!reading.showOriginal&&<p>The original assessment stays preserved. Priority and APA timing change only through an athlete-reviewed, explicitly published update. Your accepted plan is separate.</p>}
    <div className="actions" role="group" aria-label="Choose APA reading">
     <button type="button" aria-pressed={!reading.showOriginal&&!reading.showPreview} onClick={()=>setReadingChoice('current')}>{reading.needsReview?'Previous reading · review needed':'Current reading'}</button>
     <button type="button" aria-pressed={reading.showOriginal} onClick={()=>setReadingChoice('original')}>Original saved APA</button>
@@ -94,10 +94,10 @@ export default function ApprovedApa(){
    </div>
   </section>}
   {!reading.showOriginal&&<ApaNarrativeChanges receipt={reading.receipt}
-   proposed={reading.showPreview} historical={reading.needsReview&&!reading.showPreview}/>}
+   proposed={reading.showPreview} historical={stale||reading.needsReview&&!reading.showPreview}/>}
   <BusinessTwinApp key={slug} onContextChange={shareBox} viewModel={project(a,{version:reading.version,receipt:reading.receipt,
    acceptedPlan:reading.acceptedPlan,showOriginal:reading.showOriginal,showPreview:reading.showPreview,
-   needsReview:reading.needsReview})} pageComponent={ReportPage}
+   needsReview:reading.needsReview,stale})} pageComponent={ReportPage}
    pageProps={{a,acceptedPlan:reading.acceptedPlan,version:reading.version,
     receipt:reading.receipt,showOriginal:reading.showOriginal,showPreview:reading.showPreview,
     needsReview:reading.needsReview,stale}}/>

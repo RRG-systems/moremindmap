@@ -3,8 +3,8 @@ import { currentApaHash, MAX_CURRENT_APA_REVISIONS } from './currentApa.js';
 import { object, list, string, DOMAIN_SCHEMA, FUTURE_SCHEMA, CANDIDATE_SCHEMA,
   REPORT_SCHEMA } from '../athleteAcademyV1/apa/schema.js';
 import { validateReport, selectMove } from '../athleteAcademyV1/apa/contract.js';
-import { APA_NARRATIVE_FIELDS, NARRATIVE_UPDATE_SCHEMA,
-  validateApaNarrativeCandidate } from './apaNarrative.js';
+import { APA_NARRATIVE_FIELDS, APA_REPORT_NARRATIVE_FIELDS, APA_CONFIRMATION_NARRATIVE_FIELDS,
+  NARRATIVE_UPDATE_SCHEMA, setApaNarrativeValue, validateApaNarrativeCandidate } from './apaNarrative.js';
 
 const CONTRACT = 'athlete_current_apa_delta_v1';
 const UUID = /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/iu;
@@ -46,7 +46,7 @@ const BINDING_SCHEMA = object({
 });
 
 // The provider may replace complete existing entities and explicitly reviewed
-// narrative fields only. Immutable identity, dates, coach view, accepted BOS
+// narrative fields only. Immutable identity, assessment date, coach view, accepted BOS
 // references, selection results and consent stay on the server.
 export const APA_DELTA_SCHEMA = freeze(object({
   contract: { type: 'string', enum: [CONTRACT] },
@@ -54,7 +54,7 @@ export const APA_DELTA_SCHEMA = freeze(object({
   domains: { ...list(withoutBosRefs(DOMAIN_SCHEMA)), maxItems: 4 },
   futures: { ...list(withoutBosRefs(FUTURE_SCHEMA)), maxItems: 5 },
   candidates: { ...list(withoutBosRefs(CANDIDATE_SCHEMA)), maxItems: 5 },
-  narratives: { ...list(NARRATIVE_UPDATE_SCHEMA), maxItems: 5 },
+  narratives: { ...list(NARRATIVE_UPDATE_SCHEMA), maxItems: APA_NARRATIVE_FIELDS.length },
 }));
 
 function matchesSchema(value, schema) {
@@ -221,7 +221,7 @@ function applyEntities({ replacements, originals, key, fields, family, candidate
   return targets;
 }
 
-export function reconstructApaDelta({ delta, bundle, prior, confirmedChange }) {
+export function reconstructApaDelta({ delta, bundle, prior, confirmedChange, confirmedSource }) {
   const expected = apaDeltaBinding({ bundle, prior, confirmedChange });
   requireThat(matchesSchema(delta, APA_DELTA_SCHEMA), 'APA_DELTA_SCHEMA_INVALID', 'delta');
   requireThat(same(delta.binding, expected), 'APA_DELTA_BINDING_MISMATCH', 'binding');
@@ -238,7 +238,7 @@ export function reconstructApaDelta({ delta, bundle, prior, confirmedChange }) {
     const index = APA_NARRATIVE_FIELDS.indexOf(update.field);
     requireThat(index > previousNarrativeIndex, 'APA_DELTA_TARGET_ORDER_INVALID', `narrative_updates.${updateIndex}`);
     previousNarrativeIndex = index;
-    candidate.report[update.field] = clone(update.value);
+    setApaNarrativeValue(candidate, update.field, clone(update.value));
   }
   candidate.narrative_updates = clone(delta.narratives);
   targeted.narratives = delta.narratives.map(update => update.field);
@@ -248,7 +248,7 @@ export function reconstructApaDelta({ delta, bundle, prior, confirmedChange }) {
   validateApaNarrativeCandidate({ priorArtifact: prior.artifact, candidate,
     sourceId: expected.source_id, sourceMessageId: confirmedChange.source_message_id,
     sourceVersion: prior.version + 1, inactiveSourceIds: [...inactive],
-    supersedes: confirmedChange.supersedes });
+    supersedes: confirmedChange.supersedes, sourceText: confirmedSource?.text });
   const unresolvedPath = firstInactiveReference(candidate.report, inactive);
   requireThat(!unresolvedPath, 'APA_DELTA_CORRECTION_DEPENDENCY_OMITTED', unresolvedPath || 'report.refs');
   requireThat(matchesSchema(candidate.report, REPORT_SCHEMA), 'APA_DELTA_SCHEMA_INVALID', 'report');
@@ -263,8 +263,9 @@ export function reconstructApaDelta({ delta, bundle, prior, confirmedChange }) {
   const receipt = { contract: 'athlete_current_apa_delta_reconstruction_v1',
     hash_basis: 'STRICT_FULL_COMPOSITION_CANDIDATE', before_sha256: currentApaHash(before),
     after_sha256: currentApaHash(candidate), targeted_entities: targeted,
-    unchanged_copy: { frozen_confirmation_fields: true,
-      copied_report_fields: [...APA_NARRATIVE_FIELDS.filter(field => !targeted.narratives.includes(field)), 'coach_view'],
+    unchanged_copy: { frozen_confirmation_fields: ['assessment_date', 'confirmed'],
+      copied_confirmation_fields: APA_CONFIRMATION_NARRATIVE_FIELDS.filter(field => !targeted.narratives.includes(field)),
+      copied_report_fields: [...APA_REPORT_NARRATIVE_FIELDS.filter(field => !targeted.narratives.includes(field)), 'coach_view'],
       bos_refs: true, untargeted_entities: true },
     legacy_review_schedule_padding: prior.artifact.report.candidates.filter(entity => !own(entity, 'review_schedule')).length };
   return freeze({ candidate, receipt });

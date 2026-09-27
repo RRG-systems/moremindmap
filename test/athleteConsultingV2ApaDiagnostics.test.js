@@ -83,3 +83,19 @@ test('unchanged youth rule failure is reported at truthful coarse report locatio
     return true;
   });
 });
+
+test('unsupported priority or timing preserves a content-free grounding rule and indexed path', () => {
+  const input = proposal();
+  input.candidate.confirmation.review_date = '2026-10-03';
+  input.candidate.narrative_updates = [{ field: 'confirmation.review_date', value: '2026-10-03',
+    refs: [`APA:CURRENT:${input.confirmedChange.id}`] }];
+  assert.throws(() => publishCurrentApa(input), error => {
+    assert.deepEqual(apaValidatorDiagnostic(error, { stage: 'publication_dry_run' }), {
+      validator_code: 'APA_NARRATIVE_SOURCE_TEXT_REQUIRED',
+      validator_path: 'narrative_updates.0.value', stage: 'publication_dry_run',
+    });
+    assert.doesNotMatch(JSON.stringify(apaValidatorDiagnostic(error, { stage: 'publication_dry_run' })),
+      /2026-10-03|synthetic training|source_message_id/u);
+    return true;
+  });
+});

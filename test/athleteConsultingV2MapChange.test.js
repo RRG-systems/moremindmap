@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { bundles } from '../server/athleteConsultingV2/bundles.js';
 import { currentApaHash, currentApaView, publishCurrentApa } from '../server/athleteConsultingV2/currentApa.js';
+import { APA_NARRATIVE_FIELDS, getApaNarrativeValue } from '../server/athleteConsultingV2/apaNarrative.js';
 import { buildLegacySessionMapChange, buildSessionMapChange, captureSessionStartMap,
   SESSION_MAP_CHANGE_CONTRACT, SESSION_MAP_START_CONTRACT } from '../server/athleteConsultingV2/mapChange.js';
 
@@ -33,8 +34,8 @@ function publish(bundle, state, { messageId = firstMessage, changeId = firstChan
   if (kind === 'correction') {
     // The fixture explicitly reviews baseline summaries with unknown original
     // field citations; production now refuses silently carrying them forward.
-    candidate.narrative_updates = ['headline', 'opening', 'connection', 'main_obstacle', 'what_we_dont_know']
-      .map(field => ({ field, value: clone(candidate.report[field]),
+    candidate.narrative_updates = APA_NARRATIVE_FIELDS
+      .map(field => ({ field, value: clone(getApaNarrativeValue(candidate, field)),
         refs: [...(prior.artifact.narrative_provenance?.fields.find(item => item.field === field)?.refs || [])
           .filter(id => !supersedes.includes(id)), sourceId(changeId)] }));
   }

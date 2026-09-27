@@ -2,6 +2,7 @@ import { Buffer } from 'node:buffer';
 import { validateBundle } from './bundles.js';
 import { currentApaHash, currentApaView } from './currentApa.js';
 import { validatePlan } from './state.js';
+import { APA_NARRATIVE_FIELDS, apaNarrativePath, getApaNarrativeValue } from './apaNarrative.js';
 
 export const SESSION_MAP_START_CONTRACT = 'athlete_session_map_start_v1';
 export const SESSION_MAP_CHANGE_CONTRACT = 'athlete_session_map_change_v1';
@@ -13,7 +14,10 @@ const CANDIDATE_FIELDS = ['domain', 'action', 'why', 'when', 'who', 'action_sign
 const REPORT_FIELDS = ['headline', 'opening', 'connection', 'main_obstacle', 'what_we_dont_know'];
 const NEW_SUMMARY_FIELDS = ['headline', 'opening'];
 const summaryLabel = { headline: 'APA heading', opening: 'Your whole picture',
-  connection: 'How it connects', main_obstacle: 'Main obstacle', what_we_dont_know: 'What is still unknown' };
+  connection: 'How it connects', main_obstacle: 'Main obstacle', what_we_dont_know: 'What is still unknown',
+  'confirmation.priority': 'Your current priority',
+  'confirmation.review_date': 'Your agreed review date',
+  'confirmation.horizon_date': 'Your agreed horizon date' };
 const UUID = /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/iu;
 const ensure = (condition, code) => { if (!condition) throw new Error(code); };
 const clone = value => structuredClone(value);
@@ -67,11 +71,11 @@ function materialFields(artifact) {
         fields[`report.candidates.${candidate.candidate_id}.gates.${gate.id}.${field}`] = clone(gate[field]);
   for (const field of REPORT_FIELDS)
     fields[`report.${field}`] = clone(artifact.report[field]);
-  for (const field of REPORT_FIELDS) {
+  for (const field of APA_NARRATIVE_FIELDS) {
     const provenance = artifact.narrative_provenance?.fields?.find(item => item.field === field);
     fields[`narrative_provenance.${field}`] = provenance ? clone(provenance) : {
       field, status: 'BASELINE_UNCITED_AT_FIELD_LEVEL',
-      value_sha256: currentApaHash(artifact.report[field]), refs: [],
+      value_sha256: currentApaHash(getApaNarrativeValue(artifact, field)), refs: [],
       source_id: null, source_message_id: null, version: null,
     };
   }
@@ -154,7 +158,8 @@ function display(value, present) {
 function label(path) {
   if (path === 'move.selection') return 'Your One Move';
   const parts = path.split('.');
-  if (parts[0] === 'narrative_provenance') return `${summaryLabel[parts[1]]} · evidence`;
+  if (parts[0] === 'narrative_provenance') return `${summaryLabel[path.slice('narrative_provenance.'.length)]} · evidence`;
+  if (Object.hasOwn(summaryLabel, path)) return summaryLabel[path];
   if (parts[0] === 'report' && Object.hasOwn(summaryLabel, parts[1])) return summaryLabel[parts[1]];
   if (parts[0] === 'confirmation' && parts[1] === 'goals')
     return `${parts[2]} goal`;
@@ -178,21 +183,22 @@ function provenanceDisplay(value, present) {
 export function compareSessionMapSummaries(bundle, start, now, receipts) {
   const before = clone(start), current = clone(now), limits = [];
   const baseline = start.version === 0 && start.artifact_hash === bundle.apa.artifact_sha256;
-  for (const field of REPORT_FIELDS) {
-    const valuePath = `report.${field}`, evidencePath = `narrative_provenance.${field}`;
+  for (const field of APA_NARRATIVE_FIELDS) {
+    const valuePath = apaNarrativePath(field), evidencePath = `narrative_provenance.${field}`;
     const linkedReceipt = receipts.find(receipt => receipt.prior_version === start.version
       && receipt.version === start.version + 1
       && receipt.prior_artifact_sha256 === start.artifact_hash);
     const firstChange = linkedReceipt?.narrative_changes?.find(change => change.field === field);
-    if (!Object.hasOwn(before.fields, valuePath) && NEW_SUMMARY_FIELDS.includes(field)) {
-      if (baseline) before.fields[valuePath] = clone(bundle.apa.report[field]);
+    if (!Object.hasOwn(before.fields, valuePath)
+      && (NEW_SUMMARY_FIELDS.includes(field) || field.startsWith('confirmation.'))) {
+      if (baseline) before.fields[valuePath] = clone(getApaNarrativeValue(bundle.apa, field));
       else if (firstChange) before.fields[valuePath] = clone(firstChange.before);
       else { delete current.fields[valuePath]; limits.push(valuePath); }
     }
     if (!Object.hasOwn(before.fields, evidencePath)) {
       if (baseline || firstChange?.prior_provenance === 'BASELINE_FIELD_UNCITED') {
         before.fields[evidencePath] = { field, status: 'BASELINE_UNCITED_AT_FIELD_LEVEL',
-          value_sha256: currentApaHash(before.fields[valuePath] ?? bundle.apa.report[field]),
+          value_sha256: currentApaHash(before.fields[valuePath] ?? getApaNarrativeValue(bundle.apa, field)),
           refs: [], source_id: null, source_message_id: null, version: null };
       } else if (firstChange?.before_provenance) before.fields[evidencePath] = clone(firstChange.before_provenance);
       else { delete current.fields[evidencePath]; limits.push(evidencePath); }
@@ -218,8 +224,8 @@ function changedFields(before, now, receipts) {
     if (beforePresent === nowPresent && same(oldValue, newValue)) continue;
     const lineage = supported.get(path);
     ensure(lineage?.length, 'MAP_CHANGE_UNRECEIPTED_FIELD');
-    const narrativeField = path.startsWith('narrative_provenance.') ? path.split('.')[1]
-      : path.startsWith('report.') && Object.hasOwn(summaryLabel, path.split('.')[1]) ? path.split('.')[1] : null;
+    const narrativeField = APA_NARRATIVE_FIELDS.find(field => path === apaNarrativePath(field)
+      || path === `narrative_provenance.${field}`);
     const beforeEvidence = narrativeField ? before.fields[`narrative_provenance.${narrativeField}`] : null;
     const afterEvidence = narrativeField ? now.fields[`narrative_provenance.${narrativeField}`] : null;
     entries.push({ path, label: label(path),
@@ -234,7 +240,7 @@ function changedFields(before, now, receipts) {
         after_refs: clone(afterEvidence.refs),
         prior_provenance: beforeEvidence?.status === 'SOURCE_BOUND' ? 'SOURCE_BOUND'
           : beforeEvidence ? 'BASELINE_FIELD_UNCITED' : 'START_FIELD_EVIDENCE_UNAVAILABLE',
-        value_changed: !same(before.fields[`report.${narrativeField}`], now.fields[`report.${narrativeField}`]),
+        value_changed: !same(before.fields[apaNarrativePath(narrativeField)], now.fields[apaNarrativePath(narrativeField)]),
         reference_changed: !beforeEvidence || beforeEvidence.status !== afterEvidence.status
           || !same(beforeEvidence.refs, afterEvidence.refs),
         source_id: afterEvidence.source_id, source_message_id: afterEvidence.source_message_id,

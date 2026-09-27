@@ -11,7 +11,7 @@ import {
 } from '../server/athleteConsultingV2/apaComposer.js';
 import { currentApaHash, currentApaView, publishCurrentApa } from '../server/athleteConsultingV2/currentApa.js';
 import { APA_DELTA_SCHEMA, apaDeltaBinding } from '../server/athleteConsultingV2/apaDelta.js';
-import { APA_NARRATIVE_FIELDS, NARRATIVE_UPDATE_SCHEMA } from '../server/athleteConsultingV2/apaNarrative.js';
+import { APA_NARRATIVE_FIELDS, getApaNarrativeValue, NARRATIVE_UPDATE_SCHEMA } from '../server/athleteConsultingV2/apaNarrative.js';
 
 const clone = value => structuredClone(value);
 const messageId = '11111111-1111-4111-8111-111111111111';
@@ -266,7 +266,7 @@ test('correction of a currently cited athlete source composes only after replaci
   revised.report.domains[1].gap = 'Thursday is the short practice; Tuesday is now a rest day.';
   revised.report.futures[0].conditions = 'If Thursday practice stays short, Nia may need a concise passing-choice cue.';
   revised.narrative_updates = APA_NARRATIVE_FIELDS.map(field => ({ field,
-    value: clone(revised.report[field]), refs: [sourceId] }));
+    value: clone(getApaNarrativeValue(revised, field)), refs: [sourceId] }));
   const events = []; let calls = 0;
   const composer = createApaComposer({ env: {}, evidenceSink: async event => { events.push(event); },
     transport: async () => { calls++; return response(revised, {}, confirmed); } });

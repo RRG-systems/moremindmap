@@ -4,6 +4,8 @@ import test from 'node:test';
 import { bundles } from '../server/athleteConsultingV2/bundles.js';
 import { flagshipCoachingInput } from '../server/athleteConsultingV2/coach.js';
 import { currentApaView } from '../server/athleteConsultingV2/currentApa.js';
+import { APA_NARRATIVE_FIELDS, APA_CONFIRMATION_NARRATIVE_FIELDS,
+  getApaNarrativeValue, setApaNarrativeValue } from '../server/athleteConsultingV2/apaNarrative.js';
 import { athleteConsultingV2Keys, createStore, PERSIST_LUA } from '../server/athleteConsultingV2/store.js';
 
 class FakeRedis {
@@ -45,8 +47,8 @@ const clone = value => structuredClone(value);
 
 function reviewedCorrectionNarratives(candidate, prior, change) {
   if (change.kind !== 'correction') return;
-  candidate.narrative_updates = ['headline', 'opening', 'connection', 'main_obstacle', 'what_we_dont_know']
-    .map(field => ({ field, value: clone(candidate.report[field]),
+  candidate.narrative_updates = APA_NARRATIVE_FIELDS
+    .map(field => ({ field, value: clone(getApaNarrativeValue(candidate, field)),
       refs: [...(prior.narrative_provenance?.fields.find(item => item.field === field)?.refs || [])
         .filter(id => !change.supersedes.includes(id)), sourceId(change)] }));
 }
@@ -94,6 +96,53 @@ async function publishDraft(store, slug, prepared) {
   return store.act(slug, { action: 'publish_apa', id: prepared.apaDraft.id,
     hash: prepared.apaDraft.hash, revision: prepared.revision, requestId: randomUUID() });
 }
+
+test('athlete priority and timing remain a reviewed exact draft until separate manual publication', async () => {
+  let composerCalls = 0;
+  const values = ['Protect schoolwork while practising the first pass.', '2026-10-03', '2026-10-16'];
+  const { store, redis, scopeId } = fixture(input => {
+    composerCalls++;
+    const prior = currentApaView(input.bundle, input.record).artifact;
+    const candidate = { confirmation: clone(prior.confirmation), report: clone(prior.report), narrative_updates: [] };
+    APA_CONFIRMATION_NARRATIVE_FIELDS.forEach((field, index) => {
+      setApaNarrativeValue(candidate, field, values[index]);
+      candidate.narrative_updates.push({ field, value: values[index], refs: [sourceId(input.confirmedChange)] });
+    });
+    return { candidate, changed: true };
+  });
+  await act(store, 'nia', { action: 'start' });
+  const reported = await act(store, 'nia', { action: 'message', speaker: 'athlete',
+    text: `My current priority is ${values[0]} Review on October 3, 2026; horizon October 16, 2026.` });
+  const sourceMessageId = reported.messages.filter(item => item.role === 'user').at(-1).id;
+  const original = clone(bundles.nia), before = await store.read('nia');
+  const prepared = await store.act('nia', updateBody(before, sourceMessageId));
+  assert.equal(prepared.currentApa, null);
+  assert.equal(prepared.apaDraft.previewRecord.artifact.confirmation.priority, values[0]);
+  assert.equal(prepared.plan, before.plan);
+  assert.deepEqual(prepared.learning, before.learning);
+  const cold = createStore({ redis, bundles, scopeId, coach: async () => { throw Error('UNEXPECTED_MODEL'); },
+    apaComposer: async () => { throw Error('UNEXPECTED_COMPOSER'); } });
+  const reloadedDraft = await cold.read('nia');
+  assert.equal(reloadedDraft.currentApa, null);
+  assert.equal(reloadedDraft.apaDraft.hash, prepared.apaDraft.hash);
+  await assert.rejects(() => cold.act('nia', { action: 'publish_apa', id: prepared.apaDraft.id,
+    hash: 'f'.repeat(64), revision: reloadedDraft.revision, requestId: randomUUID() }), /CURRENT_APA_DRAFT_CHANGED/u);
+  assert.equal((await cold.read('nia')).currentApa, null);
+  const published = await publishDraft(cold, 'nia', await cold.read('nia'));
+  assert.equal(published.currentApa.version, 1);
+  assert.equal(published.apaDraft, null);
+  for (const [index, field] of APA_CONFIRMATION_NARRATIVE_FIELDS.entries()) {
+    assert.equal(getApaNarrativeValue(published.currentApa.artifact, field), values[index]);
+    assert.ok(published.currentApa.receipts[0].material_paths.includes(field));
+  }
+  assert.equal(published.currentApa.artifact.confirmation.assessment_date, original.apa.confirmation.assessment_date);
+  assert.deepEqual(published.currentApa.artifact.sources.slice(0, original.apa.sources.length), original.apa.sources);
+  assert.deepEqual(published.currentApa.artifact.bos_sources, original.apa.bos_sources);
+  assert.deepEqual(bundles.nia, original);
+  assert.equal((await cold.read('sofia')).currentApa, null);
+  assert.deepEqual((await cold.read('nia')).currentApa, published.currentApa);
+  assert.equal(composerCalls, 1);
+});
 
 test('whole-picture companion remains a private hash-bound draft across cold read until exact publication', async () => {
   let calls = 0;
