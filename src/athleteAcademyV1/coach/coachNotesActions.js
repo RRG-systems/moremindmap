@@ -7,6 +7,10 @@ export function coachNoteOperation(body,prior,requestId){
 }
 const knownNoWrite=new Set(['COACH_NOTE_COMMAND_INVALID','COACH_NOTES_NOT_ACTIVE','COACH_NOTE_GRANT_UNAVAILABLE','COACH_NOTE_SCOPE_INVALID','COACH_NOTE_TERMS_INVALID','COACH_NOTE_OBSERVATION_INVALID','COACH_NOTE_RECIPIENT_UNAVAILABLE','COACH_NOTE_REVIEWED_SEND_REQUIRED','COACH_NOTE_INVITATION_REVIEW_REQUIRED','SESSION_EXPIRED','SESSION_OR_FORM_EXPIRED','SIGN_IN_REQUIRED','SAME_ORIGIN_REQUIRED','ACTION_NOT_FOUND']);
 export const coachNoteFailureKnownNoWrite=error=>knownNoWrite.has(error?.code);
+// A gate rejection proves only this attempt did not write. It cannot settle an
+// earlier ambiguous attempt with the same request identity.
+export const coachNoteFailureMayClearJournal=(error,priorUncertainty)=>
+ priorUncertainty===false&&coachNoteFailureKnownNoWrite(error);
 export function coachNoteOperationAcknowledged(receipt,pending,actorId){
  if(!receipt||Object.keys(receipt).length!==6||receipt.contract!=='athlete_coach_note_operation_v1'
   ||receipt.actor_id!==actorId||receipt.mm!==pending.target_mm||receipt.request_id!==pending.request_id

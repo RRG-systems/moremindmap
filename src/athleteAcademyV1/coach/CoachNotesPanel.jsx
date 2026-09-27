@@ -1,7 +1,7 @@
 import React,{useEffect,useRef,useState} from 'react';
 import {call} from '../transport.js';
 import CoachNotes from './CoachNotes.jsx';
-import {coachNoteOperation,coachNoteFailureKnownNoWrite,coachNoteOperationAcknowledged,coachNoteOutcomeAcknowledged} from './coachNotesActions.js';
+import {coachNoteOperation,coachNoteFailureMayClearJournal,coachNoteOperationAcknowledged,coachNoteOutcomeAcknowledged} from './coachNotesActions.js';
 import {readPending,savePending,clearPending} from './coachNotesJournal.js';
 
 // Uses the existing authenticated academy endpoint, never an athlete report or
@@ -23,6 +23,7 @@ export default function CoachNotesPanel({actorId,mode,mm=null,disabled=false}){
  async function perform(body){
   if(busy||disabled||!journalReady)return false;
   if(pending.current&&!pending.current.operation)throw Error('Check the saved action acknowledgment before making another change.');
+  const priorUncertainty=Boolean(pending.current);
   const selected=coachNoteOperation(body,pending.current,crypto.randomUUID());
   setBusy(true);setError('');let result;
   try{
@@ -33,7 +34,7 @@ export default function CoachNotesPanel({actorId,mode,mm=null,disabled=false}){
    await clearPending(globalThis.localStorage,scope,metadata.request_id);
    pending.current=null;setUnknown(false);setEnvelope(null);
   }catch(e){
-   try{if(coachNoteFailureKnownNoWrite(e)&&pending.current?.metadata){await clearPending(globalThis.localStorage,scope,pending.current.metadata.request_id);pending.current=null;setUnknown(false);}
+   try{if(coachNoteFailureMayClearJournal(e,priorUncertainty)&&pending.current?.metadata){await clearPending(globalThis.localStorage,scope,pending.current.metadata.request_id);pending.current=null;setUnknown(false);}
     else{const metadata=readPending(globalThis.localStorage,scope);if(metadata&&!pending.current?.operation)pending.current={metadata};setUnknown(Boolean(metadata));}}
    catch{setJournalReady(false);setUnknown(true);}
    setError(e.message);throw e;

@@ -338,7 +338,8 @@ test('Panel journals before dispatch, verifies before clear, and reload-restored
  assert.ok(save>=0&&save<dispatch&&dispatch<verify&&verify<clear);
  assert.match(perform,/pending\.current&&!pending\.current\.operation\)throw Error/u);
  assert.match(perform,/coachNoteOperationAcknowledged\(result\.operation_receipt,metadata,actorId\)/u);
- assert.match(perform,/if\(coachNoteFailureKnownNoWrite\(e\)&&pending\.current\?\.metadata\)/u);
+ assert.match(perform,/const priorUncertainty=Boolean\(pending\.current\)/u);
+ assert.match(perform,/if\(coachNoteFailureMayClearJournal\(e,priorUncertainty\)&&pending\.current\?\.metadata\)/u);
  const check=source.slice(source.indexOf('async function checkOutcome'),source.indexOf('return <section'));
  assert.match(check,/call\('coach_notes_outcome',\{mm:metadata\.target_mm,request_id:metadata\.request_id,signature_sha256:metadata\.signature_sha256,kind:metadata\.kind\}\)/u);
  assert.ok(check.indexOf('coachNoteOutcomeAcknowledged(')<check.indexOf('await clearPending('));
