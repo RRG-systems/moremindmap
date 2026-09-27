@@ -7,7 +7,7 @@ import { createAcademyService } from '../server/athleteAcademyV1/service.js';
 import { createCoachingService } from '../server/athleteAcademyV1/coaching/service.js';
 import { initialCoachState } from '../server/athleteAcademyV1/coaching/state.js';
 import { hash } from '../server/athleteAcademyV1/coaching/bundle.js';
-import { MAIN_APA_DELTA_CONTRACT } from '../server/athleteAcademyV1/coaching/currentApa.js';
+import { MAIN_APA_REFERENCE_CODEC_CONTRACT } from '../server/athleteAcademyV1/coaching/currentApa.js';
 import { continuityView, confirmApaCommand, prepareApaCommand, publishApaCommand, apaDraftKey, APA_BOXES } from '../src/athleteAcademyV1/coach/currentApaUi.js';
 
 const clone = value => structuredClone(value);
@@ -42,17 +42,17 @@ function memoryCas() {
   return { redis, values, repo: createRedisRepository({ redis, prefix: 'more:athlete-academy:{test-apa-service}' }) };
 }
 function typedResponse(request) {
-  const packet = JSON.parse(request.input), source = packet.delta_binding.source_id;
+  const packet = JSON.parse(request.input);
   assert.equal(packet.contract, 'athlete_academy_current_apa_composition_packet_v1');
   assert.equal(packet.selected_athlete.slug, undefined);
   assert.equal(packet.selected_athlete.synthetic, false);
   assert.equal(request.store, false);
   return { status: 'completed', model: 'gpt-5.6-sol', usage: { total_tokens: 0 }, output_text: JSON.stringify({
-    contract: MAIN_APA_DELTA_CONTRACT, binding: packet.delta_binding, domains: [], futures: [], candidates: [],
+    contract: MAIN_APA_REFERENCE_CODEC_CONTRACT, binding: packet.delta_binding, domains: [], futures: [], candidates: [],
     narratives: [
-      { field: 'confirmation.priority', value: 'Make calm passing choices', refs: [source] },
-      { field: 'confirmation.review_date', value: '2026-10-03', refs: [source] },
-      { field: 'confirmation.horizon_date', value: '2026-12-01', refs: [source] },
+      { field: 'confirmation.priority', value: 'Make calm passing choices', cite_confirmed_update: true },
+      { field: 'confirmation.review_date', value: '2026-10-03', cite_confirmed_update: true },
+      { field: 'confirmation.horizon_date', value: '2026-12-01', cite_confirmed_update: true },
     ],
   }) };
 }
@@ -472,7 +472,7 @@ test('recovery rejects immutable event/request/actor/hash/response tamper withou
     'request content rehashed': { kind: 'request', change: event => { event.request.input += ' '; event.basis.request_sha256 = digest(event.request); }, code: /APA_COMPOSITION_RECOVERY_REQUEST_MISMATCH/u },
     'wrong response model': { kind: 'response', change: event => { event.response.model = 'other-model'; }, code: /APA_COMPOSITION_MODEL_MISMATCH/u },
     'incomplete response': { kind: 'response', change: event => { event.response.status = 'incomplete'; }, code: /APA_COMPOSITION_RESPONSE_INCOMPLETE/u },
-    'cross-account delta': { kind: 'response', change: event => { const delta = JSON.parse(event.response.output_text); delta.binding.actorId = 'fictional-other'; event.response.output_text = JSON.stringify(delta); }, code: /APA_COMPOSITION_CANDIDATE_INVALID/u },
+    'cross-account delta': { kind: 'response', change: event => { const delta = JSON.parse(event.response.output_text); delta.binding.actorId = 'fictional-other'; event.response.output_text = JSON.stringify(delta); }, code: /APA_COMPOSITION_RESPONSE_INVALID/u },
   };
   for (const [name, check] of Object.entries(cases)) await t.test(name, async () => {
     const f = await lostReceiptFixture(), before = await f.raw(), attempt = before.pendingAttempt.id;

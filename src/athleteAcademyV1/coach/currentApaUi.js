@@ -4,7 +4,7 @@ export const CONTINUITY_CONTRACT='athlete_academy_current_apa_v1';
 export const APA_BOXES=['where','futures','move','plan','evidence'];
 export const APA_ACTIONS=new Set(['confirm_fact','update_apa','publish_apa','discard_apa']);
 export function coachActionOperation({slug,body,view,revision,prior,requestId}){
- const continuity=APA_ACTIONS.has(body.action);
+ const continuity=APA_ACTIONS.has(body.action)||body.action==='confirm_memory';
  const signature=JSON.stringify(continuity?{slug,body,speaker:'athlete'}:{slug,body,view,speaker:'athlete'});
  const operation=prior?.signature===signature?prior.operation:{...(continuity?structuredClone(body):body),
   revision,requestId,...(continuity?{}:{view}),speaker:'athlete'};
@@ -78,12 +78,12 @@ export function continuityView(bundle,state,{reading='current'}={}){
   const selected=showPreview?d.previewRecord:c.current;
   const publishedSources=new Set((c.current?.artifact||c.original).sources.map(source=>source.id));
   const authoredMessages=new Set(eligibleApaMessages(bundle,state).map(message=>message.id));
-  const needsReview=c.changes.some(change=>own(change,bundle)&&change.confirmed===true
+  const needsReview=state.apaNeedsReview===true||c.changes.some(change=>own(change,bundle)&&change.confirmed===true
    &&change.confirmed_by==='athlete'&&authoredMessages.has(change.source_message_id)
    &&typeof change.source_id==='string'&&!publishedSources.has(change.source_id));
   const stale=c.stale||state.sourceUpdateAvailable===true||state.status==='unknown'||Boolean(state.pendingAttempt);
   return {enabled:true,verified:true,actionAllowed:!stale&&!['working','unknown'].includes(state.status)
-    &&!state.pendingAttempt&&!state.sourceUpdateAvailable,
+    &&!state.pendingAttempt&&!state.sourceUpdateAvailable&&state.coaching_write_hold?.active!==true,
    artifact:showOriginal?c.original:selected?.artifact||c.original,original:c.original,
    current:c.current?.artifact||c.original,version:showOriginal?0:selected?.version||0,
    receipt:showOriginal?null:selected?.receipts.at(-1)||null,draft:d,changes:c.changes,

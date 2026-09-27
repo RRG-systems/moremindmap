@@ -59,11 +59,15 @@ function App(){
  },[embedded,mm,reload]);
  const selected=loaded?.bundle?continuityView(loaded.bundle,loaded.state,{reading}):null;
  const stale=Boolean(error)||(refreshing&&minimum.current>revision.current)||Boolean(selected?.stale||loaded?.stale);
- const shareBox=useCallback(({destination})=>{
-  if(!embedded||stale||!selected?.verified||!selected.showPreview||!APA_BOXES.includes(destination))return;
-  window.parent.postMessage({contract:'athlete-academy-apa-box',mm,reading:'preview',box:destination,
+ const shareBox=useCallback(({destination,objectId=null})=>{
+  if(!embedded||stale||!selected?.verified||!APA_BOXES.includes(destination))return;
+  const visibleReading=selected.showOriginal?'original':selected.showPreview?'preview':selected.needsReview?'historical':'current';
+  window.parent.postMessage({contract:'athlete-academy-apa-context',mm,revision:loaded.state.revision,
+   reading:visibleReading,box:destination,objectId,version:selected.version,
+   artifact_hash:selected.artifact.artifact_sha256},location.origin);
+  if(selected.showPreview)window.parent.postMessage({contract:'athlete-academy-apa-box',mm,reading:'preview',box:destination,
    draft_id:selected.draft.id,artifact_hash:selected.artifact.artifact_sha256},location.origin);
- },[embedded,mm,selected,stale]);
+ },[embedded,loaded?.state?.revision,mm,selected,stale]);
  if(!loaded)return <main className="apa-gallery"><h1>{error||'Opening your APA…'}</h1>
   {error&&<button type="button" onClick={()=>reload()}>Refresh saved APA</button>}
   <a target="_top" href="/athlete/workspace/index.html#home">← Your Athlete home</a></main>;

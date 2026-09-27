@@ -47,6 +47,8 @@ export function academyConfig(env = {}) {
     reviewedPolicyVersion: env.ATHLETE_ACADEMY_REVIEWED_POLICY_VERSION || null,
     providerEnabled: env.ATHLETE_ACADEMY_PROVIDER_ENABLED === '1',
     currentApaEnabled: env.ATHLETE_ACADEMY_CURRENT_APA_ENABLED === '1',
+    flagshipEnabled: env.ATHLETE_ACADEMY_FLAGSHIP_ENABLED === '1',
+    coachingWriteHold: env.ATHLETE_ACADEMY_COACHING_WRITE_HOLD === '1',
     coachNotesEnabled: env.ATHLETE_ACADEMY_COACH_NOTES_ENABLED === '1',
     coachNotesPolicyVersion: env.ATHLETE_ACADEMY_COACH_NOTES_POLICY_VERSION || null,
     mailEnabled: env.ATHLETE_ACADEMY_MAIL_ENABLED === '1',

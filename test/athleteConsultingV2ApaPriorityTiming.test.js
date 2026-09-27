@@ -7,7 +7,7 @@ import { APA_NARRATIVE_FIELDS, APA_REPORT_NARRATIVE_FIELDS, APA_CONFIRMATION_NAR
   canonicalConfirmedDateLiterals, verifyApaNarrativeProvenance } from '../server/athleteConsultingV2/apaNarrative.js';
 import { currentApaHash, currentApaView, publishCurrentApa } from '../server/athleteConsultingV2/currentApa.js';
 import { createApaComposer } from '../server/athleteConsultingV2/apaComposer.js';
-import { apaDeltaBinding } from '../server/athleteConsultingV2/apaDelta.js';
+import { apaDeltaBinding, APA_REFERENCE_CODEC_CONTRACT } from '../server/athleteConsultingV2/apaDelta.js';
 
 const clone = value => structuredClone(value);
 const uuid = index => `${String(index).padStart(8, '0')}-1111-4111-8111-111111111111`;
@@ -246,9 +246,10 @@ test('cold replay rejects rehashed new3 before/value/evidence/contract/order tam
 
 test('composer uses only canonical confirmed source for new3, remains private and retains complete input/policy', async () => {
   const submitted = review(input()), prior = currentApaView(nia), events = [];
-  const delta = { contract: 'athlete_current_apa_delta_v1',
+  const delta = { contract: APA_REFERENCE_CODEC_CONTRACT,
     binding: clone(apaDeltaBinding({ bundle: nia, prior, confirmedChange: submitted.confirmedChange })),
-    domains: [], futures: [], candidates: [], narratives: clone(submitted.candidate.narrative_updates) };
+    domains: [], futures: [], candidates: [], narratives: submitted.candidate.narrative_updates.map(update =>
+      ({ field: update.field, value: clone(update.value), cite_confirmed_update: true })) };
   const compose = createApaComposer({ env: {}, evidenceSink: async event => events.push(event), transport: async request => {
     assert.equal(request.model, 'gpt-5.6-sol'); assert.equal(request.store, false);
     assert.deepEqual(request.reasoning, { effort: 'xhigh' });
@@ -270,9 +271,10 @@ test('composer cannot accept caller-picked evidence text and does not retry a mi
   const submitted = review(input(nia, null, 1, 'Thursday practice is shorter.'));
   submitted.confirmedSource = { text: SOURCE }; submitted.sourceText = SOURCE;
   const prior = currentApaView(nia), events = []; let calls = 0;
-  const delta = { contract: 'athlete_current_apa_delta_v1',
+  const delta = { contract: APA_REFERENCE_CODEC_CONTRACT,
     binding: clone(apaDeltaBinding({ bundle: nia, prior, confirmedChange: submitted.confirmedChange })),
-    domains: [], futures: [], candidates: [], narratives: clone(submitted.candidate.narrative_updates) };
+    domains: [], futures: [], candidates: [], narratives: submitted.candidate.narrative_updates.map(update =>
+      ({ field: update.field, value: clone(update.value), cite_confirmed_update: true })) };
   const compose = createApaComposer({ env: {}, evidenceSink: async event => events.push(event), transport: async request => {
     calls++;
     assert.equal(JSON.parse(request.input).saved_athlete_confirmation.text, 'Thursday practice is shorter.');

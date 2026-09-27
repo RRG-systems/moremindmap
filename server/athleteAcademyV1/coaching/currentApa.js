@@ -2,11 +2,12 @@ import { assertOwner, requireThat, validateCanonicalCoachBundle } from './bundle
 import { object, string } from '../apa/schema.js';
 import { createCurrentApaCore, currentApaHash, MAX_CURRENT_APA_REVISIONS } from '../../athleteApa/currentApaCore.js';
 import { createApaDeltaCore } from '../../athleteApa/apaDeltaCore.js';
-import { createApaComposerCore, makeApaCompositionInstructions,
+import { createApaComposerCore, makeApaCompositionInstructions, makeApaReferenceCodecInstructions,
   DEMO_APA_COMPOSITION_POLICY } from '../../athleteApa/apaComposerCore.js';
 
 export const MAIN_CURRENT_APA_CONTRACT = 'athlete_academy_current_apa_v1';
 export const MAIN_APA_DELTA_CONTRACT = 'athlete_academy_current_apa_delta_v1';
+export const MAIN_APA_REFERENCE_CODEC_CONTRACT = 'athlete_academy_current_apa_reference_codec_v2';
 const own = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
 const same = (before, after) => before === undefined || after === undefined
   ? before === after : currentApaHash(before) === currentApaHash(after);
@@ -44,6 +45,7 @@ const core = createCurrentApaCore(Object.freeze({
 
 const delta = createApaDeltaCore(Object.freeze({
   contract: MAIN_APA_DELTA_CONTRACT,
+  codecContract: MAIN_APA_REFERENCE_CODEC_CONTRACT,
   receiptContract: 'athlete_academy_current_apa_delta_reconstruction_v1',
   bindingSchema: object({
     actorId: string, mm: string, bos_sha256: string, baseline_apa_sha256: string,
@@ -60,9 +62,13 @@ export const MAIN_APA_DELTA_SCHEMA = delta.APA_DELTA_SCHEMA;
 const compositionPolicy = Object.fromEntries(Object.entries(DEMO_APA_COMPOSITION_POLICY)
   .filter(([key]) => key !== 'synthetic_only'));
 export const MAIN_APA_COMPOSITION_POLICY = Object.freeze({ ...compositionPolicy, canonical_owner_only: true });
-export const MAIN_APA_COMPOSITION_INSTRUCTIONS = makeApaCompositionInstructions({
-  athleteAuthority: 'The athlete is the authenticated canonical account identified by selected_athlete.actorId and MM. This is not a Nia/Sofia fixture or demo identity. Keep the supplied synthetic metadata unchanged; never manufacture it or use a slug as authority.',
+const athleteAuthority = 'The athlete is the authenticated canonical account identified by selected_athlete.actorId and MM. This is not a Nia/Sofia fixture or demo identity. Keep the supplied synthetic metadata unchanged; never manufacture it or use a slug as authority.';
+export const MAIN_APA_LEGACY_COMPOSITION_INSTRUCTIONS = makeApaCompositionInstructions({
+  athleteAuthority,
   deltaContract: MAIN_APA_DELTA_CONTRACT,
+});
+export const MAIN_APA_COMPOSITION_INSTRUCTIONS = makeApaReferenceCodecInstructions({
+  athleteAuthority, codecContract: MAIN_APA_REFERENCE_CODEC_CONTRACT,
 });
 
 // Only the owning service can construct this adapter, with a synchronous check
@@ -101,6 +107,8 @@ export function createMainCurrentApaAdapter({ assertFencedAuthority } = {}) {
   }
   const apaDeltaBinding = input => delta.apaDeltaBinding(deltaInput(input, 'delta_binding'));
   const reconstructApaDelta = input => delta.reconstructApaDelta(deltaInput(input, 'reconstruction'));
+  const apaReferenceCodecSchema = input => delta.apaReferenceCodecSchema(deltaInput(input, 'reconstruction'));
+  const decodeApaReferenceCodec = input => delta.decodeApaReferenceCodec(deltaInput(input, 'reconstruction'));
   function publish(input, operation = 'publication') {
     fenced(input, operation);
     return core.publishCurrentApa(input);
@@ -108,8 +116,10 @@ export function createMainCurrentApaAdapter({ assertFencedAuthority } = {}) {
   const configuration = Object.freeze({
     deltaSchema: MAIN_APA_DELTA_SCHEMA, policy: MAIN_APA_COMPOSITION_POLICY,
     instructions: MAIN_APA_COMPOSITION_INSTRUCTIONS,
+    legacyInstructions: MAIN_APA_LEGACY_COMPOSITION_INSTRUCTIONS,
+    legacySchemaName: 'athlete_academy_current_apa_delta',
     packetContract: 'athlete_academy_current_apa_composition_packet_v1',
-    schemaName: 'athlete_academy_current_apa_delta',
+    schemaName: 'athlete_academy_current_apa_reference_codec_v2',
     selectedAthlete: bundle => ({ actorId: bundle.binding.actorId, mm: bundle.person.mm,
       ...(own(bundle.person, 'synthetic') ? { synthetic: bundle.person.synthetic } : {}),
       bos_sha256: bundle.bos.artifact_sha256 }),
@@ -119,7 +129,7 @@ export function createMainCurrentApaAdapter({ assertFencedAuthority } = {}) {
   const composer = createApaComposerCore(Object.freeze({ ...configuration,
     assertCurrentApaConfirmedSource: input => source(input, 'composition'),
     publishCurrentApa: input => publish(input, 'publication_dry_run'),
-    apaDeltaBinding, reconstructApaDelta,
+    apaDeltaBinding, reconstructApaDelta, apaReferenceCodecSchema, decodeApaReferenceCodec,
   }));
   // Statically separate recovery authority: nested validation cannot switch
   // itself into a live operation or accept a request-selected bypass flag.
@@ -128,10 +138,13 @@ export function createMainCurrentApaAdapter({ assertFencedAuthority } = {}) {
     publishCurrentApa: input => publish(input, 'recovery'),
     apaDeltaBinding: input => delta.apaDeltaBinding(deltaInput(input, 'recovery')),
     reconstructApaDelta: input => delta.reconstructApaDelta(deltaInput(input, 'recovery')),
+    apaReferenceCodecSchema: input => delta.apaReferenceCodecSchema(deltaInput(input, 'recovery')),
+    decodeApaReferenceCodec: input => delta.decodeApaReferenceCodec(deltaInput(input, 'recovery')),
   }));
   return Object.freeze({ currentApaView: read,
     assertCurrentApaConfirmedSource: input => source(input), publishCurrentApa: input => publish(input),
-    apaDeltaBinding, reconstructApaDelta, createApaComposer: composer.createApaComposer,
+    apaDeltaBinding, reconstructApaDelta, apaReferenceCodecSchema, decodeApaReferenceCodec,
+    createApaComposer: composer.createApaComposer,
     validateApaPublicationDryRun: composer.validateApaPublicationDryRun,
     recoverApaComposition(input) {
       fenced(input, 'recovery');

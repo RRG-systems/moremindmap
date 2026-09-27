@@ -210,8 +210,10 @@ test('only known server no-op conflicts clear pending continuity intent, never n
 test('main wiring preserves account/MM/original routes and transport strips client roles',()=>{
  const source=name=>readFileSync(new URL('../src/athleteAcademyV1/'+name,import.meta.url),'utf8');
  const app=source('coach/App.jsx'),transport=source('coach/transport.js'),page=source('apa/main.jsx'),reports=source('coach/Reports.jsx');
- assert.match(app,/coachActionOperation\(\{slug,body,view,revision:s.revision,prior:pendingAction.current/);
- assert.match(app,/if\(continuityFailureIsKnownNoOp\(body.action,e\)\)pendingAction.current=null/);
+ assert.match(app,/coachActionOperation\(\{\s*slug,\s*body:viewContext\?\{\.\.\.body,viewContext\}:body,\s*view,\s*revision:\s*s.revision,\s*prior:\s*pendingAction.current/);
+ // An automatic fresh closing preview has its own action identity; only that
+ // exact known no-op can clear its pending journal, never a prior APA action.
+ assert.match(app,/if\s*\(continuityFailureIsKnownNoOp\(activeAction,\s*e\)\)\s*pendingAction.current\s*=\s*null/);
  assert.match(app,/<ApaContinuity bundle=\{b\} state=\{s\}/);
  assert.match(transport,/speaker:_SPEAKER,actor:_ACTOR/);
  assert.match(page,/call\('get_report',\{service:'apa',mm\}\)/);
@@ -222,6 +224,6 @@ test('main wiring preserves account/MM/original routes and transport strips clie
  assert.match(source('apa/ReportPage.jsx'),/confirmationScope\.priorityLabel/);
  assert.match(source('apa/ReportPage.jsx'),/historical=\{needsReview\|\|stale\}/);
  assert.match(app,/priorityScope\.priorityLabel/);
- assert.match(app,/apaSuggestionAvailable=.*!apaView\.needsReview/);
+ assert.match(app,/apaSuggestionAvailable\s*=.*!apaView\.needsReview/);
  assert.match(page,/needsReview:selected.needsReview/);
 });

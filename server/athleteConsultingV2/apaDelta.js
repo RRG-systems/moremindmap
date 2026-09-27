@@ -15,6 +15,7 @@ const BINDING_SCHEMA = object({
 
 const demoDelta = createApaDeltaCore(Object.freeze({
   contract: 'athlete_current_apa_delta_v1',
+  codecContract: 'athlete_current_apa_reference_codec_v2',
   receiptContract: 'athlete_current_apa_delta_reconstruction_v1',
   bindingSchema: BINDING_SCHEMA,
   validateBundle(bundle) {
@@ -31,4 +32,5 @@ const demoDelta = createApaDeltaCore(Object.freeze({
   deltaIdentity: bundle => ({ synthetic: true, athlete_slug: bundle.person.slug }),
 }));
 
-export const { APA_DELTA_SCHEMA, apaDeltaBinding, reconstructApaDelta } = demoDelta;
+export const { APA_DELTA_SCHEMA, APA_REFERENCE_CODEC_CONTRACT, apaDeltaBinding,
+  apaReferenceCodecSchema, decodeApaReferenceCodec, reconstructApaDelta } = demoDelta;

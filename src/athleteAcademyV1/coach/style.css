@@ -11,3 +11,9 @@
 .approved-apa-embed{height:100%;min-height:0;display:flex;flex-direction:column;background:#020913}.apa-embed-tools{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 24px;border-bottom:1px solid #263b45;font-size:11px;color:#aebfc3;flex-shrink:0}.apa-embed-tools>div{display:flex;gap:18px}.apa-embed-tools button{font-size:11px;min-height:32px}.approved-apa-embed iframe{display:block;border:0;flex:1;min-height:0;width:100%;background:#020913}@media(max-width:600px){.apa-embed-tools{padding:7px 16px;flex-wrap:wrap}.apa-embed-tools>div{width:100%;justify-content:space-between}.approved-apa-embed{padding-bottom:70px}}
 
 .header-tools>a{white-space:nowrap;font-size:12px;line-height:1.5}
+
+/* Keep the final map reveal readable and first in the review pane. */
+.closing-review-pane .athlete-visual-map-reveal{scroll-margin-block-start:18px}
+@media(min-width:1001px){.conversation.closing-review-pane{width:min(640px,48vw);max-width:none;flex-basis:min(640px,48vw)}}
+@media(max-width:1000px){.conversation.closing-review-pane.mobile-open{width:min(560px,100%)}}
+@media(max-width:600px){.conversation.closing-review-pane.mobile-open{width:100%;min-width:0}.closing-review-pane .closing-card,.closing-review-pane .athlete-visual-closing,.closing-review-pane .athlete-visual-map-reveal{padding:16px}}

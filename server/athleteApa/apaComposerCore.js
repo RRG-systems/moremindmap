@@ -5,6 +5,7 @@ import { GENERATE } from '../athleteAcademyV1/apa/prompts.js';
 import { currentApaHash } from './currentApaCore.js';
 import { apaValidatorDiagnostic } from '../athleteConsultingV2/apaDiagnostics.js';
 import { NARRATIVE_UPDATE_SCHEMA } from '../athleteConsultingV2/apaNarrative.js';
+import { matchesApaSchema, assertApaDeltaSchemaBudget } from './apaDeltaCore.js';
 
 const MODEL = 'gpt-5.6-sol';
 const MAX_INPUT_CHARS = 350000;
@@ -20,22 +21,7 @@ const freeze = value => {
 const digest = value => createHash('sha256').update(value).digest('hex');
 const own = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
 
-function matchesSchema(value, schema) {
-  if (schema.anyOf) return schema.anyOf.some(option => matchesSchema(value, option));
-  if (schema.type === 'array') return Array.isArray(value)
-    && (schema.minItems === undefined || value.length >= schema.minItems)
-    && (schema.maxItems === undefined || value.length <= schema.maxItems)
-    && value.every(item => matchesSchema(item, schema.items));
-  if (schema.type === 'object') return value !== null && typeof value === 'object'
-    && !Array.isArray(value) && schema.required.every(key => own(value, key))
-    && Object.keys(value).every(key => own(schema.properties, key))
-    && Object.entries(schema.properties).every(([key, child]) => matchesSchema(value[key], child));
-  if (schema.type === 'null') return value === null;
-  if (schema.type === 'integer') return Number.isSafeInteger(value)
-    && (schema.minimum === undefined || value >= schema.minimum)
-    && (schema.maximum === undefined || value <= schema.maximum);
-  return typeof value === schema.type && (!schema.enum || schema.enum.includes(value));
-}
+const matchesSchema = matchesApaSchema;
 
 function preserveLegacyAbsentReviewSchedule(candidate, prior) {
   const before = new Map(prior.artifact.report.candidates.map(item => [item.candidate_id, item]));
@@ -76,6 +62,22 @@ Return ONLY the strict ${deltaContract} envelope: copy delta_binding EXACTLY int
 
 }
 
+// The legacy generator above remains byte-stable for immutable saved requests.
+// Version two encodes citation intent, never a model-selected reference list.
+export function makeApaReferenceCodecInstructions({ athleteAuthority, codecContract }) {
+  return makeApaCompositionInstructions({ athleteAuthority, deltaContract: codecContract })
+    .replace('all still-active athlete refs.', 'all still-active athlete evidence; the server restores its references.')
+    .replace('Cite the supplied new source ID in each materially changed domain, future or candidate that supports the change, while retaining prior source references where still valid.',
+      'Set cite_confirmed_update:true on each materially changed domain, future or candidate that the confirmed change supports. The server retains canonical ordered active prior references and appends exactly the supplied new source only when this flag is true.')
+    .replace('Do not cite the new source for unrelated unchanged claims.', 'Set cite_confirmed_update:false for unrelated unchanged claims. An entity or gate with no active prior references requires true.')
+    .replace('For a correction, output every complete affected entity needed to remove every superseded source ID from ALL mutable report refs, including gate refs; if a candidate gate changes, both candidate-level and gate-level refs must cite the new source ID.',
+      'For a correction, output every complete affected entity needed to remove every superseded source ID from all mutable report evidence, including gates. If a gate changes, BOTH the candidate and that gate must independently set cite_confirmed_update:true. A gate flag never implies a parent flag; the server removes only verified inactive prior references.')
+    .replace('Each affected field is a complete typed {field,value,refs} review/replacement/reconfirmation, citing the supplied new source ID and retaining all still-active prior narrative refs.',
+      'Each affected field is a complete typed {field,value,cite_confirmed_update:true} review/replacement/reconfirmation. The server derives references from verified prior field-level provenance, removes only verified inactive references, and appends the exact new source. Unknown prior field provenance does not invent any baseline citation.')
+    .replace('including refs;', 'including cite_confirmed_update;')
+    + '\nVERSIONED REFERENCE CODEC: Never emit refs or bos_refs anywhere. Each complete existing entity and each of its five exact gates has its own required boolean cite_confirmed_update. Every emitted narrative requires cite_confirmed_update:true. Use exact entity/gate IDs from the frozen schema; do not add, omit or reorder gates. This wire format does not relax any material-change, correction-dependency, source-grounding, whole-report, youth-gate or manual-publication rule.';
+}
+
 // A static owning adapter supplies exact input/output identity and its authority
 // gates. Provider policy, complete input, evidence ordering and full validation
 // are identical across lanes; this core never grants account access itself.
@@ -90,6 +92,10 @@ export function createApaComposerCore(adapter) {
   const APA_DELTA_SCHEMA = adapter.deltaSchema;
   const APA_COMPOSITION_POLICY = adapter.policy;
   const APA_COMPOSITION_INSTRUCTIONS = adapter.instructions;
+  const usesCodec = typeof adapter.apaReferenceCodecSchema === 'function'
+    && typeof adapter.decodeApaReferenceCodec === 'function';
+  ensure(!usesCodec || (typeof adapter.legacyInstructions === 'string'
+    && typeof adapter.legacySchemaName === 'string'), 'APA_COMPOSITION_AUTHORITY_ADAPTER_REQUIRED');
 
   function packetFor(input) {
     const { bundle, record, state, confirmedChange, expectedVersion } = input;
@@ -149,12 +155,17 @@ export function createApaComposerCore(adapter) {
     }
   }
 
-  function requestFor(encoded) {
+  function requestFor(prepared, input, legacy = false) {
+    const schema = usesCodec && !legacy
+      ? adapter.apaReferenceCodecSchema({ ...input, prior: prepared.prior, confirmedSource: prepared.confirmedSource })
+      : APA_DELTA_SCHEMA;
+    assertApaDeltaSchemaBudget(schema);
     return freeze({ model: MODEL, reasoning: { effort: 'xhigh' },
       store: false, max_output_tokens: 30000,
-      instructions: APA_COMPOSITION_INSTRUCTIONS, input: encoded,
-      text: { format: { type: 'json_schema', name: adapter.schemaName,
-        strict: true, schema: APA_DELTA_SCHEMA } } });
+      instructions: usesCodec && legacy ? adapter.legacyInstructions : APA_COMPOSITION_INSTRUCTIONS,
+      input: prepared.encoded,
+      text: { format: { type: 'json_schema', name: usesCodec && legacy ? adapter.legacySchemaName : adapter.schemaName,
+        strict: true, schema } } });
   }
 
   function basisFor(input, prepared, request, id, startedAt) {
@@ -174,7 +185,8 @@ export function createApaComposerCore(adapter) {
 
   // One pure response boundary for live private composition and saved-response
   // recovery. No alternate schema, candidate shortcut or recovery-only publish.
-  function validateCompositionResponse({ input, prior, confirmedSource, response, progress = () => {} }) {
+  function validateCompositionResponse({ input, prior, confirmedSource, response, request, legacy = false,
+    progress = () => {} }) {
     const { bundle, record, state, confirmedChange, expectedVersion } = input;
     let stage, diagnostic = null, outputSize = {}, reconstructionMetadata = {};
     stage = 'delta_schema';
@@ -188,12 +200,14 @@ export function createApaComposerCore(adapter) {
     let delta;
     try { delta = JSON.parse(response.output_text); }
     catch { throw new Error('APA_COMPOSITION_RESPONSE_INVALID'); }
-    ensure(matchesSchema(delta, APA_DELTA_SCHEMA),
+    ensure(matchesSchema(delta, request.text.format.schema),
     'APA_COMPOSITION_RESPONSE_INVALID');
     stage = 'reconstruction';
     progress({ stage });
     let reconstructed;
-    try { reconstructed = reconstructApaDelta({ ...input, delta, bundle, prior, confirmedChange, confirmedSource }); }
+    try { reconstructed = usesCodec && !legacy
+      ? adapter.decodeApaReferenceCodec({ ...input, encodedDelta: delta, bundle, prior, confirmedChange, confirmedSource })
+      : reconstructApaDelta({ ...input, delta, bundle, prior, confirmedChange, confirmedSource }); }
     catch (error) {
       diagnostic = apaValidatorDiagnostic(error, { stage });
       progress({ diagnostic });
@@ -260,15 +274,23 @@ export function createApaComposerCore(adapter) {
     ensure(typeof startedAt === 'string' && !Number.isNaN(Date.parse(startedAt))
       && new Date(startedAt).toISOString() === startedAt, 'APA_COMPOSITION_RECOVERY_BASIS_MISMATCH');
     const normalizedInput = { ...input, record: input.record ?? null };
-    const prepared = packetFor(normalizedInput), request = requestFor(prepared.encoded);
+    const prepared = packetFor(normalizedInput);
+    // Select only an exact statically rebuilt request. A saved response cannot
+    // choose legacy parsing with a flag, mixed contract, or edited request hash.
+    const currentRequest = requestFor(prepared, normalizedInput);
+    const legacyRequest = usesCodec ? requestFor(prepared, normalizedInput, true) : null;
+    const isExact = request => JSON.stringify(savedRequest.request) === JSON.stringify(request);
+    const legacy = Boolean(legacyRequest && isExact(legacyRequest));
+    const request = legacy ? legacyRequest : currentRequest;
     const basis = basisFor(normalizedInput, prepared, request, savedRequest.id, startedAt);
-    ensure(JSON.stringify(savedRequest.request) === JSON.stringify(request)
+    ensure(isExact(request)
       && savedRequest.basis.request_sha256 === digest(JSON.stringify(savedRequest.request)),
     'APA_COMPOSITION_RECOVERY_REQUEST_MISMATCH');
     ensure(JSON.stringify(savedRequest.basis) === JSON.stringify(basis),
       'APA_COMPOSITION_RECOVERY_BASIS_MISMATCH');
     const validated = validateCompositionResponse({ input: normalizedInput,
-      prior: prepared.prior, confirmedSource: prepared.confirmedSource, response: savedResponse.response });
+      prior: prepared.prior, confirmedSource: prepared.confirmedSource, response: savedResponse.response,
+      request, legacy });
     const receipt = { ...compositionReceipt(basis, savedResponse.response, validated, null),
       recovery_performed: true, no_provider_call: true,
       original_response_id: savedResponse.id,
@@ -307,7 +329,7 @@ export function createApaComposerCore(adapter) {
       const { packet, encoded, prior, confirmedSource } = packetFor(input);
       const id = randomUUID();
       const prepared = { packet, encoded, prior, confirmedSource };
-      const request = requestFor(encoded);
+      const request = requestFor(prepared, input);
       const basis = basisFor(input, prepared, request, id, new Date().toISOString());
       let stage = 'request_evidence', diagnostic = null;
       let outputSize = {}, reconstructionMetadata = {};
@@ -319,7 +341,7 @@ export function createApaComposerCore(adapter) {
           signal: AbortSignal.timeout(APA_COMPOSITION_POLICY.timeout_ms) }));
         stage = 'response_evidence';
         await save({ kind: 'response', id, response });
-        const validated = validateCompositionResponse({ input, prior, confirmedSource, response,
+        const validated = validateCompositionResponse({ input, prior, confirmedSource, response, request,
           progress(update) {
             if (own(update, 'stage')) stage = update.stage;
             if (own(update, 'diagnostic')) diagnostic = update.diagnostic;

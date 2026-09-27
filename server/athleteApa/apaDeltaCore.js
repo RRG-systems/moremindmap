@@ -3,7 +3,8 @@ import { object, list, DOMAIN_SCHEMA, FUTURE_SCHEMA, CANDIDATE_SCHEMA,
   REPORT_SCHEMA } from '../athleteAcademyV1/apa/schema.js';
 import { validateReport, selectMove } from '../athleteAcademyV1/apa/contract.js';
 import { APA_NARRATIVE_FIELDS, APA_REPORT_NARRATIVE_FIELDS, APA_CONFIRMATION_NARRATIVE_FIELDS,
-  NARRATIVE_UPDATE_SCHEMA, setApaNarrativeValue, validateApaNarrativeCandidate } from '../athleteConsultingV2/apaNarrative.js';
+  NARRATIVE_UPDATE_SCHEMA, setApaNarrativeValue, validateApaNarrativeCandidate,
+  verifyApaNarrativeProvenance } from '../athleteConsultingV2/apaNarrative.js';
 
 const UUID = /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/iu;
 const own = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
@@ -34,6 +35,77 @@ function withoutBosRefs(schema) {
   return object(properties);
 }
 
+const structuralEqual = (a, b) => {
+  if (a === b) return true;
+  if (Array.isArray(a) || Array.isArray(b)) return Array.isArray(a) && Array.isArray(b)
+    && a.length === b.length && a.every((value, index) => structuralEqual(value, b[index]));
+  return isObject(a) && isObject(b) && Object.keys(a).length === Object.keys(b).length
+    && Object.keys(a).every(key => own(b, key) && structuralEqual(a[key], b[key]));
+};
+
+// Enum/const are structural restrictions, including inside anyOf. Dispatching
+// first on type would silently ignore whole-value restrictions on arrays/objects.
+export function matchesApaSchema(value, schema) {
+  if (!isObject(schema)) return false;
+  if (schema.enum && !schema.enum.some(option => structuralEqual(value, option))) return false;
+  if (own(schema, 'const') && !structuralEqual(value, schema.const)) return false;
+  if (schema.anyOf && !schema.anyOf.some(option => matchesApaSchema(value, option))) return false;
+  if (!schema.type) return Boolean(schema.anyOf || schema.enum || own(schema, 'const'));
+  if (schema.type === 'array') return Array.isArray(value)
+    && (schema.minItems === undefined || value.length >= schema.minItems)
+    && (schema.maxItems === undefined || value.length <= schema.maxItems)
+    && (!schema.items || value.every(item => matchesApaSchema(item, schema.items)));
+  if (schema.type === 'object') return isObject(value)
+    && (schema.required || []).every(key => own(value, key))
+    && (schema.additionalProperties !== false || Object.keys(value).every(key => own(schema.properties || {}, key)))
+    && Object.entries(schema.properties || {}).every(([key, child]) =>
+      !own(value, key) || matchesApaSchema(value[key], child));
+  if (schema.type === 'null') return value === null;
+  if (schema.type === 'integer') return Number.isSafeInteger(value)
+    && (schema.minimum === undefined || value >= schema.minimum)
+    && (schema.maximum === undefined || value <= schema.maximum);
+  return typeof value === schema.type;
+}
+
+export const APA_DELTA_REQUEST_SCHEMA_LIMITS = freeze({ properties: 5000, max_depth: 10,
+  enum_values: 1000, total_schema_string_chars: 120000 });
+export function apaDeltaSchemaMetrics(schema) {
+  const counts = { properties: 0, max_depth: 0, enum_values: 0,
+    enum_string_chars: 0, total_schema_string_chars: 0 };
+  const chars = value => typeof value === 'string' ? value.length : Array.isArray(value)
+    ? value.reduce((sum, item) => sum + chars(item), 0) : isObject(value)
+      ? Object.entries(value).reduce((sum, [key, child]) => sum + key.length + chars(child), 0) : 0;
+  function visit(node, depth) {
+    if (!isObject(node)) return;
+    const next = depth + (node.type === 'object' || node.type === 'array' ? 1 : 0);
+    counts.max_depth = Math.max(counts.max_depth, next);
+    if (node.enum) {
+      counts.enum_values += node.enum.length;
+      const size = chars(node.enum);
+      counts.enum_string_chars += size; counts.total_schema_string_chars += size;
+    }
+    if (own(node, 'const')) counts.total_schema_string_chars += chars(node.const);
+    if (typeof node.$ref === 'string') counts.total_schema_string_chars += node.$ref.length;
+    for (const key of ['properties', '$defs', 'definitions']) {
+      if (!isObject(node[key])) continue;
+      const entries = Object.entries(node[key]);
+      if (key === 'properties') counts.properties += entries.length;
+      counts.total_schema_string_chars += entries.reduce((sum, [name]) => sum + name.length, 0);
+      entries.forEach(([, child]) => visit(child, next));
+    }
+    if (node.items) visit(node.items, next);
+    for (const key of ['anyOf', 'allOf', 'oneOf']) (node[key] || []).forEach(child => visit(child, next));
+  }
+  visit(schema, 0);
+  return freeze(counts);
+}
+export function assertApaDeltaSchemaBudget(schema) {
+  const metrics = apaDeltaSchemaMetrics(schema);
+  requireThat(Object.entries(APA_DELTA_REQUEST_SCHEMA_LIMITS).every(([key, limit]) => metrics[key] <= limit),
+    'APA_COMPOSITION_REQUEST_SCHEMA_TOO_LARGE', 'delta');
+  return metrics;
+}
+
 // Internal, statically instantiated by the demo and canonical-account lanes.
 export function createApaDeltaCore(adapter) {
   requireThat(isObject(adapter) && typeof adapter.contract === 'string'
@@ -54,22 +126,7 @@ export function createApaDeltaCore(adapter) {
     narratives: { ...list(NARRATIVE_UPDATE_SCHEMA), maxItems: APA_NARRATIVE_FIELDS.length },
   }));
 
-  function matchesSchema(value, schema) {
-    if (schema.anyOf) return schema.anyOf.some(option => matchesSchema(value, option));
-    if (schema.type === 'array') return Array.isArray(value)
-      && (schema.minItems === undefined || value.length >= schema.minItems)
-      && (schema.maxItems === undefined || value.length <= schema.maxItems)
-      && value.every(item => matchesSchema(item, schema.items));
-    if (schema.type === 'object') return isObject(value)
-      && schema.required.every(key => own(value, key))
-      && Object.keys(value).every(key => own(schema.properties, key))
-      && Object.entries(schema.properties).every(([key, child]) => matchesSchema(value[key], child));
-    if (schema.type === 'null') return value === null;
-    if (schema.type === 'integer') return Number.isSafeInteger(value)
-      && (schema.minimum === undefined || value >= schema.minimum)
-      && (schema.maximum === undefined || value <= schema.maximum);
-    return typeof value === schema.type && (!schema.enum || schema.enum.includes(value));
-  }
+  const matchesSchema = matchesApaSchema;
 
   function strictCandidate(artifact) {
     const candidate = { confirmation: clone(artifact.confirmation), report: clone(artifact.report),
@@ -165,6 +222,75 @@ export function createApaDeltaCore(adapter) {
       bos_sha256: bundle.bos.artifact_sha256, baseline_apa_sha256: bundle.apa.artifact_sha256,
       current_apa_sha256: prior.artifact.artifact_sha256, current_apa_version: prior.version,
       source_id: sourceId, source_message_id: confirmedChange.source_message_id });
+  }
+
+  const APA_REFERENCE_CODEC_CONTRACT = adapter.codecContract;
+  function apaReferenceCodecSchema(input) {
+    requireThat(typeof APA_REFERENCE_CODEC_CONTRACT === 'string', 'APA_DELTA_AUTHORITY_ADAPTER_REQUIRED', 'binding');
+    const expected = apaDeltaBinding(input);
+    const inactive = new Set([...inactiveSources(input.prior.artifact), ...input.confirmedChange.supersedes]);
+    const citation = refs => ({ type: 'boolean',
+      ...(!refs.some(id => !inactive.has(id)) ? { enum: [true] } : {}) });
+    function entitySchema(schema, entity, key) {
+      const properties = clone(schema.properties);
+      delete properties.bos_refs; delete properties.refs;
+      properties[key] = { type: 'string', enum: [entity[key]] };
+      properties.cite_confirmed_update = citation(entity.refs);
+      if (properties.gates) properties.gates = { type: 'array', minItems: 5, maxItems: 5,
+        items: { anyOf: entity.gates.map(gate => object({ id: { type: 'string', enum: [gate.id] },
+          pass: { type: 'boolean' }, reason: { type: 'string' }, cite_confirmed_update: citation(gate.refs) })) } };
+      return object(properties);
+    }
+    const families = [['domains', DOMAIN_SCHEMA, 'id', 4], ['futures', FUTURE_SCHEMA, 'role', 5],
+      ['candidates', CANDIDATE_SCHEMA, 'candidate_id', 5]];
+    const properties = { contract: { type: 'string', enum: [APA_REFERENCE_CODEC_CONTRACT] },
+      binding: object(Object.fromEntries(Object.entries(expected).map(([key, value]) =>
+        [key, { type: typeof value === 'number' ? 'integer' : typeof value, enum: [value] }]))) };
+    for (const [family, schema, key, maxItems] of families) properties[family] = { type: 'array', maxItems,
+      items: { anyOf: input.prior.artifact.report[family].map(entity => entitySchema(schema, entity, key)) } };
+    properties.narratives = { type: 'array', maxItems: APA_NARRATIVE_FIELDS.length,
+      items: { anyOf: APA_NARRATIVE_FIELDS.map(field => object({ field: { type: 'string', enum: [field] },
+        value: field === 'what_we_dont_know' ? { type: 'array', items: { type: 'string' } } : { type: 'string' },
+        cite_confirmed_update: { type: 'boolean', enum: [true] } })) } };
+    const schema = freeze(object(properties));
+    assertApaDeltaSchemaBudget(schema);
+    return schema;
+  }
+
+  // Versioned wire codec, not rejected-ref repair. No provider refs are admitted.
+  // Each citation flag refers only to that exact entity/gate; child citations do
+  // not imply a parent citation. The old strict reconstruction remains the gate.
+  function decodeApaReferenceCodec({ encodedDelta, ...input }) {
+    const schema = apaReferenceCodecSchema(input);
+    requireThat(matchesSchema(encodedDelta, schema), 'APA_DELTA_SCHEMA_INVALID', 'delta');
+    const expected = apaDeltaBinding(input);
+    const inactive = new Set([...inactiveSources(input.prior.artifact), ...input.confirmedChange.supersedes]);
+    const refsFor = (refs, cite) => {
+      const active = refs.filter(id => !inactive.has(id));
+      requireThat(cite === true || (cite === false && active.length > 0), 'APA_DELTA_SCHEMA_INVALID', 'delta');
+      return cite ? [...active, expected.source_id] : [...active];
+    };
+    const delta = { contract: adapter.contract, binding: clone(encodedDelta.binding) };
+    for (const [family, key] of [['domains', 'id'], ['futures', 'role'], ['candidates', 'candidate_id']]) {
+      const originals = new Map(input.prior.artifact.report[family].map(entity => [entity[key], entity]));
+      delta[family] = encodedDelta[family].map(entity => {
+        const { cite_confirmed_update, ...body } = clone(entity), before = originals.get(entity[key]);
+        const decoded = { ...body, refs: refsFor(before.refs, cite_confirmed_update) };
+        if (family === 'candidates') {
+          const gates = new Map(before.gates.map(gate => [gate.id, gate]));
+          decoded.gates = body.gates.map(gate => {
+            const { cite_confirmed_update: cite, ...gateBody } = gate;
+            return { ...gateBody, refs: refsFor(gates.get(gate.id).refs, cite) };
+          });
+        }
+        return decoded;
+      });
+    }
+    const provenance = verifyApaNarrativeProvenance(input.prior.artifact);
+    delta.narratives = encodedDelta.narratives.map(update => ({ field: update.field, value: clone(update.value),
+      refs: refsFor(provenance.fields.find(field => field.field === update.field).refs, true) }));
+    const reconstructed = reconstructApaDelta({ ...input, delta });
+    return freeze({ delta, ...reconstructed });
   }
 
   function verifyRefs(before, after, sourceId, inactive, path) {
@@ -267,5 +393,6 @@ export function createApaDeltaCore(adapter) {
     return freeze({ candidate, receipt });
   }
 
-  return Object.freeze({ APA_DELTA_SCHEMA, apaDeltaBinding, reconstructApaDelta });
+  return Object.freeze({ APA_DELTA_SCHEMA, APA_REFERENCE_CODEC_CONTRACT, apaDeltaBinding,
+    apaReferenceCodecSchema, decodeApaReferenceCodec, reconstructApaDelta });
 }

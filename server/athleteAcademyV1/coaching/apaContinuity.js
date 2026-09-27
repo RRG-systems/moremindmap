@@ -3,6 +3,9 @@ import { randomUUID } from 'node:crypto';
 import { digest, requireValue } from '../repository.js';
 import { assertOwner } from './bundle.js';
 import { createMainCurrentApaAdapter, MAIN_CURRENT_APA_CONTRACT } from './currentApa.js';
+import { pendingApaCurrency, applicableApaReviewRequirements, completeApaReviewRequirements } from './currency.js';
+import { hasCurrentApaState, hasFlagshipState, coachingWriteHold, assertCoachingWritable } from './compatibility.js';
+import { redactCoachingPresentation } from './presentation.js';
 const ACTIONS = new Set(['confirm_fact', 'update_apa', 'publish_apa', 'discard_apa']);
 const UUID = /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/iu;
 const stamp = now => new Date(now()).toISOString();
@@ -24,6 +27,7 @@ export function createApaContinuityService({ repo, config, academy, transport, n
   }
   function authority(snapshot, current, state, account, attempt = null, mode = 'composition') {
     fence(current, state, account, snapshot);
+    assertCoachingWritable(config,state);
     const value = Object.freeze({ snapshot, account, revision: state.revision, binding: digest(current.binding), attempt, mode });
     contexts.add(value); return value;
   }
@@ -43,15 +47,20 @@ export function createApaContinuityService({ repo, config, academy, transport, n
     return fence(bundle, state, value.account, value.snapshot);
   } });
   function read(current, s, a) { return adapter.currentApaView({ bundle: current, record: s.currentApa || null, principal: principalFor(a, current.person.mm) }); }
-  function sourceHash(current, s, change) {
+  function sourceHash(current, s, change, contract = 'v1') {
     const message = s.messages.find(m => m.id === change.source_message_id);
-    return digest({ binding: current.binding, message, confirmedChanges: s.apaConfirmedChanges || [], acceptedPlan: s.plan, approvedLearning: s.learning, currentApa: s.currentApa || null });
+    const original = { binding: current.binding, message, confirmedChanges: s.apaConfirmedChanges || [], acceptedPlan: s.plan, approvedLearning: s.learning, currentApa: s.currentApa || null };
+    requireValue(['v1', 'rsl-review-v2'].includes(contract), 'CURRENT_APA_DRAFT_CHANGED', 409);
+    return digest(contract === 'v1' ? original : { ...original,
+      rslEvents: s.rslEvents || [], reviewRequirements: s.apaReviewRequirements || [] });
   }
   function exposed(s, current, a) {
-    if (!config.currentApaEnabled) return s;
+    if (!config.currentApaEnabled && !hasCurrentApaState(s) && !hasFlagshipState(s)) return s;
     const stale = !same(s.sourceBinding, current.binding);
     const view = stale ? null : read(current, s, a);
-    return { ...s, capabilities: { ...(s.capabilities || {}), currentApa: true }, continuity: {
+    return { ...s, apaNeedsReview: stale || pendingApaCurrency(current, s, view?.artifact).needsReview,
+      ...(coachingWriteHold(config,s)?{coaching_write_hold:coachingWriteHold(config,s)}:{}),
+      capabilities: { ...(s.capabilities || {}), currentApa: true }, continuity: {
       contract: MAIN_CURRENT_APA_CONTRACT, binding: structuredClone(s.sourceBinding), original: structuredClone(current.apa),
       current: stale ? null : s.currentApa || null, draft: stale ? null : s.apaDraft || null,
       changes: s.apaConfirmedChanges || [], current_version: view?.version ?? 0,
@@ -81,7 +90,7 @@ export function createApaContinuityService({ repo, config, academy, transport, n
       requireValue(snapshot[key]?.mm === current.person.mm, 'COACH_STATE_SOURCE_MISMATCH');
       return { writes: {}, result: snapshot[key] };
     });
-    return { state: exposed(state, current, a) };
+    return { state: redactCoachingPresentation(exposed(state, current, a)) };
   }
   async function action(a, b) {
     requireValue(config.currentApaEnabled, 'CURRENT_APA_NOT_ACTIVE', 404);
@@ -94,6 +103,7 @@ export function createApaContinuityService({ repo, config, academy, transport, n
     if (command.action === 'update_apa') requireValue(config.providerEnabled && typeof transport === 'function', 'COACH_CONNECTION_UNAVAILABLE', 503);
     const claimed = await academy.mutate(a, [key, dk], b, snapshot => {
       const s = snapshot[key] || initialState(current);
+      assertCoachingWritable(config,s);
       const auth = authority(snapshot, current, s, a);
       requireValue(s.revision === b.revision, 'STATE_CHANGED_RELOAD', 409);
       requireValue(!s.pendingAttempt && !['working', 'unknown'].includes(s.status), 'COACH_OPERATION_PENDING', 409);
@@ -111,19 +121,23 @@ export function createApaContinuityService({ repo, config, academy, transport, n
         const change = (s.apaConfirmedChanges || []).find(x => x.id === command.confirmation_id);
         requireValue(change && command.expected_version === expectedVersion, 'CURRENT_APA_STALE_VERSION', 409);
         adapter.assertCurrentApaConfirmedSource({ bundle: current, record: s.currentApa || null, state: s, confirmedChange: change, expectedVersion, principal, authority: auth });
+        applicableApaReviewRequirements(s, change);
         invalidateClosing(s, a, command.action);
         s.beforeWorking = s.status; s.status = 'working'; s.pendingTask = 'APA_UPDATE';
         s.revision++;
-        s.pendingAttempt = { id: attempt, task: 'APA_UPDATE', at: now(), lease: now() + 630000, sourceBinding: structuredClone(current.binding), currentVersion: expectedVersion, confirmationId: change.id, sourceHash: sourceHash(current, s, change) };
+        const sourceHashContract = config.flagshipEnabled === true ? 'rsl-review-v2' : 'v1';
+        s.pendingAttempt = { id: attempt, task: 'APA_UPDATE', at: now(), lease: now() + 630000, sourceBinding: structuredClone(current.binding), currentVersion: expectedVersion, confirmationId: change.id,
+          sourceHashContract, sourceHash: sourceHash(current, s, change, sourceHashContract) };
         return { writes: { [key]: s }, result: { state: s, attempt, change, expectedVersion } };
       } else {
         const d = s.apaDraft;
         requireValue(d && command.id === d.id && command.hash === d.hash, 'CURRENT_APA_DRAFT_CHANGED', 409);
         if (command.action === 'discard_apa') { event(s, 'current_apa_draft_declined', { draft_id: d.id }, a, now); s.apaDraft = null; }
         else {
-          requireValue(command.expected_version === d.expectedVersion && command.expected_version === expectedVersion && command.artifact_hash === d.previewRecord.artifact.artifact_sha256 && command.confirmation_id === d.confirmedChange.id && command.source_id === d.source_id && d.source_hash === sourceHash(current, s, d.confirmedChange), 'CURRENT_APA_DRAFT_CHANGED', 409);
+          requireValue(command.expected_version === d.expectedVersion && command.expected_version === expectedVersion && command.artifact_hash === d.previewRecord.artifact.artifact_sha256 && command.confirmation_id === d.confirmedChange.id && command.source_id === d.source_id && d.source_hash === sourceHash(current, s, d.confirmedChange, d.source_hash_contract || 'v1'), 'CURRENT_APA_DRAFT_CHANGED', 409);
           const published = adapter.publishCurrentApa({ bundle: current, record: s.currentApa || null, state: s, confirmedChange: d.confirmedChange, candidate: d.candidate, expectedVersion, principal, authority: auth });
           requireValue(published.changed && published.record.artifact.artifact_sha256 === command.artifact_hash, 'CURRENT_APA_DRAFT_CHANGED', 409);
+          completeApaReviewRequirements(s, d.reviewRequirementIds);
           s.currentApa = published.record; s.apaDraft = null;
           event(s, 'current_apa_published', { version: published.record.version, artifact_hash: command.artifact_hash, draft_id: d.id }, a, now);
         }
@@ -142,7 +156,7 @@ export function createApaContinuityService({ repo, config, academy, transport, n
         fence(current, state, a, saved);
         requireValue(state?.pendingAttempt?.id === attempt && state.pendingAttempt.task === 'APA_UPDATE'
           && state.status === 'working' && state.pendingTask === 'APA_UPDATE' && state.pendingAttempt.lease >= now()
-          && state.pendingAttempt.sourceHash === sourceHash(current, state, claimed.change), 'COACH_OPERATION_MISMATCH', 409);
+          && state.pendingAttempt.sourceHash === sourceHash(current, state, claimed.change, state.pendingAttempt.sourceHashContract || 'v1'), 'COACH_OPERATION_MISMATCH', 409);
         return { writes: {}, result: saved };
       });
     } catch (error) {
@@ -171,13 +185,16 @@ export function createApaContinuityService({ repo, config, academy, transport, n
       if (state?.pendingAttempt?.id !== attempt) return { writes: {}, result: true };
       try {
         const finalAuthority = authority(saved, current, state, a, attempt);
-        requireValue(!failure && state.pendingAttempt.sourceHash === sourceHash(current, state, claimed.change), 'CURRENT_APA_RESULT_UNAVAILABLE', 409);
+        requireValue(!failure && state.pendingAttempt.sourceHash === sourceHash(current, state, claimed.change, state.pendingAttempt.sourceHashContract || 'v1'), 'CURRENT_APA_RESULT_UNAVAILABLE', 409);
         const preview = adapter.publishCurrentApa({ bundle: current, record: state.currentApa || null, state, confirmedChange: claimed.change, candidate: composed.candidate, expectedVersion: claimed.expectedVersion, principal, authority: finalAuthority });
         requireValue(preview.changed === composed.changed, 'CURRENT_APA_COMPOSER_MISMATCH');
         if (preview.changed) {
           if (state.apaDraft) event(state, 'current_apa_draft_superseded', { draft_id: state.apaDraft.id }, a, now);
           const source_id = adapter.assertCurrentApaConfirmedSource({ bundle: current, record: state.currentApa || null, state, confirmedChange: claimed.change, expectedVersion: claimed.expectedVersion, principal, authority: finalAuthority }).source.id;
-          const d = { id: draftId, candidate: composed.candidate, confirmedChange: claimed.change, expectedVersion: claimed.expectedVersion, source_id, previewRecord: preview.record, source_hash: sourceHash(current, state, claimed.change) };
+          const source_hash_contract = state.pendingAttempt.sourceHashContract || 'v1';
+          const d = { id: draftId, candidate: composed.candidate, confirmedChange: claimed.change, expectedVersion: claimed.expectedVersion, source_id, previewRecord: preview.record,
+            source_hash_contract, source_hash: sourceHash(current, state, claimed.change, source_hash_contract),
+            reviewRequirementIds: applicableApaReviewRequirements(state, claimed.change) };
           d.hash = digest({ candidate: d.candidate, confirmedChange: d.confirmedChange, expectedVersion: d.expectedVersion, artifact_hash: d.previewRecord.artifact.artifact_sha256, source_hash: d.source_hash });
           state.apaDraft = d;
         }
@@ -197,10 +214,12 @@ export function createApaContinuityService({ repo, config, academy, transport, n
     const key = `coach:${current.person.mm}`;
     return repo.transact([key, `dossier:${current.person.mm}`, `account:${a.id}`], snapshot => {
       const s = snapshot[key]; fence(current, s, a, snapshot);
+      assertCoachingWritable(config,s);
       requireValue(s.pendingAttempt?.id === attempt && s.status === 'working'
         && ['OPENING', 'CHAT', 'CLOSE'].includes(s.pendingTask) && s.pendingAttempt.task === s.pendingTask
         && s.pendingAttempt.lease >= now(), 'COACH_OPERATION_MISMATCH', 409);
-      return { writes: {}, result: { state: s, artifact: read(current, s, a).artifact } };
+      const artifact = read(current, s, a).artifact;
+      return { writes: {}, result: { state: { ...s, apaNeedsReview: pendingApaCurrency(current, s, artifact).needsReview }, artifact } };
     });
   }
   async function recover(a, b, current) {
@@ -213,13 +232,14 @@ export function createApaContinuityService({ repo, config, academy, transport, n
     const principal = principalFor(a, current.person.mm);
     await academy.mutate(a, [key, `dossier:${current.person.mm}`, ...(validAttempt ? [requestKey, responseKey] : [])], b, snapshot => {
       const s = snapshot[key], pending = s?.pendingAttempt;
+      assertCoachingWritable(config,s);
       // The existing account/session idempotency gate runs before this callback,
       // so a completed recovery can be read back without reusing an attempt.
       requireValue(validAttempt, 'RECOVERY_NOT_REQUIRED', 409);
       requireValue(pending?.id === attempt && pending.task === 'APA_UPDATE' && (s.status === 'unknown' || pending.lease < now()), 'ATTEMPT_STILL_ACTIVE', 409);
       requireValue(s.revision === b.revision, 'STATE_CHANGED_RELOAD', 409);
       const change = s.apaConfirmedChanges?.find(x => x.id === pending.confirmationId);
-      requireValue(change && pending.sourceHash === sourceHash(current, s, change)
+      requireValue(change && pending.sourceHash === sourceHash(current, s, change, pending.sourceHashContract || 'v1')
         && pending.currentVersion === read(current, s, a).version, 'CURRENT_APA_RESULT_UNAVAILABLE', 409);
       const auth = authority(snapshot, current, s, a, attempt, 'recovery');
       requireValue(snapshot[requestKey] && snapshot[responseKey], 'RESULT_NOT_YET_RECOVERABLE', 409);
@@ -231,7 +251,9 @@ export function createApaContinuityService({ repo, config, academy, transport, n
         if (s.apaDraft) event(s, 'current_apa_draft_superseded', { draft_id: s.apaDraft.id }, a, now);
         const d = { id: draftId, candidate: recovered.candidate, confirmedChange: change,
           expectedVersion: pending.currentVersion, source_id: recovered.receipt.source_id,
-          previewRecord: recovered.previewRecord, source_hash: sourceHash(current, s, change) };
+          previewRecord: recovered.previewRecord, source_hash_contract: pending.sourceHashContract || 'v1',
+          source_hash: sourceHash(current, s, change, pending.sourceHashContract || 'v1'),
+          reviewRequirementIds: applicableApaReviewRequirements(s, change) };
         d.hash = digest({ candidate: d.candidate, confirmedChange: d.confirmedChange,
           expectedVersion: d.expectedVersion, artifact_hash: d.previewRecord.artifact.artifact_sha256, source_hash: d.source_hash });
         s.apaDraft = d;
@@ -244,5 +266,6 @@ export function createApaContinuityService({ repo, config, academy, transport, n
     return responseFor(a, current, key);
   }
   return { handles: action => ACTIONS.has(action), action, recover, exposed, refreshSources, responseFor, coachPreflight, assertReadableSnapshot: readable,
-    currentArtifact: (s, current, a) => config.currentApaEnabled ? read(current, s, a).artifact : current.apa };
+    currentArtifact: (s, current, a) => config.currentApaEnabled || hasCurrentApaState(s) || hasFlagshipState(s)
+      ? read(current, s, a).artifact : current.apa };
 }

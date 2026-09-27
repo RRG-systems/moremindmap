@@ -1,9 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import nia from '../server/athleteConsultingV2/fixtures/nia.json' with { type: 'json' };
 import { buildCanonicalCoachBundle, hash } from '../server/athleteAcademyV1/coaching/bundle.js';
 import { createMainCurrentApaAdapter, MAIN_CURRENT_APA_CONTRACT, MAIN_APA_DELTA_CONTRACT,
-  MAIN_APA_DELTA_SCHEMA, MAIN_APA_COMPOSITION_POLICY } from '../server/athleteAcademyV1/coaching/currentApa.js';
+  MAIN_APA_DELTA_SCHEMA, MAIN_APA_COMPOSITION_POLICY,
+  MAIN_APA_REFERENCE_CODEC_CONTRACT,
+  MAIN_APA_LEGACY_COMPOSITION_INSTRUCTIONS } from '../server/athleteAcademyV1/coaching/currentApa.js';
 import { currentApaHash } from '../server/athleteApa/currentApaCore.js';
 import { APA_NARRATIVE_FIELDS, APA_NARRATIVE_CONTRACT_V1, getApaNarrativeValue,
   verifyApaNarrativeProvenance } from '../server/athleteConsultingV2/apaNarrative.js';
@@ -123,9 +126,10 @@ async function savedComposition(input, { noChange = false, failReceipt = false }
       stats.providerCalls++;
       const packet = JSON.parse(request.input);
       return { id: 'resp_fictional_saved_apa', status: 'completed', model: 'gpt-5.6-sol',
-        usage: { total_tokens: 0 }, output_text: JSON.stringify({ contract: MAIN_APA_DELTA_CONTRACT,
+        usage: { total_tokens: 0 }, output_text: JSON.stringify({ contract: MAIN_APA_REFERENCE_CODEC_CONTRACT,
           binding: packet.delta_binding, domains: [], futures: [], candidates: [],
-          narratives: noChange ? [] : timing(input).narrative_updates,
+          narratives: noChange ? [] : timing(input).narrative_updates.map(update =>
+            ({ field: update.field, value: update.value, cite_confirmed_update: true })),
         }) };
     } });
   let result;
@@ -360,10 +364,11 @@ test('main injected composer retains complete canonical input, exact provider po
   const compose = input.adapter.createApaComposer({ env: {}, evidenceSink: event => { evidence.push(event); },
     transport: async request => {
       requests.push(request);
-      const packet = JSON.parse(request.input), source = packet.delta_binding.source_id;
+      const packet = JSON.parse(request.input);
       return { status: 'completed', model: 'gpt-5.6-sol', usage: { total_tokens: 0 }, output_text: JSON.stringify({
-        contract: MAIN_APA_DELTA_CONTRACT, binding: packet.delta_binding, domains: [], futures: [], candidates: [],
-        narratives: timing(input).narrative_updates.map(update => ({ ...update, refs: [source] })),
+        contract: MAIN_APA_REFERENCE_CODEC_CONTRACT, binding: packet.delta_binding, domains: [], futures: [], candidates: [],
+        narratives: timing(input).narrative_updates.map(update =>
+          ({ field: update.field, value: update.value, cite_confirmed_update: true })),
       }) };
     } });
   const result = await compose(input), packet = JSON.parse(requests[0].input);
@@ -384,7 +389,8 @@ test('main injected composer retains complete canonical input, exact provider po
   assert.equal(packet.saved_athlete_confirmation.mm, input.bundle.person.mm);
   assert.deepEqual(packet.current_apa, { artifact_sha256: input.bundle.apa.artifact_sha256,
     same_as_original_apa: true, original_apa_sha256: input.bundle.apa.artifact_sha256 });
-  assert.equal(requests[0].text.format.schema, MAIN_APA_DELTA_SCHEMA);
+  assert.deepEqual(requests[0].text.format.schema, input.adapter.apaReferenceCodecSchema(input));
+  assert.equal(Object.isFrozen(requests[0].text.format.schema), true);
   assert.equal(requests[0].model, 'gpt-5.6-sol'); assert.equal(requests[0].reasoning.effort, 'xhigh');
   assert.equal(requests[0].store, false); assert.equal(requests[0].max_output_tokens, 30000);
   assert.equal(MAIN_APA_COMPOSITION_POLICY.max_retries, 0); assert.equal(MAIN_APA_COMPOSITION_POLICY.synthetic_only, undefined);
@@ -406,7 +412,7 @@ test('main composer rejects unverified account sources before injected dispatch 
   const guarded = adapter.createApaComposer({ env: {}, evidenceSink: event => { events.push(event); }, transport: async request => {
     calls++; const packet = JSON.parse(request.input); allowed = false;
     return { status: 'completed', model: 'gpt-5.6-sol', output_text: JSON.stringify({
-      contract: MAIN_APA_DELTA_CONTRACT, binding: packet.delta_binding, domains: [], futures: [], candidates: [], narratives: [],
+      contract: MAIN_APA_REFERENCE_CODEC_CONTRACT, binding: packet.delta_binding, domains: [], futures: [], candidates: [], narratives: [],
     }) };
   } });
   await assert.rejects(guarded({ ...valid, authority }), /APA_COMPOSITION_CANDIDATE_INVALID/u);
@@ -552,4 +558,32 @@ test('recovery authority is explicit and synchronous, never a caller-selected li
   assert.throws(() => recoveryOnly.recoverApaComposition({ ...input, ...saved, authority: {} }), /MAIN_CURRENT_APA_FENCE_REQUIRED/u);
   const asynchronous = createMainCurrentApaAdapter({ assertFencedAuthority: async () => true });
   assert.throws(() => asynchronous.recoverApaComposition({ ...input, ...saved }), /MAIN_CURRENT_APA_FENCE_REQUIRED/u);
+});
+
+test('main recovery accepts an exact legacy raw-ref request only through its static recovery fence and refuses mixed versions', async () => {
+  // An offline immutable-request fixture rebuilt from the byte-preserved legacy
+  // instructions/schema, not a claim that a new provider invocation occurred.
+  const input = setup(), saved = await savedComposition(input), before = clone(saved.stats);
+  const savedRequest = clone(saved.savedRequest), savedResponse = clone(saved.savedResponse);
+  savedRequest.request.instructions = MAIN_APA_LEGACY_COMPOSITION_INSTRUCTIONS;
+  savedRequest.request.text.format.name = 'athlete_academy_current_apa_delta';
+  savedRequest.request.text.format.schema = MAIN_APA_DELTA_SCHEMA;
+  savedRequest.basis.request_sha256 = createHash('sha256').update(JSON.stringify(savedRequest.request)).digest('hex');
+  savedResponse.response.output_text = JSON.stringify({ contract: MAIN_APA_DELTA_CONTRACT,
+    binding: input.adapter.apaDeltaBinding(input), domains: [], futures: [], candidates: [],
+    narratives: timing(input).narrative_updates });
+  input.state.status = 'unknown'; input.calls.length = 0;
+  const recovered = input.adapter.recoverApaComposition({ ...input, savedRequest, savedResponse });
+  assert.deepEqual(recovered.candidate, saved.result.candidate);
+  assert.equal(recovered.receipt.preview_content_hash, saved.result.receipt.preview_content_hash);
+  assert.deepEqual(new Set(input.calls), new Set(['recovery']));
+  assert.equal(recovered.receipt.no_provider_call, true); assert.deepEqual(saved.stats, before);
+  const mixed = clone(savedResponse); mixed.response.output_text = saved.savedResponse.response.output_text;
+  assert.throws(() => input.adapter.recoverApaComposition({ ...input, savedRequest, savedResponse: mixed }),
+    /APA_COMPOSITION_RESPONSE_INVALID/u);
+  const edited = clone(savedRequest); edited.request.text.format.schema.properties.narratives.maxItems = 9;
+  edited.basis.request_sha256 = createHash('sha256').update(JSON.stringify(edited.request)).digest('hex');
+  assert.throws(() => input.adapter.recoverApaComposition({ ...input, savedRequest: edited, savedResponse }),
+    /APA_COMPOSITION_RECOVERY_REQUEST_MISMATCH/u);
+  assert.equal(input.record, null); assert.deepEqual(saved.stats, before);
 });

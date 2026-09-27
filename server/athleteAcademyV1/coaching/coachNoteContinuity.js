@@ -1,10 +1,24 @@
 // Proposed private note replay adapter. No runtime/provider creation or role grant.
 import { digest, requireValue } from '../repository.js';
 import { COACH_NOTES_POLICY_VERSION, noteGate, noteSession } from './coachNotesPolicy.js';
+import { pendingApaCurrency } from './currency.js';
+import { assertCoachingWritable } from './compatibility.js';
 
 export function createCoachNoteContinuity({ repo, academy, config, notes, apa, now }) {
   const enabled = () => config.coachNotesEnabled === true && config.coachNotesPolicyVersion === COACH_NOTES_POLICY_VERSION;
   const same = (a, b) => digest(a) === digest(b);
+  function sourcePacketMatches(packet, current, state, a) {
+    const artifact = apa.currentArtifact(state, current, a);
+    const needsReview = pendingApaCurrency(current, state, artifact).needsReview;
+    if (!needsReview && packet.full_youth_apa?.artifact_sha256 === artifact.artifact_sha256) return true;
+    const c = packet.apa_currency;
+    return packet.full_youth_apa === null
+      && needsReview === true
+      && c?.contract === 'athlete_academy_current_apa_v1' && c.requires_review === true
+      && c.baseline_apa_sha256 === current.apa.artifact_sha256
+      && c.current_apa_sha256 === artifact.artifact_sha256
+      && c.version === (artifact.current_apa_version || 0);
+  }
   async function keys(a, mm) {
     if (!enabled()) return [];
     noteGate(config);
@@ -25,6 +39,7 @@ export function createCoachNoteContinuity({ repo, academy, config, notes, apa, n
   function attempt(snapshot, a, current, id, recovery = false) {
     readable(snapshot, a, current);
     const s = snapshot[`coach:${current.person.mm}`], p = s?.pendingAttempt;
+    assertCoachingWritable(config,s);
     requireValue(s?.mm === current.person.mm && same(s.sourceBinding, current.binding)
       && p?.id === id && p.task === 'OPENING' && s.pendingTask === 'OPENING'
       && same(p.sourceBinding, current.binding)
@@ -62,7 +77,7 @@ export function createCoachNoteContinuity({ repo, academy, config, notes, apa, n
       try { packet = JSON.parse(request.input); } catch { requireValue(false, 'COACH_NOTE_REQUEST_MISMATCH'); }
       requireValue(packet.task === 'OPENING' && packet.athlete?.actorId === a.id
         && packet.athlete.mm === current.person.mm && same(packet.reviewed_coach_observations, input.observations)
-        && packet.full_youth_apa?.artifact_sha256 === apa.currentArtifact(s,current,a).artifact_sha256,
+        && sourcePacketMatches(packet,current,s,a),
       'COACH_NOTE_REQUEST_MISMATCH');
       const admitted = notes.dispatchedOpening({ snapshot, mm: current.person.mm, ownerAccount: a,
         reservation: r, evidenceId });
@@ -88,7 +103,7 @@ export function createCoachNoteContinuity({ repo, academy, config, notes, apa, n
       requireValue(packet.task === 'OPENING' && packet.athlete?.actorId === a.id
         && packet.athlete.mm === current.person.mm
         && same(packet.reviewed_coach_observations,input.observations)
-        && packet.full_youth_apa?.artifact_sha256===apa.currentArtifact(before,current,a).artifact_sha256,
+        && sourcePacketMatches(packet,current,before,a),
       'RECOVERED_RESULT_MISMATCH');
     }
     const completed = notes.completeOpening({ snapshot, mm: current.person.mm,

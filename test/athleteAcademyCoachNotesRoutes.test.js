@@ -304,10 +304,10 @@ test('normal and read-only acknowledgments require exact actor/MM/request/hash/f
 test('existing App destinations keep owner/recipient scope separate and held panels mounted across navigation',()=>{
  const ownerSource=readFileSync(new URL('../src/athleteAcademyV1/coach/App.jsx',import.meta.url),'utf8');
  const homeSource=readFileSync(new URL('../src/athleteAcademyV1/App.jsx',import.meta.url),'utf8');
- const ownerSlot=ownerSource.match(/<div hidden=\{view!=='home'\}>[^]*?<\/div>/u)?.[0];
+ const ownerSlot=ownerSource.match(/<div hidden=\{view\s*!==\s*'home'\}>[^]*?<\/div>/u)?.[0];
  const recipientSlot=homeSource.match(/<div hidden=\{page!=='home'\}>[^]*?<\/div>/u)?.[0];
  assert.ok(ownerSlot);assert.ok(recipientSlot);
- assert.match(ownerSlot,/s\.capabilities\?\.coachNotes&&<CoachNotesPanel/u);
+ assert.match(ownerSlot,/s\.capabilities\?\.coachNotes\s*&&\s*<CoachNotesPanel/u);
  assert.match(ownerSlot,/<CoachNotesPanel[^>]*actorId=\{b\.binding\.actorId\} mode="owner" mm=\{slug\}/u);
  assert.match(recipientSlot,/session\?\.account&&session\.capabilities\.coachNotes&&<CoachNotesPanel/u);
  const recipientPanel=recipientSlot.match(/<CoachNotesPanel[^>]*mode="recipient"[^>]*\/?>/u)?.[0];

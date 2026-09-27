@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { initial, validatePlan, validateOutput, applyLocalAction, applyOutput, draft as legacyDraft } from '../../athleteConsultingV2/state.js';
 import { assertOwner, assertPrincipal, hash, requireThat, validateCanonicalCoachBundle } from './bundle.js';
+import { validatedViewContext } from './viewContext.js';
 
 const now = () => new Date().toISOString();
 const own = (bundle, principal) => principal.role === 'athlete' && principal.actorId === bundle.binding.actorId;
@@ -82,6 +83,7 @@ export function applyActorAction(state, command, bundle, principal) {
     }
     next.speaker = 'athlete';
     next.view = ['home', 'you', 'sport', 'plan'].includes(command.view) ? command.view : next.view;
+    next.viewContext = validatedViewContext(next.view, command.viewContext);
     next.beforeWorking = next.status;
     next.status = 'working';
     next.pendingTask = task;
@@ -133,7 +135,7 @@ export function applyActorAction(state, command, bundle, principal) {
   return next;
 }
 
-export function applyCoachOutput(state, output, task, bundle, principal) {
+export function applyCoachOutput(state, output, task, bundle, principal, reservedIdentity = null) {
   sameBinding(state, bundle); assertOwner(bundle, principal); validateOutput(output);
   requireThat(['OPENING', 'CHAT', 'CLOSE'].includes(task) && state.status === 'working'
     && state.pendingTask === task, 'COACH_OPERATION_MISMATCH');
@@ -141,13 +143,27 @@ export function applyCoachOutput(state, output, task, bundle, principal) {
   next.status = next.beforeWorking;
   delete next.beforeWorking; delete next.pendingTask;
   applyOutput(next, output, task);
-  if (output.plan && task === 'CHAT') {
+  if (output.plan && ['CHAT', 'CLOSE'].includes(task)) {
     // A model proposal is private. Coach-owned actions need explicit share + actual
     // separate confirmation; the model cannot turn conversation into authority.
     const proposed = next.draft;
     next.draft = { ...proposed, visibility: 'private', proposedBy: principal.actorId, approvals: [] };
   }
   next.messages.at(-1).sessionId = next.sessionId;
+  if (reservedIdentity !== null) {
+    // This is a server-only reservation persisted before dispatch. Rebuilding
+    // an exact saved response must not invent new message/draft/closing IDs.
+    requireThat(['assistantId', 'draftId', 'closingId'].every(key =>
+      /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/iu.test(reservedIdentity[key] || ''))
+      && typeof reservedIdentity.at === 'string'
+      && new Date(reservedIdentity.at).toISOString() === reservedIdentity.at,
+    'COACH_OUTPUT_IDENTITY_INVALID');
+    next.messages.at(-1).id = reservedIdentity.assistantId;
+    next.messages.at(-1).at = reservedIdentity.at;
+    if (output.plan && ['CHAT', 'CLOSE'].includes(task)) next.draft.id = reservedIdentity.draftId;
+    if (task === 'CLOSE') next.closing.id = reservedIdentity.closingId;
+    for (const item of next.events.slice(state.events.length)) if (item.at) item.at = reservedIdentity.at;
+  }
   return next;
 }
 
