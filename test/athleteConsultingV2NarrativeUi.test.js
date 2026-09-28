@@ -31,7 +31,7 @@ test('authenticated narrative review renders exact string/array before-after and
   assert.match(preview, /<li>Whether the Friday cue will help\.<\/li>/u);
   assert.match(preview, /<li>Whether rehearsal timing stays stable\.<\/li>/u);
   assert.match(preview, /No earlier citation has been invented/u);
-  assert.match(preview, /The wording is unchanged/u);
+  assert.match(preview, /The value is unchanged\. Its supporting evidence is proposed for review\./u);
   assert.doesNotMatch(preview, /11111111|SAVED WHOLE-PICTURE UPDATE</u);
   const saved = render({ proposed: false });
   assert.match(saved, /SAVED WHOLE-PICTURE UPDATE/u);
