@@ -56,12 +56,14 @@ test('shared closing formatter uses only React text children with native list se
   assert.match(source, /\{segment\.text\}/u);
   assert.match(source, /value: item\.number/u, 'original ordered labels are not renumbered');
 });
-test('both closing destinations share the formatter without changing ordinary conversation rendering', () => {
+test('both closing destinations retain their formatter while assistant chat uses the shared safe block renderer', () => {
   const demo = read('src/athleteConsultingV2/App.jsx'), main = read('src/athleteAcademyV1/coach/ClosingReview.jsx');
   assert.match(demo, /<AthleteText value=\{s\.closing\.summary\}/u);
   assert.match(main, /<AthleteText value=\{state\.closing\.summary\}/u);
-  assert.match(demo, /<Text value=\{m\.text\}/u);
-  assert.match(read('src/athleteAcademyV1/coach/App.jsx'), /function Text\(/u);
+  assert.match(demo, /m\.role==='assistant'\?<AthleteChatText value=\{m\.text\}/u);
+  assert.match(read('src/athleteAcademyV1/coach/App.jsx'),
+    /m\.role === 'assistant' \? <AthleteChatText value=\{m\.text\}/u);
+  assert.match(demo, /:<Text value=\{m\.text\}/u, 'athlete and coach text stays on the existing path');
 });
 test('recap formatting is limited to server-owned SESSION_RECAP and exact full comparisons stay available', () => {
   const file = 'src/athleteConsultingV2/AthleteVisual.jsx', source = read(file), root = tree(file);

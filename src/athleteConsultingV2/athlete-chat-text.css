@@ -1,0 +1,15 @@
+.message .athlete-chat-text{min-width:0;overflow-wrap:anywhere}
+.message .athlete-chat-text p{white-space:normal;margin:10px 0 0}
+.message .athlete-chat-text h2,.message .athlete-chat-text h3,.message .athlete-chat-text h4{font-size:15px;line-height:1.45;letter-spacing:0;color:#e6f3ec;margin:18px 0 8px}
+.message .athlete-chat-text ul,.message .athlete-chat-text ol{padding-left:22px;margin:10px 0 14px;color:#d7e1dc;font-size:14px;line-height:1.65}
+.message .athlete-chat-text li{margin:6px 0;padding-left:2px}
+.message .athlete-chat-text pre{display:block;max-width:100%;overflow-x:auto;white-space:pre;overflow-wrap:normal;word-break:normal;margin:12px 0;padding:12px;border:1px solid #385a50;border-radius:9px;background:#06120f;color:#e3eee8;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;tab-size:2}
+.message .athlete-chat-text code{font:inherit;white-space:inherit}
+.message .athlete-chat-table-scroll{max-width:100%;overflow-x:auto;margin:12px 0;border:1px solid #385a50;border-radius:9px}
+.message .athlete-chat-table-scroll:focus-visible{outline:3px solid #81e4c9;outline-offset:2px}
+.message .athlete-chat-text table{border-collapse:collapse;width:max-content;min-width:100%;font-size:12px;line-height:1.5;color:#d7e1dc}
+.message .athlete-chat-text th,.message .athlete-chat-text td{padding:9px 10px;border-bottom:1px solid #294238;border-right:1px solid #294238;text-align:left;vertical-align:top;white-space:normal;min-width:100px}
+.message .athlete-chat-text th{color:#9ce6c9;background:#0d261e;font-weight:700}
+.message .athlete-chat-text tr:last-child td{border-bottom:0}
+.message .athlete-chat-text th:last-child,.message .athlete-chat-text td:last-child{border-right:0}
+.message .athlete-chat-text>:last-child{margin-bottom:0}
