@@ -362,6 +362,34 @@ test('honest no-material-change result is a validated receipt, not a failure or 
   assert.equal(currentApaView(nia).version, 0);
 });
 
+test('explicit fictional priority/date reaches the exact composer packet, but an empty governed response remains a no-op', async () => {
+  const submitted = currentApprovals(), before = clone(submitted), events = [];
+  const text = 'Practice asking one clear question before the drill starts. Review on October 7, 2026.';
+  submitted.state.messages.find(message => message.id === messageId).text = text;
+  submitted.confirmedChange.reason = 'Review this priority for the next seven days.';
+  const snapshot = clone(submitted); let dispatches = 0;
+  const composer = createApaComposer({ env: {}, evidenceSink: async event => events.push(event),
+    transport: async request => {
+      dispatches++;
+      const packet = JSON.parse(request.input);
+      assert.equal(packet.saved_athlete_confirmation.message_id, messageId);
+      assert.equal(packet.saved_athlete_confirmation.text, text);
+      assert.equal(packet.saved_athlete_confirmation.reason, submitted.confirmedChange.reason);
+      assert.match(request.instructions, /confirmation\.priority/u);
+      assert.match(request.instructions, /confirmation\.review_date/u);
+      return response({ contract: APA_REFERENCE_CODEC_CONTRACT, binding: clone(packet.delta_binding),
+        domains: [], futures: [], candidates: [], narratives: [] }, {}, submitted);
+    } });
+  const result = await composer(submitted);
+  assert.equal(dispatches, 1, 'mock transport only, no retry');
+  assert.equal(result.changed, false); assert.equal(result.publication_performed, false);
+  assert.equal(result.receipt.status, 'no_material_change');
+  assert.equal(result.receipt.preview_content_hash, nia.apa.artifact_sha256);
+  assert.deepEqual(submitted, snapshot);
+  assert.deepEqual(submitted.state.plan, before.state.plan);
+  assert.deepEqual(events.map(event => event.kind), ['request', 'response', 'receipt']);
+});
+
 test('correction of a currently cited athlete source composes only after replacing its references', async () => {
   const confirmed = correctionInput();
   const revised = candidate();

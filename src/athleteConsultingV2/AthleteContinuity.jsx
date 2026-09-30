@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { eligibleAthleteMessages, selectableApaSources, short,
-  summarizeApaChanges } from './continuityModel.js';
+  summarizeApaChanges, prepareApaReview, apaNoChangeEvent,
+  APA_NO_CHANGE_TITLE, APA_NO_CHANGE_DETAIL } from './continuityModel.js';
 import './athlete-continuity.css';
 
 export function AthleteMessageActions({ message, onChoose, disabled = false }) {
@@ -35,7 +36,7 @@ export default function AthleteContinuity({ bundle, state, onAction, onNavigate,
   const facts = state?.personalMemory?.items || [];
   const apaSources = selectableApaSources(bundle, state);
   const draft = state?.apaDraft || null;
-  const currentVersion = state?.currentApa?.version || 0;
+  const noChange = !apaUpdating && apaNoChangeEvent(bundle, state);
   const close = () => { setMode(null); onSelectionHandled(); };
   if (!state?.flagship_enabled) return null;
 
@@ -50,11 +51,9 @@ export default function AthleteContinuity({ bundle, state, onAction, onNavigate,
   async function prepareApa(event) {
     event.preventDefault();
     if (!sourceMessageId || !reason.trim() || (effectiveKind === 'correction' && !supersededSourceId)) return;
-    const result = await onAction({ action: 'update_apa', sourceMessageId,
-      reason: reason.trim(), kind: effectiveKind,
-      supersedes: effectiveKind === 'correction' ? [supersededSourceId] : [],
-      expectedApaVersion: currentVersion });
-    if (result && !result.lastError) { close(); onNavigate('sport', { apaReading: 'preview' }); }
+    await prepareApaReview({ state, sourceMessageId, reason, kind: effectiveKind,
+      supersedes: effectiveKind === 'correction' ? [supersededSourceId] : [], onAction,
+      onPrepared: () => { close(); onNavigate('sport', { apaReading: 'preview' }); } });
   }
 
   async function publishDraft() {
@@ -75,6 +74,9 @@ export default function AthleteContinuity({ bundle, state, onAction, onNavigate,
             : 'You can confirm a detail from your conversation, or ask MORE to prepare a review of your APA. Nothing changes automatically.'}</p>
         {draft && <p className="athlete-continuity-summary">Proposed version {draft.previewRecord.version}
           {summarizeApaChanges(draft).length ? ` · ${summarizeApaChanges(draft).join(' · ')}` : ''}</p>}
+        {noChange && <div role="status" aria-label="Last APA preparation result">
+          <h3>{APA_NO_CHANGE_TITLE}</h3><p>{APA_NO_CHANGE_DETAIL}</p>
+        </div>}
       </div>
       <div className="athlete-continuity-actions">
         {draft && <><button type="button" onClick={() => onNavigate('sport', { apaReading: 'preview' })}>Read the proposed APA →</button>
@@ -112,10 +114,13 @@ export default function AthleteContinuity({ bundle, state, onAction, onNavigate,
     {activeMode === 'apa' && <ContinuityModal title="Prepare an APA update" onClose={close}>
       <form onSubmit={prepareApa}>
         {actionError && <p role="alert">{actionError}</p>}
+        {noChange?.source_message_id === sourceMessageId && <div role="status">
+          <h3>{APA_NO_CHANGE_TITLE}</h3><p>{APA_NO_CHANGE_DETAIL}</p>
+        </div>}
         {apaUpdating && <p className="athlete-apa-progress" role="status">MORE is preparing your APA review. This can take several minutes. Your saved reading and agreed plan stay unchanged while it runs; keep this page open.</p>}
         <p>{state.apaNeedsReview
           ? 'The previous APA is historical. Choose the exact saved athlete message that corrects the earlier source; an unrelated new reality cannot make the old reading current. Your original APA and agreed plan stay unchanged.'
-          : 'This prepares a private five-box proposal from one of your saved messages. Your original APA and agreed plan stay unchanged. You will review a proposal before anything becomes current.'}</p>
+          : 'This asks MORE to prepare a private five-box proposal from one of your saved messages. Your original APA and agreed plan stay unchanged. If a proposal is prepared, you will review it before anything becomes current. A no-change result does not publish your requested update.'}</p>
         <label>Which message describes what changed?<select required value={sourceMessageId}
           onChange={(event) => setSourceMessageId(event.target.value)}>
           <option value="">Choose your message</option>{messages.map((message) =>
