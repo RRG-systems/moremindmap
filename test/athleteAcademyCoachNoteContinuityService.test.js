@@ -483,6 +483,11 @@ test('note capability metadata survives ordinary current-APA replies and explici
     assert.equal(chatted.state.capabilities.currentApa, true);
     const before = await f.raw(), box = await f.box(), savedMessage = before.messages.findLast(message => message.role === 'user');
     assert.equal(savedMessage.actorId, f.owner.id);
+    // Legacy message timestamps use wall time; this fixture's confirmation
+    // clock is explicitly controlled. Advance it past the saved source rather
+    // than weakening the Production confirmation chronology requirement.
+    f.advance(Math.max(1, Date.parse(savedMessage.at) - f.now() + 1));
+    assert.ok(new Date(f.now()).toISOString() >= savedMessage.at);
     const confirmed = await f.action({ action: 'confirm_fact', source_message_id: savedMessage.id,
       reason: 'I reviewed my own saved current priority and timing.', kind: 'reality', supersedes: [] });
     assert.equal(confirmed.state.capabilities?.coachNotes, expected);
