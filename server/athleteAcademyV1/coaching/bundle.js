@@ -30,7 +30,7 @@ export function assertOwner(bundle, principal) {
 
 export function validateCanonicalCoachBundle(bundle) {
   requireThat(object(bundle?.binding) && text(bundle.binding.actorId) && text(bundle.person?.mm)
-    && Number.isInteger(bundle.person.age) && bundle.person.age >= 17,
+    && Number.isInteger(bundle.person.age) && bundle.person.age >= 13,
   'COACH_CANONICAL_PAIR_REQUIRED');
   for (const artifact of [bundle.bos, bundle.apa]) {
     requireThat(object(artifact) && digest(artifact.artifact_sha256), 'COACH_CANONICAL_PAIR_REQUIRED');

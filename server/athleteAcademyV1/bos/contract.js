@@ -7,7 +7,7 @@ export function requireThat(condition, code) { if (!condition) throw new Error(c
 export function validateSubject(subject) {
   requireThat(typeof subject.synthetic === 'boolean' && ['private_participant','synthetic_test'].includes(subject.record_kind), 'PRIVATE_PARTICIPANT_REQUIRED');
   requireThat(/^MM-\d{8}-[A-F0-9]{8}$/.test(subject.mm), 'INVALID_MM');
-  requireThat(subject.age >= 17 && subject.age <= 120, 'AGE_OUT_OF_SCOPE');
+  requireThat(subject.age >= 13 && subject.age <= 120, 'AGE_OUT_OF_SCOPE');
   const hybrid = subject.intake_mode === 'hybrid';
   const count = subject.answers.length;
   requireThat((hybrid ? count >= 12 && count <= 20 : count === 20) && new Set(subject.answers.map(x => x.question_id)).size === count, 'INTAKE_INCOMPLETE');

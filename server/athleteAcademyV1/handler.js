@@ -25,8 +25,8 @@ export function createAcademyHandler({config,auth,academy,coaching,notes,deliver
    const raw=String(req.headers.cookie||'').split(';').map(x=>x.trim()).find(x=>x.startsWith(COOKIE+'='))?.slice(COOKIE.length+1);let s=await auth.session(raw);
    if(req.method==='GET'){
     if(!s){await auth.limited('bootstrap:'+String(req.headers['x-forwarded-for']||req.socket?.remoteAddress||'unknown').split(',')[0],100,3600000);const created=await auth.createSession();s=created.session;res.setHeader('Set-Cookie',cookie(created.raw));}
-    let athletes=[];if(s.account){const {dossier}=await academy.getDossier(s.account,{mm:s.account.mm});athletes=[{mm:dossier.mm,name:dossier.person.name}];}
-    return res.status(200).json({ok:true,csrfToken:s.csrf,account:publicAccount(s.account),athletes,institutions:INSTITUTIONS,cohort:config.cohort,policyVersion:config.reviewedPolicyVersion||'candidate-review-v1',capabilities:{generation:config.providerEnabled,email:config.mailEnabled,syntheticPreview:config.syntheticPreview,realYouth:config.realYouthEnabled,...(notesEnabled()?{coachNotes:true}:{})}});
+    let athletes=[];if(s.account&&s.account.role!=='guardian'){const {dossier}=await academy.getDossier(s.account,{mm:s.account.mm});athletes=[{mm:dossier.mm,name:dossier.person.name}];}
+    return res.status(200).json({ok:true,csrfToken:s.csrf,account:publicAccount(s.account),athletes,institutions:INSTITUTIONS,cohort:config.cohort,policyVersion:config.reviewedPolicyVersion||'candidate-review-v1',youthPolicyVersion:config.reviewedYouthPolicyVersion||(config.syntheticPreview?config.reviewedPolicyVersion||'candidate-review-v1':null),capabilities:{generation:config.providerEnabled,email:config.mailEnabled,syntheticPreview:config.syntheticPreview,realYouth:config.realYouthEnabled,...(notesEnabled()&&s.account?.role!=='guardian'?{coachNotes:true}:{})}});
    }
    requireValue(s&&req.headers['x-csrf-token']===s.csrf,'SESSION_OR_FORM_EXPIRED',403);requireValue(String(req.headers['content-type']||'').includes('application/json'),'JSON_REQUIRED',415);
    const b=req.body;requireValue(b&&typeof b==='object'&&!Array.isArray(b)&&JSON.stringify(b).length<=200000,'REQUEST_INVALID',413);
@@ -44,7 +44,7 @@ export function createAcademyHandler({config,auth,academy,coaching,notes,deliver
     if(b.action==='logout'){await auth.logout(raw);res.setHeader('Set-Cookie',`${COOKIE}=; Path=/api/athlete/academy; HttpOnly; SameSite=Strict; Max-Age=0${config.allowInsecureLocalhost?'':'; Secure'}`);result={signedOut:true};}
     else if(b.action==='redeem_institution')result=await auth.redeem(a,b);
     else if(typeof b.action==='string'&&b.action.startsWith('coach_notes_')){
-     noteGate(config);requireValue(notes,'COACH_NOTES_NOT_ACTIVE',404);
+     requireValue(a.role!=='guardian','PARTICIPANT_ACCOUNT_REQUIRED',403);noteGate(config);requireValue(notes,'COACH_NOTES_NOT_ACTIVE',404);
      const {action,...command}=b;
      if(action==='coach_notes_view'){const {requestId:_requestId,...read}=command;result=await notesView(a,read);}
      else if(action==='coach_notes_outcome'){const {requestId:_requestId,...read}=command;result=await notes.outcome(a,read);}
@@ -52,7 +52,10 @@ export function createAcademyHandler({config,auth,academy,coaching,notes,deliver
     }
     else {
      const actions={get_dossier:academy.getDossier,accept_participation:academy.acceptParticipation,invite_guardian:academy.inviteGuardian,guardian_invitation:academy.guardianPreview,accept_guardian:academy.acceptGuardian,withdraw_participation:academy.withdraw,guardian_dashboard:academy.guardians,save_intake:academy.saveIntake,get_report:academy.getReport,start_assessment:academy.startAssessment,get_job:academy.getJob,advance_assessment:academy.advance,reconcile_assessment:academy.reconcile,abandon_assessment:academy.abandon,start_preserved_bos_recovery:academy.startPreservedBosRecovery,bos_feedback:academy.feedback,coach_bundle:coaching.bundle,coach_state:coaching.state,coach_action:coaching.action};
-     requireValue(Object.hasOwn(actions,b.action),'ACTION_NOT_FOUND',404);result=await actions[b.action](a,b);
+     requireValue(Object.hasOwn(actions,b.action),'ACTION_NOT_FOUND',404);
+     const guardianActions=new Set(['guardian_invitation','accept_guardian','withdraw_participation','guardian_dashboard']);
+     requireValue(a.role!=='guardian'||guardianActions.has(b.action),'PARTICIPANT_ACCOUNT_REQUIRED',403);
+     result=await actions[b.action](a,b);
     }
    }
    const publicMail=['signup','request_email_verification','request_password_reset'].includes(b.action);

@@ -7,10 +7,10 @@ export const INSTITUTIONS = Object.freeze([
   Object.freeze({ id: 'horizon-academy', name: 'Horizon Sports Institute', enrollment: 'directory_example_only', synthetic: true }),
 ]);
 export function cohortFor(realYouthEnabled = false) {
-  const minimumAge = realYouthEnabled ? 17 : 18;
+  const minimumAge = realYouthEnabled ? 13 : 18;
   return Object.freeze({ region: 'US-CA', minimumAge, minAge: minimumAge, guardianRequiredUnder: realYouthEnabled ? 18 : null, maximumAge: null, ageInterpretation: 'Actual age is retained. These are source-based interpretations, not age-normed scores.' });
 }
-// The exported cohort remains the complete 17+ design contract. Runtime responses
+// The exported cohort describes the youth-on design. Runtime responses
 // use config.cohort so the default adult-only pilot cannot advertise youth access.
 export const COHORT = cohortFor(true);
 function exactOrigin(value,{allowInsecureLocalhost=false}={}){
@@ -24,7 +24,12 @@ function exactOrigin(value,{allowInsecureLocalhost=false}={}){
 export function academyConfig(env = {}) {
   const origin = env.ATHLETE_ACADEMY_ORIGIN || '';
   const allowInsecureLocalhost=env.ATHLETE_ACADEMY_LOCAL_PREVIEW==='1';
-  const realYouthEnabled=env.ATHLETE_ACADEMY_REAL_YOUTH_ENABLED === '1';
+  const syntheticPreview=env.ATHLETE_ACADEMY_SYNTHETIC_PREVIEW === '1';
+  const reviewedYouthPolicyVersion=String(env.ATHLETE_ACADEMY_REVIEWED_YOUTH_POLICY_VERSION || '').trim() || null;
+  requireValue(!reviewedYouthPolicyVersion || /^[a-zA-Z0-9][a-zA-Z0-9._-]{2,100}$/.test(reviewedYouthPolicyVersion),'YOUTH_POLICY_CONFIG_INVALID',503);
+  // A switch is not policy acceptance. A separately reviewed youth policy is
+  // required for real enrollment; the adult policy and existing adults stay intact.
+  const realYouthEnabled=env.ATHLETE_ACADEMY_REAL_YOUTH_ENABLED === '1' && (syntheticPreview || Boolean(reviewedYouthPolicyVersion));
   const canonicalOrigin=exactOrigin(origin,{allowInsecureLocalhost});
   if(env.ATHLETE_ACADEMY_ENABLED==='1')requireValue(canonicalOrigin,origin?'ACADEMY_ORIGIN_INVALID':'ACADEMY_ORIGIN_NOT_CONFIGURED',503);
   const allowedOrigins=new Set(canonicalOrigin?[canonicalOrigin]:[]);
@@ -41,10 +46,11 @@ export function academyConfig(env = {}) {
     origin,
     allowedOrigins,
     allowInsecureLocalhost: allowInsecureLocalhost && Boolean(canonicalOrigin?.startsWith('http://')),
-    syntheticPreview: env.ATHLETE_ACADEMY_SYNTHETIC_PREVIEW === '1',
+    syntheticPreview,
     cohort: cohortFor(realYouthEnabled),
     realYouthEnabled,
     reviewedPolicyVersion: env.ATHLETE_ACADEMY_REVIEWED_POLICY_VERSION || null,
+    reviewedYouthPolicyVersion,
     providerEnabled: env.ATHLETE_ACADEMY_PROVIDER_ENABLED === '1',
     currentApaEnabled: env.ATHLETE_ACADEMY_CURRENT_APA_ENABLED === '1',
     flagshipEnabled: env.ATHLETE_ACADEMY_FLAGSHIP_ENABLED === '1',
@@ -64,7 +70,18 @@ export function resolveInstitution(config, { institutionId, code }) {
 }
 export function ageOn(birthDate, at = Date.now()) {
   requireValue(typeof birthDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(birthDate), 'BIRTH_DATE_REQUIRED');
-  const birth = new Date(`${birthDate}T12:00:00Z`), today = new Date(at);
-  requireValue(Number.isFinite(birth.getTime()) && birth.toISOString().slice(0, 10) === birthDate && birth <= today, 'BIRTH_DATE_INVALID');
-  return today.getUTCFullYear() - birth.getUTCFullYear() - (today.toISOString().slice(5, 10) < birthDate.slice(5) ? 1 : 0);
+  const birth = new Date(`${birthDate}T12:00:00Z`);
+  const parts = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date(at)).map(({ type, value }) => [type, value]));
+  const today = `${parts.year}-${parts.month}-${parts.day}`;
+  requireValue(Number.isFinite(birth.getTime()) && birth.toISOString().slice(0, 10) === birthDate && birthDate <= today, 'BIRTH_DATE_INVALID');
+  return Number(parts.year) - Number(birthDate.slice(0, 4)) - (today.slice(5) < birthDate.slice(5) ? 1 : 0);
+}
+
+export function participationPolicyVersion(config, age) {
+  if (age >= 18) return config.reviewedPolicyVersion || 'candidate-review-v1';
+  requireValue(config.realYouthEnabled, 'YOUTH_ENROLLMENT_NOT_ACTIVE', 503);
+  const policyVersion = config.reviewedYouthPolicyVersion ||
+    (config.syntheticPreview ? config.reviewedPolicyVersion || 'candidate-review-v1' : null);
+  requireValue(policyVersion, 'YOUTH_POLICY_REVIEW_REQUIRED', 503);
+  return policyVersion;
 }

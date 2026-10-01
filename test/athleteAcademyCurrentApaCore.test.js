@@ -173,7 +173,7 @@ test('owner-only reads verify the full canonical pair and never require a fixtur
   for (const principal of [{ ...input.principal, actorId: 'other' }, { ...input.principal, role: 'coach' },
     { ...input.principal, authenticated: false }, { ...input.principal, grants: { participation: true, coachingRead: true } }])
     assert.throws(() => input.adapter.currentApaView({ ...input, principal }), /COACH_(?:ACTOR_AUTHORITY|PRIVATE_ACCESS|REPORT_ACCESS)_DENIED/u);
-  const altered = clone(input.bundle); altered.person.age = 16;
+  const altered = clone(input.bundle); altered.person.age = 12;
   assert.throws(() => input.adapter.currentApaView({ ...input, bundle: altered }), /COACH_CANONICAL_PAIR_REQUIRED/u);
   const tampered = clone(input.bundle); tampered.apa.report.headline += ' altered';
   assert.throws(() => input.adapter.currentApaView({ ...input, bundle: tampered }), /COACH_REPORT_IDENTITY_OR_INTEGRITY_FAILURE/u);

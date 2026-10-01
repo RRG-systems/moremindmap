@@ -30,7 +30,7 @@ export async function runAssessmentQueue(runtime) {
         }
       }
     } catch (e) {
-      if (['JOB_NOT_READY', 'ACADEMY_ACCESS_REQUIRED', 'PARTICIPATION_WITHDRAWN', 'PARTICIPATION_REVIEW_REQUIRED', 'GUARDIAN_REQUIRED', 'YOUTH_ENROLLMENT_NOT_ACTIVE', 'ACCOUNT_INACTIVE', 'PILOT_17_PLUS'].includes(e.code)) {
+      if (['JOB_NOT_READY', 'ACADEMY_ACCESS_REQUIRED', 'PARTICIPATION_WITHDRAWN', 'PARTICIPATION_REVIEW_REQUIRED', 'GUARDIAN_REQUIRED', 'YOUTH_ENROLLMENT_NOT_ACTIVE', 'ACCOUNT_INACTIVE', 'PILOT_13_PLUS', 'PILOT_18_PLUS'].includes(e.code)) {
         const key=`queue-pause:${id}`;
         await repo.transact([key], s=>({writes:{[key]:{jobId:id,reason:e.code,firstSeen:s[key]?.firstSeen||Date.now(),lastSeen:Date.now()}},result:true}));
         continue;
