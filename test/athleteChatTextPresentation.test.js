@@ -6,7 +6,7 @@ import os from 'node:os';
 import React from 'react';
 import react from '@vitejs/plugin-react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { createServer } from 'vite';
+import { createServer } from './helpers/inMemoryRenderCompiler.mjs';
 import { athleteChatTextBlocks } from '../src/athleteConsultingV2/chatText.js';
 
 const read = file => readFileSync(new URL(`../${file}`, import.meta.url), 'utf8');

@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 import {randomUUID} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
 import Redis from 'ioredis';
+import {ownedAcademyRedis} from './helpers/ownedAcademyRedis.mjs';
 import {createAcademyRuntime} from '../server/athleteAcademyV1/runtime.js';
 import {digest,createRedisRepository} from '../server/athleteAcademyV1/repository.js';
 import {QUESTIONS,QUESTIONNAIRE_VERSION} from '../server/athleteAcademyV1/bos/questions.js';
@@ -14,7 +15,8 @@ const fixture=JSON.parse(await readFile(new URL('../server/athleteConsultingV2/f
 // The new pilot has no coach testimony, so test prose is never quality evidence.
 const apaReplay=JSON.parse(JSON.stringify(fixture.apa.report).replace(/COACH[123]/g,'A15'));
 apaReplay.coach_view.status='pending';
-const redis=new Redis('redis://127.0.0.1:6394',{maxRetriesPerRequest:0,enableOfflineQueue:false});await new Promise((res,rej)=>{redis.once('ready',res);redis.once('error',rej);});
+const ownedRedis=await ownedAcademyRedis();
+const redis=new Redis(ownedRedis.url,{maxRetriesPerRequest:0,enableOfflineQueue:false,retryStrategy:()=>null});await new Promise((res,rej)=>{redis.once('ready',res);redis.once('error',rej);});
 let clock=Date.parse('2026-09-21T18:00:00Z');const mailbox=[],requests=[];let interrupted=false;
 async function* replay(request){requests.push(request);const input=JSON.parse(request.input.split('\n').slice(1).join('\n'));let output;
  if(input.packet){output=input.report?fixture.apa.audit:apaReplay;}
@@ -31,7 +33,7 @@ const rt=createAcademyRuntime({env,redis,now:()=>clock,assessmentTransport:repla
 const req=extra=>({requestId:randomUUID(),...extra});
 async function account(email,dateOfBirth='2007-02-04'){const signup=await rt.auth.signup({email,password:'Synthetic-only-password-2026',displayName:email.split('@')[0],dateOfBirth,region:'US-CA',sport:'Soccer',institutionId:'beyond-today-sports-institute',institutionCode:'darrendemo1'});const item=await rt.repo.read(`mail:${signup.mailId}`);await rt.auth.verifyEmail(item.token);const login=await rt.auth.login({email,password:'Synthetic-only-password-2026'});return {...login.session.account,session:login.raw};}
 let adult,other,youth,guardian;
-test('real Redis account, verified enrollment and canonical MM survive runtime reload',async()=>{adult=await account('first@test.invalid');other=await account('second@test.invalid');assert.notEqual(adult.mm,other.mm);const d=await rt.academy.dossier(adult);assert.equal(d.synthetic,true);assert.equal(d.entitlements.bos,true);assert.equal((await createRedisRepository({redis,prefix:env.ATHLETE_ACADEMY_NAMESPACE}).read(`account:${adult.id}`)).mm,adult.mm);await assert.rejects(()=>rt.academy.getDossier(other,{mm:adult.mm}),/NOT_FOUND/);await assert.rejects(()=>rt.auth.signup({email:'young@test.invalid',displayName:'Young tester',dateOfBirth:'2010-01-01',region:'US-CA',sport:'Soccer',password:'long-password-example'}),/PILOT_CALIFORNIA_17_PLUS/);});
+test('real Redis account, verified enrollment and canonical MM survive runtime reload',async()=>{adult=await account('first@test.invalid');other=await account('second@test.invalid');assert.notEqual(adult.mm,other.mm);const d=await rt.academy.dossier(adult);assert.equal(d.synthetic,true);assert.equal(d.entitlements.bos,true);assert.equal((await createRedisRepository({redis,prefix:env.ATHLETE_ACADEMY_NAMESPACE}).read(`account:${adult.id}`)).mm,adult.mm);await assert.rejects(()=>rt.academy.getDossier(other,{mm:adult.mm}),/NOT_FOUND/);await assert.rejects(()=>rt.auth.signup({email:'young@test.invalid',displayName:'Young tester',dateOfBirth:'2014-01-01',region:'US-CA',sport:'Soccer',password:'long-password-example'}),/PILOT_CALIFORNIA_13_PLUS/);});
 test('adult-only mode admits 18, rejects 17, and preserves existing youth reads and safety controls without processing',async()=>{
  const namespace=`more:athlete-academy:{test-${randomUUID()}}`,enabled=createAcademyRuntime({env:{...env,ATHLETE_ACADEMY_NAMESPACE:namespace},redis,now:()=>clock,assessmentTransport:replay,coachTransport:async()=>{},mailTransport:async()=>({status:'sent'})});
  async function create(runtime,email,dateOfBirth){const signup=await runtime.auth.signup({email,password:'Synthetic-only-password-2026',displayName:email.split('@')[0],dateOfBirth,region:'US-CA',sport:'Soccer',institutionId:'beyond-today-sports-institute',institutionCode:'darrendemo1'}),message=await runtime.repo.read(`mail:${signup.mailId}`),verificationToken=message.token;await runtime.deliver(signup.mailId);await runtime.auth.verifyEmail(verificationToken);return (await runtime.auth.login({email,password:'Synthetic-only-password-2026'})).session.account;}
@@ -75,6 +77,27 @@ test('adult-only mail worker quarantines guardian mail without starving eligible
 });
 test('single-use verification; code never grants report authority',async()=>{const r=await rt.auth.signup({email:'unverified@test.invalid',password:'Synthetic-only-password-2026',displayName:'Unverified',dateOfBirth:'2000-01-01',sport:'Soccer',region:'US-CA'});const m=await rt.repo.read(`mail:${r.mailId}`);await assert.rejects(()=>rt.auth.login({email:m.email,password:'Synthetic-only-password-2026'}),/VERIFY_EMAIL_FIRST/);await rt.auth.verifyEmail(m.token);await assert.rejects(()=>rt.auth.verifyEmail(m.token),/LINK_EXPIRED_OR_USED/);await assert.rejects(()=>rt.auth.redeem(adult,{institutionId:'horizon-academy',institutionCode:'darrendemo1'}),/INSTITUTION_CODE_INVALID/);});
 test('17 year old is blocked until own assent and separate verified guardian acceptance',async()=>{youth=await account('youth@test.invalid','2009-01-02');guardian=await account('guardian@test.invalid','1982-01-01');await rt.academy.acceptParticipation(youth,req({accepted:true,policyVersion:'candidate-review-v1'}));const d=await rt.academy.dossier(youth);await assert.rejects(()=>rt.academy.saveIntake(youth,req({mm:youth.mm,revision:d.revision,service:'bos',answers:[{question_id:'Q01',text:'A real answer',skipped:false}]})),/GUARDIAN_REQUIRED/);const invite=await rt.academy.inviteGuardian(youth,req({email:guardian.email}));const mail=await rt.repo.read(`mail:${invite.mailId}`);await assert.rejects(()=>rt.academy.guardianPreview(other,{token:mail.token}),/GUARDIAN_INVITATION_INVALID/);await rt.academy.acceptGuardian(guardian,req({token:mail.token,accepted:true,policyVersion:'candidate-review-v1'}));assert.equal((await rt.academy.dossier(youth)).participation.status,'authorized');await assert.rejects(()=>rt.academy.getDossier(guardian,{mm:youth.mm}),/NOT_FOUND/);});
+test('13 and 16 year olds retain separate durable assent and guardian history across returning sign-in',async()=>{
+ for(const age of [13,16]){
+  const email=`youth-${age}@test.invalid`,a=await account(email,`${2026-age}-01-02`);
+  const g=await account(`guardian-${age}@test.invalid`,'1980-01-01');
+  let d=await rt.academy.dossier(a);
+  assert.throws(()=>rt.academy.participant(d,a,'bos'),/PARTICIPATION_REVIEW_REQUIRED/);
+  await rt.academy.acceptParticipation(a,req({accepted:true,policyVersion:'candidate-review-v1'}));
+  d=await rt.academy.dossier(a);assert.throws(()=>rt.academy.participant(d,a,'bos'),/GUARDIAN_REQUIRED/);
+  const invitation=await rt.academy.inviteGuardian(a,req({email:g.email})),mail=await rt.repo.read(`mail:${invitation.mailId}`);
+  await rt.academy.acceptGuardian(g,req({token:mail.token,accepted:true,policyVersion:'candidate-review-v1',guardianRelationship:'parent'}));
+  const reload=createAcademyRuntime({env,redis,now:()=>clock,mailTransport:async()=>({status:'sent'})});
+  const returning=(await reload.auth.login({email,password:'Synthetic-only-password-2026'})).session.account;
+  d=await reload.academy.dossier(returning);reload.academy.participant(d,returning,'bos');
+  assert.equal(d.youthApprovalRegister.approvals[0].claimedRelationship,'parent');
+  assert.equal(d.youthApprovalRegister.approvals[0].independentlyVerified,false);
+  assert.equal(d.youthApprovalRegister.ageBandAtRegistration,'13-16');
+  const original=structuredClone(d.reports);await reload.academy.withdraw(g,req({mm:a.mm}));
+  d=await reload.academy.dossier(returning);assert.throws(()=>reload.academy.participant(d,returning,'bos'),/PARTICIPATION_WITHDRAWN/);
+  assert.deepEqual(d.reports,original);assert.equal(d.youthApprovalRegister.approvals[0].status,'withdrawn');
+ }
+});
 test('draft saves are idempotent, require current revision and isolate people',async()=>{await rt.academy.acceptParticipation(adult,req({accepted:true,policyVersion:'candidate-review-v1'}));const d=await rt.academy.dossier(adult),body=req({mm:adult.mm,service:'bos',revision:d.revision,answers:fixture.bos_source.answers.map(a=>({...a,skipped:false}))});const [x,y]=await Promise.all([rt.academy.saveIntake(adult,body),rt.academy.saveIntake(adult,body)]);assert.equal(x.dossier.revision,y.dossier.revision);await assert.rejects(()=>rt.academy.saveIntake(adult,{...body,requestId:randomUUID()}),/STATE_CHANGED_RELOAD/);await assert.rejects(()=>rt.academy.saveIntake(other,{...body,requestId:randomUUID()}),/NOT_FOUND/);});
 test('five BOS stages save before dispatch and publish exact locked questionnaire with complete reader',async()=>{const d=await rt.academy.dossier(adult);let j=(await rt.academy.startAssessment(adult,req({mm:adult.mm,service:'bos',inputRevision:d.intake.bos.revision}))).job;let first;for(let i=0;i<5;i++){const body=req({jobId:j.jobId});if(i===0)first=body;j=(await rt.academy.advance(adult,body)).job;assert.equal(j.status,i===4?'completed':'ready',j.errorCode||'');assert.equal(j.totalStages,5,'clean reading keeps the five-stage path');}const count=requests.length;await rt.academy.advance(adult,first);assert.equal(requests.length,count,'replay must never redispatch');const report=await rt.academy.getReport(adult,{mm:adult.mm,service:'bos'});assert.equal(report.source.questionnaire_version,QUESTIONNAIRE_VERSION);assert.equal(report.source.questions.length,20);assert.equal(report.artifact.reading.chapters.length,8);assert.equal(report.artifact.mm,adult.mm);assert.equal(report.artifact.synthetic,true);assert.equal(report.artifact.questionnaire_version,QUESTIONNAIRE_VERSION);await assert.rejects(()=>rt.academy.getReport(other,{mm:adult.mm,service:'bos'}),/NOT_FOUND/);});
 
@@ -232,7 +255,7 @@ test('guardian withdrawal cannot be undone by athlete assent alone',async()=>{
  await rt.academy.acceptParticipation(youth,req({accepted:true,policyVersion:'candidate-review-v1'}));
  const d=await rt.academy.dossier(youth);assert.equal(d.participation.status,'guardian_required');assert.equal(d.participation.guardianId,null);
  assert.throws(()=>rt.academy.participant(d,youth,'bos'),/GUARDIAN_REQUIRED/);
- const listing=await rt.academy.guardians(guardian);assert.equal(listing.participants[0].active,false);
+ const listing=await rt.academy.guardians(guardian);assert.deepEqual(listing.participants,[],'withdrawn guardian has no current participant access');
 });
 test('changed policy requires current athlete and separate guardian acceptance',async()=>{
  const next=createAcademyRuntime({env:{...env,ATHLETE_ACADEMY_REVIEWED_POLICY_VERSION:'policy-v2'},redis,now:()=>clock,assessmentTransport:replay,coachTransport:async()=>{},mailTransport:async()=>({status:'sent'})});
@@ -339,4 +362,4 @@ test('bounded synthetic repair rejects completed stages, another active job, and
 test('withdrawal stops new coaching but owner can still read their original reports',async()=>{
  await rt.academy.withdraw(adult,req({mm:adult.mm}));assert.ok((await rt.academy.getReport(adult,{service:'bos'})).artifact.reading);await assert.rejects(()=>rt.coaching.bundle(adult,{mm:adult.mm}),/PARTICIPATION_WITHDRAWN/);
 });
-test.after(async()=>{await redis.quit();});
+test.after(async()=>{await redis.quit();await ownedRedis.stop();});

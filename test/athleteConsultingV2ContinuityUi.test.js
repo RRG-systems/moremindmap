@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { createServer } from 'vite';
+import { createServer } from './helpers/inMemoryRenderCompiler.mjs';
 import { eligibleAthleteMessages, selectableApaSources,
   summarizeApaChanges, APA_NO_CHANGE_TITLE } from '../src/athleteConsultingV2/continuityModel.js';
 

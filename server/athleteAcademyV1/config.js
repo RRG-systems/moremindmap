@@ -1,6 +1,7 @@
 import { Buffer } from 'node:buffer';
 import { timingSafeEqual } from 'node:crypto';
 import { digest, requireValue } from './repository.js';
+import { parseYouthRegisterBinding } from './youthRegisterAccess.js';
 
 export const INSTITUTIONS = Object.freeze([
   Object.freeze({ id: 'beyond-today-sports-institute', name: 'Beyond Today Sports Institute', enrollment: 'configured_pilot', synthetic: false }),
@@ -51,6 +52,7 @@ export function academyConfig(env = {}) {
     realYouthEnabled,
     reviewedPolicyVersion: env.ATHLETE_ACADEMY_REVIEWED_POLICY_VERSION || null,
     reviewedYouthPolicyVersion,
+    youthRegisterBinding: parseYouthRegisterBinding(env.ATHLETE_ACADEMY_YOUTH_REGISTER_STAFF_BINDING),
     providerEnabled: env.ATHLETE_ACADEMY_PROVIDER_ENABLED === '1',
     currentApaEnabled: env.ATHLETE_ACADEMY_CURRENT_APA_ENABLED === '1',
     flagshipEnabled: env.ATHLETE_ACADEMY_FLAGSHIP_ENABLED === '1',

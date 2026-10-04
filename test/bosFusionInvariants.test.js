@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import process from 'node:process';
 import test from 'node:test';
-import { createServer } from 'vite';
+import { createServer } from './helpers/inMemoryRenderCompiler.mjs';
 
 import BuildProfileInput from '../api/engine/buildProfileInput.js';
 import { generateCanonicalProfile } from '../api/engine/canonical/canonicalProfileGenerator.js';

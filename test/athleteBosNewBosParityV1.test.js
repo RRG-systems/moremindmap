@@ -354,7 +354,9 @@ test('the generator refuses a private source at the coach boundary and accepts o
   const fullPrivateMara = getFixture('synthetic-athlete-mara');
   assert.throws(() => validateAthleteAudienceSource(fullPrivateMara, 'coach'), /COACH_PROJECTION_NOT_SERVER_ISSUED/);
   const coachProjection = filterAudience(fullPrivateMara, 'coach', '2026-09-04T00:00:00Z');
-  assert.equal(validateAthleteAudienceSource(coachProjection, 'coach'), coachProjection);
+  const projectionTime = Date.parse('2026-09-04T00:00:00Z');
+  assert.equal(validateAthleteAudienceSource(coachProjection, 'coach', projectionTime), coachProjection);
+  assert.throws(() => validateAthleteAudienceSource(coachProjection, 'coach', Date.parse(coachProjection.projectionScope.expiresAt)), /COACH_EXACT_PROJECTION_EXPIRED/);
   assert.throws(() => validateAthleteAudienceSource(structuredClone(coachProjection), 'coach'), /COACH_PROJECTION_NOT_SERVER_ISSUED/);
   const extraEvidence = structuredClone(coachProjection);
   extraEvidence.evidence.push(structuredClone(fullPrivateMara.evidence[0]));

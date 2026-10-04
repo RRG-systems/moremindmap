@@ -1,10 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import os from 'node:os';
-import path from 'node:path';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { createServer } from 'vite';
+import { build } from 'vite';
 import { selectCoachNoteHandoff } from '../src/athleteConsultingV2/coachNoteHandoff.js';
 
 const bundle = { person: { synthetic: true, slug: 'nia', mm: 'MM-NIA', name: 'Nia Brooks' } };
@@ -41,11 +39,18 @@ test('handoff UI shows no notes for mismatched identity or non-synthetic athlete
     { pending: [], lastOpening: [] });
 });
 
-test('rendered athlete handoff names the pending and delivered receipt without showing a crossed note', async (context) => {
-  const vite = await createServer({ cacheDir: path.join(os.tmpdir(), 'athlete-coach-note-ui-vite'),
-    server: { middlewareMode: true }, appType: 'custom', logLevel: 'silent' });
-  context.after(() => vite.close());
-  const { default: CoachNoteHandoff } = await vite.ssrLoadModule('/src/athleteConsultingV2/CoachNoteHandoff.jsx');
+test('rendered athlete handoff names the pending and delivered receipt without showing a crossed note', async () => {
+  // This is a rendered-component assertion, not a dev-server/network test.
+  // Compile in memory without listeners, watchers, caches or environment files.
+  const compiled = await build({ root: process.cwd(), configFile: false, envDir: false, logLevel: 'silent',
+    server: { host: '127.0.0.1', hmr: false, watch: null, fs: { allow: [process.cwd()] } },
+    build: { ssr: new URL('../src/athleteConsultingV2/CoachNoteHandoff.jsx', import.meta.url).pathname,
+      write: false, minify: false } });
+  const chunk = compiled.output.find(part => part.type === 'chunk' && part.isEntry);
+  assert.ok(chunk);
+  const code = chunk.code.replace(/(from\s+|import\s+)(["'])(react(?:\/jsx-runtime)?)\2/g,
+    (_match, prefix, _quote, dependency) => `${prefix}${JSON.stringify(import.meta.resolve(dependency))}`);
+  const { default: CoachNoteHandoff } = await import(`data:text/javascript,${encodeURIComponent(code)}`);
   const state = { mm: 'MM-NIA', messages: [
     { ...capture('nia-pending'), text: 'Nia-only practice note' },
     { ...capture('nia-delivered'), text: 'Nia-only delivered note' },

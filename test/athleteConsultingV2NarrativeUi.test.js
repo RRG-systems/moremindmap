@@ -5,7 +5,7 @@ import os from 'node:os';
 import React from 'react';
 import react from '@vitejs/plugin-react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { createServer } from 'vite';
+import { createServer } from './helpers/inMemoryRenderCompiler.mjs';
 
 test('authenticated narrative review renders exact string/array before-after and truthful provenance', async context => {
   const vite = await createServer({ configFile: false, envFile: false, plugins: [react()],

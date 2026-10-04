@@ -5,7 +5,7 @@ import os from 'node:os'
 import path from 'node:path'
 import React from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { createServer } from 'vite'
+import { createServer } from './helpers/inMemoryRenderCompiler.mjs'
 
 async function loadUi(context) {
   const vite = await createServer({ cacheDir: path.join(os.tmpdir(), 'athlete-living-consult-one-shot-ui-test-vite'), server: { middlewareMode: true }, appType: 'custom', logLevel: 'silent' })

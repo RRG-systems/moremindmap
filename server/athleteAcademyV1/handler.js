@@ -3,7 +3,7 @@ import {INSTITUTIONS,resolveInstitution} from './config.js';
 import {publicAccount} from './auth.js';
 import {COACH_NOTES_POLICY_VERSION,noteGate,noteCommand} from './coaching/coachNotesPolicy.js';
 const COOKIE='more_athlete_academy';
-export function createAcademyHandler({config,auth,academy,coaching,notes,deliver}){
+export function createAcademyHandler({config,auth,academy,coaching,notes,deliver,youthRegister,authorizeYouthRegister}){
  const notesEnabled=()=>config.coachNotesEnabled===true&&config.coachNotesPolicyVersion===COACH_NOTES_POLICY_VERSION;
  async function notesView(a,body){
   noteGate(config);requireValue(notes,'COACH_NOTES_NOT_ACTIVE',404);noteCommand(body,['mode','mm']);
@@ -26,7 +26,9 @@ export function createAcademyHandler({config,auth,academy,coaching,notes,deliver
    if(req.method==='GET'){
     if(!s){await auth.limited('bootstrap:'+String(req.headers['x-forwarded-for']||req.socket?.remoteAddress||'unknown').split(',')[0],100,3600000);const created=await auth.createSession();s=created.session;res.setHeader('Set-Cookie',cookie(created.raw));}
     let athletes=[];if(s.account&&s.account.role!=='guardian'){const {dossier}=await academy.getDossier(s.account,{mm:s.account.mm});athletes=[{mm:dossier.mm,name:dossier.person.name}];}
-    return res.status(200).json({ok:true,csrfToken:s.csrf,account:publicAccount(s.account),athletes,institutions:INSTITUTIONS,cohort:config.cohort,policyVersion:config.reviewedPolicyVersion||'candidate-review-v1',youthPolicyVersion:config.reviewedYouthPolicyVersion||(config.syntheticPreview?config.reviewedPolicyVersion||'candidate-review-v1':null),capabilities:{generation:config.providerEnabled,email:config.mailEnabled,syntheticPreview:config.syntheticPreview,realYouth:config.realYouthEnabled,...(notesEnabled()&&s.account?.role!=='guardian'?{coachNotes:true}:{})}});
+    let youthRegisterAllowed=false;
+    if(s.account?.verified&&authorizeYouthRegister){try{await authorizeYouthRegister(s.account);youthRegisterAllowed=true;}catch(e){if(e.code!=='YOUTH_REGISTER_READ_DENIED')throw e;}}
+    return res.status(200).json({ok:true,csrfToken:s.csrf,account:publicAccount(s.account),athletes,institutions:INSTITUTIONS,cohort:config.cohort,policyVersion:config.reviewedPolicyVersion||'candidate-review-v1',youthPolicyVersion:config.reviewedYouthPolicyVersion||(config.syntheticPreview?config.reviewedPolicyVersion||'candidate-review-v1':null),capabilities:{generation:config.providerEnabled,email:config.mailEnabled,syntheticPreview:config.syntheticPreview,realYouth:config.realYouthEnabled,...(notesEnabled()&&s.account?.role!=='guardian'?{coachNotes:true}:{}),...(youthRegisterAllowed?{youthApprovalRegister:true}:{})}});
    }
    requireValue(s&&req.headers['x-csrf-token']===s.csrf,'SESSION_OR_FORM_EXPIRED',403);requireValue(String(req.headers['content-type']||'').includes('application/json'),'JSON_REQUIRED',415);
    const b=req.body;requireValue(b&&typeof b==='object'&&!Array.isArray(b)&&JSON.stringify(b).length<=200000,'REQUEST_INVALID',413);
@@ -43,6 +45,11 @@ export function createAcademyHandler({config,auth,academy,coaching,notes,deliver
     requireValue(a?.verified,'SIGN_IN_REQUIRED',401);
     if(b.action==='logout'){await auth.logout(raw);res.setHeader('Set-Cookie',`${COOKIE}=; Path=/api/athlete/academy; HttpOnly; SameSite=Strict; Max-Age=0${config.allowInsecureLocalhost?'':'; Secure'}`);result={signedOut:true};}
     else if(b.action==='redeem_institution')result=await auth.redeem(a,b);
+    else if(b.action==='youth_approval_register'){
+     requireValue(youthRegister&&authorizeYouthRegister,'YOUTH_REGISTER_READ_DENIED',403);
+     const {action:_action,requestId:_requestId,...query}=b;
+     result={youthApprovalRegister:await youthRegister(a,query)};
+    }
     else if(typeof b.action==='string'&&b.action.startsWith('coach_notes_')){
      requireValue(a.role!=='guardian','PARTICIPANT_ACCOUNT_REQUIRED',403);noteGate(config);requireValue(notes,'COACH_NOTES_NOT_ACTIVE',404);
      const {action,...command}=b;
