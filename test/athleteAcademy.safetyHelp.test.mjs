@@ -63,6 +63,7 @@ test('public help route precedes bootstrap and guardian gates; existing staff ga
   assert.ok(source.indexOf("if(page==='safety')content=<SafetyHelp/>") < source.indexOf('else if(!session)'));
   assert.ok(source.indexOf("if(page==='safety')content=<SafetyHelp/>") < source.indexOf("else if(session.account?.role==='guardian'"));
   assert.match(source, /<nav><a href="#safety">Safety help<\/a>/);
+  assert.match(source, /error&&page!=='safety'&&<div className="alert" role="alert">/);
   assert.match(source, /session\.account&&session\.capabilities\.youthApprovalRegister\?<YouthApprovalRegisterPanel key=\{session\.account\.id\}/);
 });
 
