@@ -77,10 +77,18 @@ test('the exact reported 25 and five adjacent non-production handlers are outsid
 
 test('the SPA fallback cannot turn an unknown API path into a successful HTML response', () => {
   const config = JSON.parse(fs.readFileSync(path.join(root, 'vercel.json'), 'utf8'));
-  assert.deepEqual(config.rewrites, [{
-    source: '/:path((?!api(?:/|$)).*)',
-    destination: '/',
-  }]);
+  // The protected Darren library rewrites were added after the original P0
+  // fixture. Preserve them exactly; they must not broaden the SPA API fallback.
+  assert.deepEqual(config.rewrites, [
+    { source: '/darren-library', destination: '/api/internal/darren-demo-library?path=library' },
+    { source: '/darren-library/:path*', destination: '/api/internal/darren-demo-library?path=:path*' },
+    { source: '/:path((?!api(?:/|$)).*)', destination: '/' },
+  ]);
+  const fallback = /^\/((?!api(?:\/|$)).*)$/u;
+  for (const unknown of ['/api', '/api/', '/api/diagnostic', '/api/unknown', '/api/internal/unknown'])
+    assert.equal(fallback.test(unknown), false, unknown);
+  for (const product of ['/', '/athlete/workspace/index.html', '/leadership'])
+    assert.equal(fallback.test(product), true, product);
 });
 
 test('deployable source cannot import the quarantined HTTP handlers', () => {
