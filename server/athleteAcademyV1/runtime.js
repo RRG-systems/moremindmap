@@ -8,6 +8,7 @@ import {createAcademyService} from './service.js';
 import {createCoachingService} from './coaching/service.js';
 import {createCoachNotesService} from './coaching/coachNotes.js';
 import {createDelivery,resendTransport} from './delivery.js';
+import {academyPreviewMail} from './previewMail.js';
 import {createAcademyHandler} from './handler.js';
 import {createYouthRegisterAuthorizer} from './youthRegisterAccess.js';
 import {createYouthApprovalRegisterReader} from './youthApprovalRegister.js';
@@ -19,7 +20,8 @@ export function createAcademyRuntime({env,redis,assessmentTransport,coachTranspo
  const coach=coachTransport||(config.providerEnabled&&env.OPENAI_API_KEY?(request,options)=>ai().responses.create(request,{...options,maxRetries:0}):null);
  const mailKey=env.RESEND_API_KEY||env.MOREMINDMAP_SERVER_ONLY_PROFILE_OWNERSHIP_RESEND_API_KEY;
  const mailFrom=env.ATHLETE_ACADEMY_MAIL_FROM||env.PUBLIC_PROFILE_OWNERSHIP_EMAIL_FROM;
- const mail=mailTransport||(config.mailEnabled&&mailKey&&mailFrom?resendTransport({key:mailKey,from:mailFrom}):null);
+ const boundMail=config.mailEnabled&&mailKey&&mailFrom?resendTransport({key:mailKey,from:mailFrom}):null;
+ const mail=mailTransport||academyPreviewMail({env,transport:boundMail});
  config.providerEnabled=Boolean(config.providerEnabled&&transport&&coach);config.mailEnabled=Boolean(config.mailEnabled&&mail);
  const auth=createAuth({repo,config,now}),academy=createAcademyService({repo,config,auth,transport,now}),notes=createCoachNotesService({repo,config,academy,now}),coaching=createCoachingService({repo,config,academy,notes,transport:coach,now}),deliver=createDelivery({repo,config,transport:mail,now});
  const authorizeYouthRegister=createYouthRegisterAuthorizer({repo,config,now});
