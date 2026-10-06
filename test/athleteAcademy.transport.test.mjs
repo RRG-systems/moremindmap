@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {clientSessionEvents} from '../src/athleteAcademyV1/sessionEvents.js';
 
 const response=(status,body)=>({ok:status>=200&&status<300,status,async json(){return body;}});
 
@@ -104,4 +105,31 @@ test('network failures are surfaced without replay',async t=>{
  const {call}=await import(`../src/athleteAcademyV1/transport.js?network=${Date.now()}`);
  await assert.rejects(call('reset_password',{token:'fictional-token',password:'fictional-password'}),/synthetic network interruption/);
  assert.deepEqual(requests.map(x=>x.options.method||'GET'),['GET','POST']);
+});
+
+test('concurrent bootstraps share one request and cannot race anonymous CSRF identity',async t=>{
+ const originalFetch=globalThis.fetch;let release;let requests=0;
+ globalThis.fetch=async()=>{requests++;return new Promise(resolve=>{release=()=>resolve(response(200,{ok:true,csrfToken:'fictional-current',account:null}));});};
+ t.after(()=>{globalThis.fetch=originalFetch;});
+ const {bootstrap}=await import(`../src/athleteAcademyV1/transport.js?dedupe=${Date.now()}`);
+ const first=bootstrap(),second=bootstrap();assert.equal(requests,1);release();
+ const result=await Promise.all([first,second]);assert.equal(result[0],result[1]);assert.equal(requests,1);
+});
+
+test('a bootstrap response from the previous session is discarded without replay',async t=>{
+ const originalFetch=globalThis.fetch;let release;let requests=0;
+ globalThis.fetch=async()=>{requests++;return new Promise(resolve=>{release=()=>resolve(response(200,{ok:true,csrfToken:'fictional-stale',account:{id:'old-fictional',role:'participant'}}));});};
+ t.after(()=>{globalThis.fetch=originalFetch;});
+ const {bootstrap}=await import(`../src/athleteAcademyV1/transport.js?old-bootstrap=${Date.now()}`);
+ const pending=bootstrap();clientSessionEvents.invalidate();release();
+ await assert.rejects(pending,error=>error.code==='SESSION_CHANGED');assert.equal(requests,1);
+});
+
+test('an old private response cannot be returned after another tab changes session',async t=>{
+ const originalFetch=globalThis.fetch;let release;let requests=0;
+ globalThis.fetch=async()=>{requests++;if(requests===1)return response(200,{ok:true,csrfToken:'fictional-current',account:{id:'fictional-current',role:'participant'}});return new Promise(resolve=>{release=()=>resolve(response(200,{ok:true,dossier:{mm:'MM-OLD-FICTIONAL'}}));});};
+ t.after(()=>{globalThis.fetch=originalFetch;});
+ const {bootstrap,call}=await import(`../src/athleteAcademyV1/transport.js?old-private=${Date.now()}`);
+ await bootstrap();const pending=call('get_dossier',{mm:'MM-OLD-FICTIONAL'});clientSessionEvents.invalidate();release();
+ await assert.rejects(pending,error=>error.code==='SESSION_CHANGED');assert.equal(requests,2);
 });

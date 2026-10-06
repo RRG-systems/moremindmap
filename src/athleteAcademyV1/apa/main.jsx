@@ -6,6 +6,7 @@ import {project} from './projection.js';
 import {call,workspaceLink} from '../transport.js';
 import {api} from '../coach/transport.js';
 import {APA_BOXES,continuityView,apaReadingLabel} from '../coach/currentApaUi.js';
+import ClientSessionBoundary from '../ClientSessionBoundary.jsx';
 import './base.css';import './athlete.css';import './youth.css';
 
 function App(){
@@ -90,5 +91,5 @@ function App(){
    pageComponent={ReportPage} pageProps={{a,...options}}/>
  </div>;
 }
-createRoot(document.getElementById('root')).render(<App/>);
+createRoot(document.getElementById('root')).render(<ClientSessionBoundary><App/></ClientSessionBoundary>);
 export {App};
